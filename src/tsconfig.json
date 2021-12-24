@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "react",
+    "types": ["react/next", "react-dom/next"]
+  },
+  "include": ["./**/*"],
+  "files": ["../electron/renderers/index.ts", "../store.d.ts"]
+}

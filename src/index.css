@@ -1,0 +1,23 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import url(https://fonts.googleapis.com/css?family=Lilita+One:regular);
+.noDrag {
+  -webkit-app-region: no-drag;
+}
+
+#dragBar {
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+}
+html,
+body {
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
