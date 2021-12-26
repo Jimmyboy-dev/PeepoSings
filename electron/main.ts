@@ -1,35 +1,38 @@
 import isDev from "electron-is-dev"
 import * as dotenv from "dotenv"
 dotenv.config()
-import { app, BrowserWindow, Tray, Menu, nativeImage } from "electron"
+import { app, BrowserWindow, Tray, Menu, session, protocol, ProtocolRequest } from "electron/main"
 import { ipcMain as ipc } from "electron-better-ipc"
 import contextMenu from "electron-context-menu"
 import windowStateKeeper from "electron-window-state"
 import Store, { Schema } from "electron-store"
 import serve from "electron-serve"
 import path from "path"
-import { StateStore } from "../store"
+import { MusicStore, Song, StateStore } from "../store"
+import { MusicManager } from "./MusicManager"
+import { nativeImage } from "electron/common"
 
 const disposeCTXMenu = contextMenu({
   showSaveImageAs: true,
   append: (menu) => [{ label: "Refresh", click: () => BrowserWindow.getFocusedWindow()?.reload() }],
 })
 
+import updateApp = require('update-electron-app')
+import { fileURLToPath } from "url"
+updateApp()
+
 Store.initRenderer()
+const musicStore = new Store<MusicStore>({ name: "music", defaults: { songs: [], lastSong: null }, watch: true })
+
+musicStore.onDidChange("songs", (songs) => {
+  if (mainWindow) {
+    mainWindow.webContents.send("music-change", songs)
+  }
+})
 
 const loadURL = serve({ directory: "dist" })
 
-// const clientId = "YOUR_CLIENT_ID"
-// const redirectUri = "http://foo.bar/login"
-
-// const authProvider = new ElectronAuthProvider(
-//   {
-//     clientId,
-//     redirectUri,
-//   },
-//   {}
-// )
-// authProvider.allowUserChange()
+let musicManager: MusicManager;
 
 let tray: Tray | undefined
 const appIcon = nativeImage.createFromPath(path.join(__dirname, "..", "assets", process.platform === "win32" ? "icon.ico" : "icon.png"))
@@ -63,21 +66,41 @@ const createWindow = () => {
     height: mainWindowState.height,
     frame: false,
     icon: appIcon,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "renderers", "index.js"),
       contextIsolation: false,
+      // webSecurity: !isDev
     },
   })
+
 
   mainWindowState.manage(mainWindow)
 
   if (isDev) {
     console.log("Running in development")
     mainWindow.loadURL("http://localhost:3000")
+    mainWindow.on("ready-to-show", () => mainWindow.show())
   } else loadURL(mainWindow)
 }
 
 app.whenReady().then(() => {
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        "Access-Control-Allow-Origin": "https://* http://localhost:* file://*",
+      }
+    })
+  })
+  protocol.interceptFileProtocol('resource', async (req: ProtocolRequest, callback: (filePath: string) => void) => {
+    const url = fileURLToPath(req.url.replace("resource", "file"))
+    callback(url);
+  });
+
+  musicManager = MusicManager.getInstance()
+  musicManager.setMusicDb(musicStore)
+
   initTray()
   createWindow()
 
@@ -86,12 +109,26 @@ app.whenReady().then(() => {
       createWindow()
     }
   })
+
+
 })
 
 app.on("will-quit", disposeCTXMenu)
 
-ipc.on("getAuth", (e, msg) => {
-  // e.sender.send("auth", authProvider)
+ipc.handle("music-get", (e, key) => {
+  return musicStore.get(key)
+})
+
+ipc.handle("get-dataUrl", async (e, filePath: string) => {
+  return await musicManager.getDataUrl(filePath)
+})
+
+ipc.handle("music-set", (e, key: string, value: Song) => {
+  return musicStore.set(key, value)
+})
+
+ipc.handle("music-open-in-editor", (e, key) => {
+  return musicStore.openInEditor()
 })
 
 ipc.on("windowCmd", (e, msg) => {

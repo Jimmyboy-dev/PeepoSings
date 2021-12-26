@@ -4,6 +4,9 @@ import React from "react"
 import App from "./App"
 import { MantineProvider } from "@mantine/core"
 import theme from "./theme"
+import gsap from "gsap"
+import MotionPathPlugin from "gsap/MotionPathPlugin"
+gsap.registerPlugin(MotionPathPlugin)
 // import isDev from "electron-is-dev"
 // console.log(isDev ? "is Development" : "is Production")
 
