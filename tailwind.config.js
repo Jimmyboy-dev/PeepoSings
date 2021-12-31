@@ -1,5 +1,5 @@
 module.exports = {
-  content: ["./index.html", "./src/**/*.{html,tsx}"],
+  content: ["./packages/renderer/index.html", "./packages/renderer/src/**/*.{html,tsx,css,ts,}"],
   theme: { extend: {} },
   plugins: [require("daisyui")],
 }

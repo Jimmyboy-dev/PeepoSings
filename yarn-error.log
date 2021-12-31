@@ -1,5 +1,5 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\yarn\bin\yarn.js add --dev @types/dataurl
+  C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\yarn\bin\yarn.js add @lodash/debouce
 
 PATH: 
   C:\Program Files\PowerShell\7;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\libnvvp;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64\compiler;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\cmd-programs\OBSCommand;C:\Program Files\dotnet\;C:\Program Files (x86)\Common Files\Acronis\SnapAPI\;C:\Program Files (x86)\Common Files\Acronis\VirtualFile\;C:\Program Files (x86)\Common Files\Acronis\VirtualFile64\;C:\Program Files (x86)\Common Files\Acronis\FileProtector\;C:\Program Files (x86)\Common Files\Acronis\FileProtector64\;C:\Users\jimmy\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\cmd-programs;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\jimmy\.pyenv\pyenv-win\\bin;C:\Users\jimmy\.pyenv\pyenv-win\\shims;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files\NVIDIA Corporation\Nsight Compute 2021.3.1\;C:\Program Files\Microsoft VS Code Insiders\bin;C:\Strawberry\c\bin;C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;C:\Program Files\PowerShell\7\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Users\jimmy\.yarn\bin;C:\Users\jimmy\scoop\shims;C:\Users\jimmy\AppData\Local\Microsoft\WindowsApps;C:\Users\jimmy\.dotnet\tools;C:\Users\jimmy\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\tools\neovim\Neovim\bin;C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin;C:\Users\jimmy\.pyenv\pyenv-win\bin;C:\Users\jimmy\.pyenv\pyenv-win\shims;C:\Users\jimmy\.dotnet\tools;C:\Program Files (x86)\GitHub CLI\;C:\Program Files (x86)\Nmap;c:\Users\jimmy\AppData\Roaming\Code - Insiders\User\globalStorage\ms-vscode-remote.remote-containers\cli-bin;C:\Users\jimmy\.dotnet\tools;
@@ -14,7 +14,7 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: https://registry.npmjs.org/@types%2fdataurl: Not found
+  Error: https://registry.npmjs.org/@lodash%2fdebouce: Not found
       at Request.params.callback [as _callback] (C:\Users\jimmy\AppData\Roaming\nvm\v16.10.0\node_modules\yarn\lib\cli.js:67029:18)
       at Request.self.callback (C:\Users\jimmy\AppData\Roaming\nvm\v16.10.0\node_modules\yarn\lib\cli.js:140883:22)
       at Request.emit (node:events:390:28)
@@ -28,13 +28,17 @@ Trace:
 
 npm manifest: 
   {
-    "name": "twitch-music-player",
+    "name": "peepo-sings",
     "version": "0.1.0",
     "description": "Desktop music player designed for Live Broadcasts - Music based on moods",
     "main": "main.ts",
     "author": "devJimmyboy",
     "license": "MIT",
     "private": true,
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/devJimmyboy/Moody-Beats.git"
+    },
     "scripts": {
       "dev": "set ELECTRON_IS_DEV=1 && run-p dev:*",
       "build": "tsc --outDir ./build",
@@ -50,8 +54,7 @@ npm manifest:
       "@mantine/hooks": "^3.4.3",
       "@mantine/modals": "^3.4.3",
       "@mantine/notifications": "^3.4.3",
-      "daisyui": "^1.19.0",
-      "dataurl": "^0.1.0",
+      "daisyui": "^1.20.0",
       "dayjs": "^1.10.7",
       "dotenv": "^10.0.0",
       "electron-better-ipc": "^2.0.1",
@@ -60,9 +63,14 @@ npm manifest:
       "electron-serve": "^1.1.0",
       "electron-store": "^8.0.1",
       "electron-window-state": "^5.0.3",
+      "fitool": "^1.0.2",
       "fluent-ffmpeg": "^2.1.2",
+      "gsap": "^3.9.1",
       "jquery": "^3.6.0",
       "lastfmapi": "^0.1.1",
+      "mobx": "^6.3.10",
+      "mobx-react-lite": "^3.2.2",
+      "mobx-utils": "^6.0.4",
       "open": "^8.4.0",
       "prop-types": "^15.8.0",
       "react": "^17.0.2",
@@ -948,6 +956,11 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
     integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
   
+  base64-js@^1.3.1:
+    version "1.5.1"
+    resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
+    integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
+  
   binary-extensions@^2.0.0:
     version "2.2.0"
     resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.2.0.tgz#75f502eeaf9ffde42fc98829645be4ea76bd9e2d"
@@ -1201,15 +1214,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.10.tgz#2ad3a7bed70f35b965707c092e5f30b327c290e5"
     integrity sha512-2u44ZG2OcNUO9HDp/Jl8C07x6pU/eTR3ncV91SiK3dhG9TWvRVsCoJw14Ckx5DgWkzGA3waZWO3d7pgqpUI/XA==
   
-  daisyui@^1.19.0:
-    version "1.19.0"
-    resolved "https://registry.yarnpkg.com/daisyui/-/daisyui-1.19.0.tgz#fb8c1c1b45f093e539ad1651756f6fffee8f2e43"
-    integrity sha512-SaKe2acN734KVtrrCvxXFnrl1BOQzXqQybHbUZnXz3kK5h903mK/kKHWx+423Y03+DikWJbuGYWgcYHTQk3dwQ==
-  
-  dataurl@^0.1.0:
-    version "0.1.0"
-    resolved "https://registry.yarnpkg.com/dataurl/-/dataurl-0.1.0.tgz#1f4734feddec05ffe445747978d86759c4b33199"
-    integrity sha1-H0c0/t3sBf/kRXR5eNhnWcSzMZk=
+  daisyui@^1.20.0:
+    version "1.20.0"
+    resolved "https://registry.yarnpkg.com/daisyui/-/daisyui-1.20.0.tgz#3f7acfe7213139b2cd7a6d1398299a48de57970d"
+    integrity sha512-vHXw/M9KRIkdPE6r2KSqfGNg/evoCXyZFsGZQDi4PNDOlP7wL+3YmPev5M+CvmviB2kXhorekQXpulbTTqLAZQ==
   
   date-time@^3.1.0:
     version "3.1.0"
@@ -1699,6 +1707,13 @@ Lockfile:
       locate-path "^6.0.0"
       path-exists "^4.0.0"
   
+  fitool@^1.0.2:
+    version "1.0.2"
+    resolved "https://registry.yarnpkg.com/fitool/-/fitool-1.0.2.tgz#9fae6e04f24f995e5d67b798153579c97ede96c2"
+    integrity sha512-6me7kfh+k/25Iw77QHdsvqp0FRZVLtoyAyRUW8RTCjuQFgwPeJ8YDDMipr7T+fbTV46i5CVSIR2V7tDfUdRhlQ==
+    dependencies:
+      base64-js "^1.3.1"
+  
   fluent-ffmpeg@^2.1.2:
     version "2.1.2"
     resolved "https://registry.yarnpkg.com/fluent-ffmpeg/-/fluent-ffmpeg-2.1.2.tgz#c952de2240f812ebda0aa8006d7776ee2acf7d74"
@@ -1860,6 +1875,11 @@ Lockfile:
     version "4.2.8"
     resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.8.tgz#e412b8d33f5e006593cbd3cee6df9f2cebbe802a"
     integrity sha512-qkIilPUYcNhJpd33n0GBXTB1MMPp14TxEsEs0pTrsSVucApsYzW5V+Q8Qxhik6KU3evy+qkAAowTByymK0avdg==
+  
+  gsap@^3.9.1:
+    version "3.9.1"
+    resolved "https://registry.yarnpkg.com/gsap/-/gsap-3.9.1.tgz#d4c7443540497afee9ddc0824fd0180224e33360"
+    integrity sha512-JSGVYoC6da4pIjdF/yxFU6Rz8OojOIDkbooveZlfNg0+JIoFoRruyfWAEi6R/gUeNcuOiTqUIb0gi1nCNrHf8w==
   
   has-bigints@^1.0.1:
     version "1.0.1"
@@ -2342,6 +2362,21 @@ Lockfile:
     version "1.0.4"
     resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
     integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
+  
+  mobx-react-lite@^3.2.2:
+    version "3.2.2"
+    resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-3.2.2.tgz#cee5f09e6b0e4d2705d87276baf1de74d997fa33"
+    integrity sha512-FxJJMqmHcnQYOVVs2DdjNHioGlFsXF5/9VHztS9NAfIT3DYrxNZzVi119Zr/OmlWKkWNkAsssSNzPkqautfL4A==
+  
+  mobx-utils@^6.0.4:
+    version "6.0.4"
+    resolved "https://registry.yarnpkg.com/mobx-utils/-/mobx-utils-6.0.4.tgz#5283a466ece8de0ac36ae3cfa1b1c032ec302b37"
+    integrity sha512-CcTgFcCWN78eyRXU7OiKfhIVDEWFFoKdpfj49GIVcWykIQ4deXnaRnnKHElbVYFFgz1TOs8a3bDAq7qsSe864A==
+  
+  mobx@^6.3.10:
+    version "6.3.10"
+    resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.3.10.tgz#c3bc715c8f03717b9a2329f9697d42b7998d42e0"
+    integrity sha512-lfuIN5TGXBNy/5s3ggr1L+IbD+LvfZVlj5q1ZuqyV9AfMtunYQvE8G0WfewS9tgIR3I1q8HJEEbcAOsxEgLwRw==
   
   modify-filename@^1.1.0:
     version "1.1.0"
