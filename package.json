@@ -15,7 +15,7 @@
     "url": "https://github.com/devJimmyboy/PeepoSings.git"
   },
   "scripts": {
-    "dev": "yarn run watch",
+    "dev": "npm run watch",
     "build": "node scripts/build.js",
     "precompile": "cross-env MODE=production npm run build",
     "compile": "electron-builder build --config .electron-builder.config.js --dir",
