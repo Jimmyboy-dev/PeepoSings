@@ -20,7 +20,7 @@ export default function PeepoSings({ talk }: Props): ReactElement {
       <div className="relative">
         <img
           id="peepo-sings"
-          style={{ width: "7.5vw", marginLeft: "1vw", zIndex: 1 }}
+          style={{ width: "10vw", marginLeft: "1vw", zIndex: 1 }}
           src={talk ? peepoTalk : peepoIdle}
         />
         {notes.map((note, i) => (

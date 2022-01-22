@@ -24,8 +24,10 @@ type ChangeHandler<T> = (...args: T[]) => void | Promise<void>;
 
 const changeHandlers: { [key: string]: ChangeHandler<any>[] } = {
   musicChange: [],
+  configChange: [],
   downloadProgress: [],
-  downloadEnd: []
+  downloadEnd: [],
+  togglePlay: []
 }
 
 ipc.answerMain("download-progress", (data) => {
@@ -37,7 +39,10 @@ ipc.answerMain("download-end", (data) => {
 ipc.answerMain("music-change", (songs: SongJSON[]) => {
   changeHandlers.musicChange.forEach(h => h(songs))
 })
-
+ipc.answerMain("config-change", (config: PeepoSingConfig) => {
+  changeHandlers.musicChange.forEach(h => h(config))
+})
+ipc.answerMain("toggle-play", () => changeHandlers.togglePlay.forEach(l => l()))
 
 
 const api = {
@@ -91,11 +96,32 @@ const api = {
       return () => {
         changeHandlers.musicChange.splice(changeHandlers.musicChange.indexOf(handler), 1)
       }
+    },
+    onConfigChange: (handler: ChangeHandler<PeepoSingConfig>) => {
+      changeHandlers.configChange.push(handler)
+      return () => {
+        changeHandlers.configChange.splice(changeHandlers.configChange.indexOf(handler), 1)
+      }
+    },
+    togglePlay: (handler: ChangeHandler<void>) => {
+      changeHandlers.togglePlay.push(handler)
+      return () => {
+        changeHandlers.togglePlay.splice(changeHandlers.togglePlay.indexOf(handler), 1)
+      }
     }
   },
   config: {
-    get: async (): Promise<PeepoSingConfig> => { return await ipc.callMain("config-get") },
-    set: async (key: string, value: string) => { return await ipc.callMain("config-set", [key, value]) },
+    get: async <T extends keyof PeepoSingConfig>(path?: T): Promise<PeepoSingConfig | PeepoSingConfig[T]> => {
+      if (!path) return await ipc.callMain("config-get") as PeepoSingConfig
+      else
+        return await ipc.callMain("config-get", path) as PeepoSingConfig[T]
+    },
+    set: async (key: string, value: unknown) => { return await ipc.callMain("config-set", [key, value]) },
+  },
+  misc: {
+    openURL: (url: string) => {
+      ipc.callMain("open-url", url)
+    }
   }
 }
 

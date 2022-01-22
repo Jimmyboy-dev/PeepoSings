@@ -18,7 +18,8 @@ export interface PeepoSingConfig {
   scrobblerKeys: {
     apiKey: string | null;
     apiSecret: string | null;
-  }
+  };
+  outputDevice: string | null;
 }
 
 declare global {
@@ -32,6 +33,8 @@ declare global {
     albumArt?: string;
     metadata: VideoDetails | Item | MakeAllOptional<MoreVideoDetails>;
     favorite?: boolean;
+    in: number;
+    out: number;
     mood?: MoodJSON
   }
 

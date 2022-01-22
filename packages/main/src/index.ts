@@ -33,12 +33,16 @@ const disposeCTXMenu = contextMenu({
 
 const appIcon = nativeImage.createFromPath(join(__dirname, "../../..", "build", process.platform === "win32" ? "icon.ico" : "icon.png"))
 
-const store = new Store<SettingsStore>({ name: "settings", watch: true, defaults: { config: { autoPlay: false, runOnStartup: false, scrobblerKeys: { apiKey: null, apiSecret: null } } } })
+const store = new Store<SettingsStore>({ name: "settings", watch: true, defaults: { config: { autoPlay: false, runOnStartup: false, scrobblerKeys: { apiKey: null, apiSecret: null }, outputDevice: null } } })
 
 const musicStore = new Store<MusicStore>({ name: "music", defaults: { songs: [], lastSong: null }, watch: true })
 
 musicStore.onDidChange("songs", (songs) => {
   ipc.sendToRenderers("music-change", songs)
+})
+
+store.onDidAnyChange((val) => {
+  ipc.sendToRenderers("config-change", val.config)
 })
 
 const loadURL = serve({ directory: "dist" })
@@ -68,6 +72,7 @@ function initTray() {
   tray = new Tray(appIcon)
 
   const contextMenu = Menu.buildFromTemplate([
+    { label: "Play/Pause", click: () => ipc.sendToRenderers("toggle-play") },
     { label: "Show/Hide", click: () => mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show() },
     { label: "Quit", click: () => app.quit() },
   ])
@@ -92,7 +97,6 @@ const createWindow = async () => {
     icon: appIcon,
     webPreferences: {
       nativeWindowOpen: true,
-      webviewTag: false, // The webview tag is not recommended. Consider alternatives like iframe or Electron's BrowserView. https://www.electronjs.org/docs/latest/api/webview-tag#warning
       preload: join(__dirname, '../../preload/dist/index.cjs'),
     },
   });
@@ -137,6 +141,10 @@ ipc.on("windowCmd", (e, msg) => {
   else if (msg === "maximize" && !mainWindow.isMaximized()) mainWindow.maximize()
   else if (msg === "maximize" && mainWindow.isMaximized()) mainWindow.unmaximize()
   else if (msg === "close") mainWindow.close()
+})
+
+ipc.on("trayTooltip", (e, tip: string) => {
+  if (tray) tray.setToolTip(tip)
 })
 
 app.on('second-instance', () => {
@@ -216,6 +224,8 @@ listeners.musicUpdate = ipc.answerRenderer("music-save", (json: SongJSON) => {
     song.favorite = json.favorite
     song.filePath = json.filePath
     song.metadata = json.metadata
+    song.in = json.in;
+    song.out = json.out;
     song.mood = json.mood
     musicStore.set("songs", songs)
     return true
@@ -265,10 +275,18 @@ listeners.musicSearch = ipc.answerRenderer("music-search", async (query: string)
   return await ytsr(query, { limit: 10 }).catch(console.error)
 })
 
-listeners.configGet = ipc.answerRenderer("config-get", () => {
-  return store.get("config")
+listeners.configGet = ipc.answerRenderer("config-get", (path?: string) => {
+  if (!path)
+    return store.get("config")
+  else
+    return store.get(`config.${path}`)
 })
 
 listeners.configSet = ipc.answerRenderer("config-set", async ([key, value]: [string, string]) => {
   store.set(key, value)
+})
+
+listeners.openURL = ipc.answerRenderer("open-url", (url: string) => {
+  if (url.startsWith("http"))
+    shell.openExternal(url)
 })

@@ -1,35 +1,34 @@
 import { ActionIcon, Button, Group, Image, Text, Tooltip } from "@mantine/core"
 import { useListState } from "@mantine/hooks"
 import React, { ReactElement, useContext, useEffect } from "react"
-import { observer } from "mobx-react-lite"
 import { CurrentSongContext } from "../hooks/useCurrentSong"
 import { VideoDetails } from "ytdl-core"
-import { makeAutoObservable } from "mobx"
-import { useStore } from "../store"
+import { useMusic } from "../store"
 import { Icon } from "@iconify/react"
 
 interface Props {
-  songs?: Song[]
+  songs?: SongJSON[]
 }
 
 const db = window.electron.music
 
-export default observer(({}: Props): ReactElement => {
-  const rootStore = useStore()
-  const songs = rootStore.musicStore.songs
+export default ({}: Props): ReactElement => {
+  const { songs, setCurrentSong } = useMusic()
   return (
     <Group direction="column" className="w-full">
       {songs.length === 0 && <div>No songs found</div>}
-      {songs.length !== 0 && (songs as Song[]).map((song, i) => <SongView song={song} key={song.title} />)}
+      {songs.length !== 0 &&
+        songs.map((song, i) => <SongView song={song} setCurrentSong={setCurrentSong} key={song.title} />)}
     </Group>
   )
-})
+}
 
-const SongView = observer(({ song }: { song: Song }) => {
+const SongView = ({ song, setCurrentSong }: { song: SongJSON; setCurrentSong: (song: SongJSON) => void }) => {
+  const { removeSong } = useMusic()
   return (
     <div
       className="flex flex-row cursor-pointer items-center w-full p-2 text-gray-100 rounded-lg h-24 hover:bg-base-100 transition-colors hover:font-semibold"
-      onClick={() => song.makeCurrent()}>
+      onClick={() => setCurrentSong(song)}>
       <Tooltip label="Open in Explorer" position="left" placement="center" gutter={10}>
         <ActionIcon className="mx-1" onClick={() => window.electron.music.openLocation(song.filePath)}>
           <Icon icon="fas:arrow-up-right-from-square" />
@@ -42,13 +41,14 @@ const SongView = observer(({ song }: { song: Song }) => {
       </div>
       <ActionIcon
         className="ml-auto hover:text-red-400"
-        onClick={(e) => {
+        onClick={(e: React.MouseEvent) => {
           e.stopPropagation()
           e.preventDefault()
-          song.remove()
+          setCurrentSong(null)
+          setTimeout(() => removeSong(song), 250)
         }}>
         <Icon icon="fas:trash" />
       </ActionIcon>
     </div>
   )
-})
+}

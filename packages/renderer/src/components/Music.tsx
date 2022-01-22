@@ -3,14 +3,14 @@ import { Button, Group, Input, InputWrapper, Text } from "@mantine/core"
 import React, { ReactElement } from "react"
 import SongsView from "./SongsView"
 import SongSearch from "./SongSearch"
-import { useStore } from "../store"
+import { useMusic } from "../store"
 
 interface Props {
   currentTab: string
 }
 
 export default function Music({ currentTab }: Props): ReactElement {
-  const store = useStore()
+  const store = useMusic()
   switch (currentTab) {
     case "moods":
       return <></>
@@ -19,7 +19,7 @@ export default function Music({ currentTab }: Props): ReactElement {
       return (
         <Group className="mx-16" direction="column">
           <SongSearch />
-          <SongsView songs={store.musicStore.songs} />
+          <SongsView />
         </Group>
       )
   }

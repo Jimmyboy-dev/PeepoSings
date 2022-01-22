@@ -1,0 +1,37 @@
+{
+  "folders": [
+    {
+      "name": "Root",
+      "path": "."
+    },
+    {
+      "name": "Types",
+      "path": "./types"
+    },
+    {
+      "name": "Electron API",
+      "path": "./packages/main"
+    },
+    {
+      "name": "Preload",
+      "path": "./packages/preload"
+    },
+    {
+      "name": "Renderer",
+      "path": "./packages/renderer"
+    }
+  ],
+  "settings": {
+    "git.ignoreLimitWarning": true,
+    "files.exclude": {
+      "**/twitch-music-player/types": true,
+      "**/packages": true,
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/Thumbs.db": true
+    }
+  }
+}

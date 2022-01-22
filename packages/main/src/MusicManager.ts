@@ -64,13 +64,19 @@ export class MusicManager {
         i = -1
       }
       if (i !== -1) {
-        this.store.set("songs", songs.splice(i, 1));
+        songs.splice(i, 1)
+        this.store.set("songs", songs);
       }
     } else {
       this.store.set("songs", []);
     }
-    if (fs.existsSync(path))
-      fs.rmSync(path, { maxRetries: 5 })
+    try {
+      if (fs.existsSync(path)) {
+        fs.rmSync(path, { maxRetries: 5, })
+      }
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async addSong(url: string): Promise<SongJSON> {
@@ -85,6 +91,8 @@ export class MusicManager {
       filePath: path,
       artist: info.videoDetails.author.name,
       duration: parseInt(info.videoDetails.lengthSeconds),
+      in: 0,
+      out: parseInt(info.videoDetails.lengthSeconds),
       albumArt: info.videoDetails.thumbnails[0].url,
       metadata: info.videoDetails
     }
