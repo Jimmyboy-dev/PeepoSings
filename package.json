@@ -1,6 +1,6 @@
 {
   "name": "peepo-sings",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "Desktop music player designed for Live Broadcasts - Music based on moods",
   "main": "packages/main/dist/index.cjs",
   "author": "devJimmyboy",
@@ -33,7 +33,7 @@
   "dependencies": {
     "@mantine/core": "3.6.3",
     "@mantine/dates": "3.6.3",
-    "@mantine/hooks": "^3.6.2",
+    "@mantine/hooks": "3.6.3",
     "@mantine/modals": "^3.6.2",
     "@mantine/notifications": "^3.6.2",
     "@typescript-eslint/parser": "5.10.1",
