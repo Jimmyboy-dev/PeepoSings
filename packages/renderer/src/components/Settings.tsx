@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from "react"
 import { Drawer, Button, Group, Modal, Select } from "@mantine/core"
-import { PeepoSingConfig } from "../../../../types/store"
+import { PeepoSingConfig } from "../../../shared/types/peepo-sings"
 
 interface Props {
   opened: boolean

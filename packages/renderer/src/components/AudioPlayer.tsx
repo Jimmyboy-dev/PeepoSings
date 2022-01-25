@@ -15,10 +15,10 @@ import {
 } from "@mantine/core"
 import { useBooleanToggle, useLocalStorageValue } from "@mantine/hooks"
 import React, { ReactElement, useContext, useEffect } from "react"
-import { CurrentSongContext } from "../hooks/useCurrentSong"
+import { CurrentSongContext } from "../lib/useCurrentSong
 import { useConfig, useMusic } from "../store"
 import PeepoSings from "./PeepoSings"
-import { useSessionStorage } from "../hooks/useSessionStorage"
+import { useSessionStorage } from "../lib/useSessionStorage"
 
 interface Props {}
 

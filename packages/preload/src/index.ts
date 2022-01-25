@@ -5,7 +5,7 @@ import { contextBridge } from "electron";
 import { Result } from "ytsr";
 import { IpcRendererEvent } from "electron/renderer";
 import { videoInfo } from "ytdl-core";
-import { PeepoSingConfig } from "../../../types/store";
+import { PeepoSingConfig } from "../../shared/types/peepo-sings";
 
 export type ElectronAPI = typeof api;
 

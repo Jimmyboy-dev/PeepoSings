@@ -8,7 +8,7 @@ import readline from 'readline';
 import ffmpeg from "fluent-ffmpeg";
 import { Readable } from "stream";
 import Store, { Schema } from "electron-store";
-import { MusicStore } from "../../../types/store";
+import { MusicStore } from "../../shared/types/peepo-sings";
 import { URL } from "url";
 import { Blob } from "buffer";
 import sanitize from "sanitize-filename"

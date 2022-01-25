@@ -1,7 +1,7 @@
 import { ActionIcon, Button, Group, Image, Text, Tooltip } from "@mantine/core"
 import { useListState } from "@mantine/hooks"
 import React, { ReactElement, useContext, useEffect } from "react"
-import { CurrentSongContext } from "../hooks/useCurrentSong"
+import { CurrentSongContext } from "../lib/useCurrentSong
 import { VideoDetails } from "ytdl-core"
 import { useMusic } from "../store"
 import { Icon } from "@iconify/react"

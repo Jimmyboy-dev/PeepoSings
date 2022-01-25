@@ -1,26 +1,26 @@
 import React, { ReactElement, useContext, useEffect, useState } from "react"
 import { MoreVideoDetails, VideoDetails } from "ytdl-core"
-export const musicContext = React.createContext<MusicCtx>(null)
+export const musicContext = React.createContext<MusicCtx | null>(null)
 
 export interface MusicCtx {
-  currentSong: SongJSON
-  setCurrentSong: (song: SongJSON) => void
+  currentSong: Song | null
+  setCurrentSong: (song: Song) => void
   currentSongIndex: number
-  songs: SongJSON[]
-  removeSong: (song: SongJSON) => void
+  songs: Song[]
+  removeSong: (song: Song) => void
 }
 
 export function MusicProvider(props: any): ReactElement {
-  const [currentSong, setCurrentSong] = useState<SongJSON>(null)
-  const [songs, setSongs] = useState<SongJSON[]>([])
+  const [currentSong, setCurrentSong] = useState<Song | null>(null)
+  const [songs, setSongs] = useState<Song[]>([])
   const [currSongInd, setInd] = useState<number>(currentSong ? songs.indexOf(currentSong) : -1)
 
-  const removeSong = (song: SongJSON) => {
+  const removeSong = (song: Song) => {
     window.electron.music.removeSong(song.filePath, song.title)
   }
 
   useEffect(() => {
-    const listeners = []
+    const listeners: (() => void)[] = []
 
     window.electron.music.getSongs().then((songs) => {
       setSongs(songs)
@@ -64,12 +64,12 @@ export const useMusic = () => {
   return music
 }
 
-export const useSong = (songID: SongJSON) => {
+export const useSong = (songID: Song) => {
   const { songs } = useMusic()
   if (!songs) {
     throw new Error("MusicProvider not found")
   }
-  const setSong = (song: SongJSON) => {
+  const setSong = (song: Song) => {
     const ind = songs.indexOf(songs.find((s) => s.filePath === song.filePath))
     if (ind !== -1) {
       window.electron.music.saveSong(song)

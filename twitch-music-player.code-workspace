@@ -5,8 +5,8 @@
       "path": "."
     },
     {
-      "name": "Types",
-      "path": "./types"
+      "name": "Shared",
+      "path": "./packages/shared"
     },
     {
       "name": "Electron API",

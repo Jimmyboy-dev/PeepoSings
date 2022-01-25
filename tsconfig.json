@@ -1,19 +1,24 @@
 {
   "compilerOptions": {
-    "module": "esnext",
-    "target": "esnext",
+    "target": "es2020",
+    "module": "es2020",
     "sourceMap": true,
-    "moduleResolution": "Node",
+    "jsx": "react",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "removeComments": false,
+    "strict": true,
     "skipLibCheck": true,
-    // "strict": true,
-    "isolatedModules": true,
     "types": ["node"],
-    "typeRoots": ["node_modules/@types", "./types"],
-    "lib": ["ESNext"],
+    "typeRoots": ["packages/shared/types/**/*.d.ts"],
+    "lib": ["dom", "es2015", "es2016", "es2017.object"],
     "allowSyntheticDefaultImports": true,
     "useDefineForClassFields": true,
     "paths": {
-      "types/*": ["./types/*"]
+      "types/*": ["packages/shared/types/*"]
     }
-  }
+  },
+  "exclude": ["**/node_modules/**", "**/__tests__", "./build/**/*", "./dist/**/*"]
 }
