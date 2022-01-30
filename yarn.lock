@@ -425,10 +425,10 @@
     react-popper "^2.2.5"
     react-textarea-autosize "^8.3.2"
 
-"@mantine/dates@3.6.3":
-  version "3.6.3"
-  resolved "https://registry.yarnpkg.com/@mantine/dates/-/dates-3.6.3.tgz#b1ae66157ad3ea67fd2353402188c13bc78b82a8"
-  integrity sha512-ec5pW0ZX1AI5K9bIGnc1/Xp8Hb0k8c/lR5/QjQE1Da7gllrMcssq53HysJImeSacuQjQd3XSniUyRqitzBBXbQ==
+"@mantine/dates@3.6.4":
+  version "3.6.4"
+  resolved "https://registry.yarnpkg.com/@mantine/dates/-/dates-3.6.4.tgz#829fd3e13f304e57a8d9f72f3ad7ef50cf9168ee"
+  integrity sha512-El+U0iN/GuurLZZDo59qrh3iB+7vpnvzbMQ8nPLO7rh2sHuJKC5VLIz4TVncyNyHLDagoxxbLZVFo0KhglTJcA==
   dependencies:
     "@popperjs/core" "^2.9.3"
     clsx "^1.1.1"
