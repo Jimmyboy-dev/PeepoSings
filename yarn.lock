@@ -439,10 +439,10 @@
   resolved "https://registry.yarnpkg.com/@mantine/hooks/-/hooks-3.6.5.tgz#4f7a905a5301e0b38bf984cd8b6a4d6f98c5d66c"
   integrity sha512-GiSM3n9XnIeuLBNmdG75gAYh6aXn7J6yxvKGLTF1lM/l8ImsUNFVsBe6sNu/yINBQR8X9NZuylAeh/9KMnAO4w==
 
-"@mantine/modals@3.6.4":
-  version "3.6.4"
-  resolved "https://registry.yarnpkg.com/@mantine/modals/-/modals-3.6.4.tgz#dbdc40a0bd103262dfceaaa2c000db1cff40afe6"
-  integrity sha512-ntI8MANuNAmy1V/Jkbgg6XMqqAhmIinD5txSY4wfJ7pS/8CUwl0mvpYfKr59F1SHA3h3iQ7dY1NKwcAHlkA1yg==
+"@mantine/modals@3.6.5":
+  version "3.6.5"
+  resolved "https://registry.yarnpkg.com/@mantine/modals/-/modals-3.6.5.tgz#8a1e96e94ef9794f3f96324d557a0ab38c7a586d"
+  integrity sha512-2bhowJ+oqSqtFiC52txYRV6188fATlcA5iPRetRWVowJOlMPb4i9Wn5pMOZM+j49dzjadKgSoMDEhksxOkECyQ==
 
 "@mantine/notifications@3.6.4":
   version "3.6.4"
