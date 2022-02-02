@@ -434,10 +434,10 @@
     clsx "^1.1.1"
     react-popper "^2.2.5"
 
-"@mantine/hooks@3.6.4":
-  version "3.6.4"
-  resolved "https://registry.yarnpkg.com/@mantine/hooks/-/hooks-3.6.4.tgz#f763ca3883d76b33402975045425464afac04960"
-  integrity sha512-sD8OJ7EBro/RspWb8kCDKNFDHzxdIgZg0bJa3OZ6py1Osg7eRX/yTequCLT2JdTJCEyUCo7TUAN0erBTlIYxbg==
+"@mantine/hooks@3.6.5":
+  version "3.6.5"
+  resolved "https://registry.yarnpkg.com/@mantine/hooks/-/hooks-3.6.5.tgz#4f7a905a5301e0b38bf984cd8b6a4d6f98c5d66c"
+  integrity sha512-GiSM3n9XnIeuLBNmdG75gAYh6aXn7J6yxvKGLTF1lM/l8ImsUNFVsBe6sNu/yINBQR8X9NZuylAeh/9KMnAO4w==
 
 "@mantine/modals@3.6.4":
   version "3.6.4"
