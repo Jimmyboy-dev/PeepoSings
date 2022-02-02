@@ -1,6 +1,6 @@
 {
   "name": "peepo-sings",
-  "version": "0.2.38",
+  "version": "0.2.39",
   "description": "Desktop music player designed for Live Broadcasts - Music based on moods",
   "main": "packages/main/dist/index.cjs",
   "author": "devJimmyboy",
@@ -103,7 +103,7 @@
     "ts-node": "^10.4.0",
     "ts-node-dev": "^1.1.8",
     "tslib": "^2.3.1",
-    "typescript": "4.6.0-dev.20220201",
+    "typescript": "4.6.0-dev.20220202",
     "vite": "^2.7.13"
   }
 }
