@@ -507,10 +507,10 @@
   resolved "https://registry.yarnpkg.com/@mantine/modals/-/modals-3.6.9.tgz#df8206bd5f140f8fe0cfe3ebb4cdc54c127fc5e7"
   integrity sha512-iO0UPKdgpYYIUq6mhYCIPGDja3UBmbH5ziWBONQMZAxVM4woeHRV2TzMep2US8qO8ySRGFv41E1jKLVmo4O7fg==
 
-"@mantine/notifications@3.6.8":
-  version "3.6.8"
-  resolved "https://registry.yarnpkg.com/@mantine/notifications/-/notifications-3.6.8.tgz#f471a02c3dd6c36817cb9a4fe3d2965c32d4646b"
-  integrity sha512-KqHP9acNYm8d4rVAsB+h2UaP1Gy9/S3HbnKhkc/8Cku3aUx1wsxGyyUjfdQwuNT58VGk/4yTDxOYmoagKfHeuA==
+"@mantine/notifications@3.6.9":
+  version "3.6.9"
+  resolved "https://registry.yarnpkg.com/@mantine/notifications/-/notifications-3.6.9.tgz#3df883fd27f41562c05f141b25d5bc3e64d5648f"
+  integrity sha512-vW6y3IIn503359q6QSm/XOpDUE+LmKy96zYrT8aNP7rUXkYOeWY2DMlpu8w/uRwSEGvrBc7wxk992HZyq64Ogw==
   dependencies:
     clsx "^1.1.1"
     react-transition-group "^4.4.2"
