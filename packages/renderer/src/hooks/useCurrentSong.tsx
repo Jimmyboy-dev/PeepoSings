@@ -1,5 +1,5 @@
 import React from "react"
-import { Song } from "../../store"
+import { Song } from "../store"
 export const CurrentSongContext = React.createContext<{ song: Song; setSong: (song: string) => void }>({
   song: null,
   setSong: (song: string) => {},
