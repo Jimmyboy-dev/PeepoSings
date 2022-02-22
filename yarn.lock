@@ -4176,7 +4176,7 @@ playwright-core@1.19.1:
     yauzl "2.10.0"
     yazl "2.5.1"
 
-playwright@1.19.1:
+playwright@^1.19.1:
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.19.1.tgz#5db88245932036ba208dbc2db8d5291ca50199e1"
   integrity sha512-h1iCJ1S2eAkZ67lZCmOxhRiT3OKa1JFGtyHLaZV30znqIjcsJLuyB/dmo78V3ajpMdz8iwxIb2xjpaSh1G+8UA==
