@@ -1,6 +1,6 @@
 {
   "name": "peepo-sings",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Desktop music player designed for Live Broadcasts - Music based on moods",
   "main": "packages/main/dist/index.cjs",
   "author": "devJimmyboy",
@@ -52,7 +52,7 @@
     "electron-window-state": "^5.0.3",
     "fitool": "^1.0.2",
     "fluent-ffmpeg": "^2.1.2",
-    "framer-motion": "^6.2.6",
+    "framer-motion": "6.2.7",
     "gsap": "^3.9.1",
     "jquery": "^3.6.0",
     "lastfmapi": "^0.1.1",
