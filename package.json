@@ -17,7 +17,11 @@
   "scripts": {
     "build": "node scripts/build.js",
     "build:dev": "cross-env MODE=development yarn run build",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps",
     "precompile": "cross-env MODE=production yarn run build",
+    "release": "electron-builder -p always",
     "compile": "electron-builder build --config .electron-builder.config.js --dir --config.asar=false",
     "package": "electron-builder build --config .electron-builder.config.js -w",
     "pretest": "yarn run build",

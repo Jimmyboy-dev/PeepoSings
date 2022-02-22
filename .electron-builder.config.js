@@ -17,17 +17,23 @@ const config = {
   productName: "Peepo Sings",
   copyright: "Copyright © 2021 devJimmyboy",
   icon: "build/icon.png",
+  publish: { provider: "github" },
   win: {
     target: "nsis",
     icon: "build/icon.ico",
-    publish: { provider: "github" },
   },
   nsis: {
     oneClick: false,
     allowElevation: true,
     allowToChangeInstallationDirectory: true,
   },
-
+  mac: {
+    category: "music",
+  },
+  linux: {
+    category: "music",
+    target: "AppImage",
+  },
   directories: {
     output: "dist",
     buildResources: "build",
