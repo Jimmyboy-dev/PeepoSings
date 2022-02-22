@@ -33,6 +33,11 @@ const config = {
     buildResources: "build",
   },
   files: ["packages/**/dist/**", "build/**/*"],
+  publish: {
+    provider: "github",
+    owner: "devJimmyboy",
+    repo: "PeepoSings",
+  },
   extraMetadata: {
     version: process.env.VITE_APP_VERSION,
   },

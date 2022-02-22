@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useEffect } from "react"
 import React from "react"
 import { ActionIcon, Group, SegmentedControl } from "@mantine/core"
 import { Icon } from "@iconify/react"
@@ -12,6 +13,10 @@ interface Props {
 
 export default function TitleBar({ currentTab, onTabChange }: Props): ReactElement {
   const [isOpen, toggleIsOpen] = useBooleanToggle(false)
+  const [version, setVersion] = React.useState("")
+  useEffect(() => {
+    window.electron.misc.getVersion().then(setVersion)
+  })
 
   return (
     <div
@@ -26,13 +31,16 @@ export default function TitleBar({ currentTab, onTabChange }: Props): ReactEleme
         </ActionIcon>
         <Settings opened={isOpen} toggle={toggleIsOpen} />
       </div>
-      <Icon className="ml-4 text-base-content border-none" fontSize={20} icon="fas:music-note" />
-      <div className="inline-flex  gap-1 items- px-2 ">
-        <span className="text-lg  text-primary font-bold self-end">Peepo Sings</span>
-        <span className="text-xs font-semibold">Twitch Music Player</span>
+      <Icon className="ml-4 border-none text-primary" fontSize={24} icon="fas:music-note" />
+      <div className="inline-flex gap-2 px-2 ">
+        <div className="flex flex-col items-end">
+          <span className="text-xl  text-primary font-bold self-end">Peepo Sings</span>
+          <span className="text-xs font-semibold -bottom-3 right-0">Twitch Music Player</span>
+        </div>
+        <span className=" text-xs  text-secondary font-bold ">v{version}</span>
       </div>
       <SegmentedControl
-        className="noDrag ml-6 max-w-xs"
+        className="noDrag flex-shrink ml-6 max-w-xs"
         value={currentTab}
         onChange={onTabChange}
         data={[
@@ -41,7 +49,7 @@ export default function TitleBar({ currentTab, onTabChange }: Props): ReactEleme
         ]}
       />
       <div className="flex-grow" />
-      <Group className="windowControl noDrag" spacing={4}>
+      <Group className="windowControl flex-nowrap noDrag" spacing={4}>
         <ActionIcon onClick={() => window.electron.windowControl("minimize")}>
           <Icon color="white" icon="fas:window-minimize" />
         </ActionIcon>

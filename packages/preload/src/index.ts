@@ -1,6 +1,6 @@
 import { ipcRenderer as ipc } from "electron-better-ipc"
 // import Store from "electron-store";
-import { contextBridge } from "electron"
+import { app, contextBridge } from "electron"
 // import $ from "jquery";
 import type { Result } from "ytsr"
 import type { IpcRendererEvent } from "electron/renderer"
@@ -69,6 +69,7 @@ const api = {
     onDownloadEnd: (handler: (event: IpcRendererEvent, download: { path: string, dlInfo: DownloadInfo }) => void) => ipc.on("download-end", handler),
   },
   misc: {
+    getVersion: async () => { return await ipc.callMain("get-version") },
     openURL: (url: string) => {
       ipc.callMain("open-url", url)
     },

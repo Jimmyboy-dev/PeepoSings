@@ -11,15 +11,18 @@ import { ipcMain as ipc } from "electron-better-ipc"
 import contextMenu from "electron-context-menu"
 import windowStateKeeper from "electron-window-state"
 import Store from "electron-store"
-import serve from "electron-serve"
-import { MusicManager } from "./MusicManager"
+// import serve from "electron-serve"
+import { MusicManager } from "./modules/MusicManager"
 import AutoLaunch from "auto-launch"
 import ytsr from "ytsr"
+import type AutoUpdater from "./modules/AutoUpdater"
 
 let autoLauncher: AutoLaunch
 
 const isSingleInstance = app.requestSingleInstanceLock()
 const isDevelopment = import.meta.env.MODE === "development" || isDev
+
+let updater: AutoUpdater = null
 
 if (!isSingleInstance) {
   app.quit()
@@ -70,6 +73,8 @@ function initTray() {
 }
 
 const createWindow = async () => {
+  if (mainWindow)
+    mainWindow.close()
   const mainWindowState = windowStateKeeper({
     defaultWidth: 1000,
     defaultHeight: 800,
@@ -113,7 +118,7 @@ const createWindow = async () => {
    */
   const pageUrl = isDevelopment && import.meta.env.VITE_DEV_SERVER_URL !== undefined
     ? import.meta.env.VITE_DEV_SERVER_URL
-    : new URL("../renderer/dist/index.html", "file://" + __dirname).toString()
+    : new URL(join(__dirname, "../renderer/dist/index.html"), "file://").toString()
 
 
   await mainWindow.loadURL(pageUrl)
@@ -182,8 +187,8 @@ app.whenReady().then(() => {
 // Auto-updates
 if (import.meta.env.PROD) {
   app.whenReady()
-    .then(() => import("electron-updater"))
-    .then(({ autoUpdater }) => autoUpdater.checkForUpdatesAndNotify())
+    .then(() => import("./modules/AutoUpdater"))
+    .then(({ default: AutoUpdater }) => { updater = new AutoUpdater() })
     .catch((e) => console.error("Failed check updates:", e))
 }
 
@@ -203,9 +208,11 @@ listeners.musicAdd = ipc.answerRenderer("music-add", async (url: string) => {
   return await song
 })
 
-// listeners.musicSet = ipc.answerRenderer("music-set", ([key, value]: [string, SongJSON]) => {
-//   return musicStore.set(key, value)
-// })
+listeners.musicRemove = ipc.answerRenderer("music-remove", async (path: string) => {
+  const song = musicManager.removeSong(path)
+  return song
+})
+
 
 listeners.videoInfo = ipc.answerRenderer("video-info", async (url: string) => {
   return await musicManager.getYoutubeVideoInfo(url)
@@ -213,6 +220,17 @@ listeners.videoInfo = ipc.answerRenderer("video-info", async (url: string) => {
 
 listeners.musicSearch = ipc.answerRenderer("music-search", async (query: string) => {
   return await ytsr(query, { limit: 10 }).catch(console.error)
+})
+
+listeners.checkForUpdates = ipc.answerRenderer("check-for-updates", async () => {
+  if (updater) {
+    return await updater.manualCheckForUpdates(mainWindow)
+  }
+  else return false
+})
+
+listeners.getVersion = ipc.answerRenderer("get-version", () => {
+  return app.getVersion()
 })
 
 

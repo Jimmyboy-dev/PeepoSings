@@ -68,7 +68,7 @@ function AudioPlayer(): ReactElement {
         audio.current.currentTime = queue[nextSong].in
         audioPlay()
       } else {
-        if (currentSong === songs.length - 1) dispatch(setCurrentSong(0))
+        if (currentSong === queue.length - 1) dispatch(setCurrentSong(0))
         else dispatch(nextSong())
       }
     }
