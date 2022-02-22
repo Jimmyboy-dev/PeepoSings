@@ -10,11 +10,5 @@
     "allowSyntheticDefaultImports": true
   },
 
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "types/**/*.d.ts",
-    "../../types/**/*.d.ts",
-    "../preload/exposedInMainWorld.d.ts"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "types/**/*.d.ts", "../../types/**/*.d.ts", "../preload/**/*.ts"]
 }
