@@ -8,5 +8,5 @@
     "jsx": "preserve"
   },
   "files": ["src/index.ts"],
-  "include": ["../../types/**/*.d.ts", "../renderer/src/store/**/*"]
+  "include": ["../../types/**/*.d.ts"]
 }
