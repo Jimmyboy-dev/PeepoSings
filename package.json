@@ -1,6 +1,6 @@
 {
   "name": "peepo-sings",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Desktop music player designed for Live Broadcasts - Music based on moods",
   "main": "packages/main/dist/index.cjs",
   "author": "devJimmyboy",
@@ -98,7 +98,7 @@
     "electron": "^17.0.1",
     "electron-builder": "^22.14.13",
     "electron-devtools-installer": "^3.2.0",
-    "electron-reloader": "1.2.2",
+    "electron-reloader": "1.2.3",
     "eslint": "8.9.0",
     "eslint-plugin-react": "7.28.0",
     "nano-staged": "0.6.0",
