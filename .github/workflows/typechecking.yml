@@ -4,22 +4,22 @@ on:
     branches:
       - main
     paths:
-      - '**.ts'
-      - '**.tsx'
-      - '**/tsconfig.json'
-      - 'package-lock.json'
-      - '.github/workflows/typechecking.yml'
+      - "**.ts"
+      - "**.tsx"
+      - "**/tsconfig.json"
+      - "package-lock.json"
+      - ".github/workflows/typechecking.yml"
   pull_request:
     paths:
-      - '**.ts'
-      - '**.tsx'
-      - '**/tsconfig.json'
-      - 'package-lock.json'
-      - '.github/workflows/typechecking.yml'
+      - "**.ts"
+      - "**.tsx"
+      - "**/tsconfig.json"
+      - "package-lock.json"
+      - ".github/workflows/typechecking.yml"
 
 defaults:
   run:
-    shell: 'bash'
+    shell: "bash"
 
 jobs:
   typescript:
@@ -30,13 +30,13 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 16 # Need for npm >=7.7
-          cache: 'npm'
+          cache: "yarn"
 
       # TODO: Install not all dependencies, but only those required for this workflow
       - name: Install dependencies
-        run: npm ci
+        run: yarn install
 
       # Type checking is divided into three separate commands for more convenient logs
-      - run: npm run typecheck-main
-      - run: npm run typecheck-preload
-      - run: npm run typecheck-renderer
+      - run: yarn run typecheck-main
+      - run: yarn run typecheck-preload
+      - run: yarn run typecheck-renderer

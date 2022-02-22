@@ -32,6 +32,10 @@
       "**/CVS": true,
       "**/.DS_Store": true,
       "**/Thumbs.db": true
+    },
+    "yaml.schemas": {
+      "file:///toc.schema.json": "/toc\\.yml/i",
+      "https://json.schemastore.org/github-issue-config.json": "file:///c%3A/Users/jimmy/dev/Node/twitch-music-player/.github/ISSUE_TEMPLATE/config.yml"
     }
   }
 }
