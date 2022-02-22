@@ -1,8 +1,8 @@
-import React, { ReactElement } from "react"
-import { ActionIcon, Burger, Button, Group, Popover, SegmentedControl } from "@mantine/core"
+import type { ReactElement } from "react"
+import React from "react"
+import { ActionIcon, Group, SegmentedControl } from "@mantine/core"
 import { Icon } from "@iconify/react"
 import { useBooleanToggle } from "@mantine/hooks"
-import AppDrawer from "./Settings"
 // import AppSelection from "./AppSelection"
 import Settings from "./Settings"
 interface Props {
@@ -16,7 +16,7 @@ export default function TitleBar({ currentTab, onTabChange }: Props): ReactEleme
   return (
     <div
       id="dragBar"
-      className="navbar fixed top-0 left-0 hover:shadow-2xl transition-shadow flex-row w-full mb-2 shadow-lg bg-base-300 text-base-content rounded-box rounded-t-none">
+      className="navbar fixed top-0 left-0 hover:shadow-2xl transition-shadow flex-row w-full mb-2 shadow-lg bg-base-300 text-base-content rounded-box rounded-t-none z-50">
       <div className="noDrag">
         <ActionIcon
           className="flex-none text-green-400 ml-2 cursor-pointer h-12 w-12 rounded-full"
@@ -32,7 +32,7 @@ export default function TitleBar({ currentTab, onTabChange }: Props): ReactEleme
         <span className="text-xs font-semibold">Twitch Music Player</span>
       </div>
       <SegmentedControl
-        className="noDrag ml-6"
+        className="noDrag ml-6 max-w-xs"
         value={currentTab}
         onChange={onTabChange}
         data={[

@@ -1,19 +1,20 @@
 import { Icon } from "@iconify/react"
 import { Button, Group, Input, InputWrapper, Text } from "@mantine/core"
-import React, { ReactElement } from "react"
+import type { ReactElement } from "react"
+import React from "react"
 import SongsView from "./SongsView"
 import SongSearch from "./SongSearch"
-import { useMusic } from "../store"
+import { useAppSelector } from "../store"
+import Moods from "./Moods"
 
 interface Props {
   currentTab: string
 }
 
 export default function Music({ currentTab }: Props): ReactElement {
-  const store = useMusic()
   switch (currentTab) {
     case "moods":
-      return <></>
+      return <Moods />
     case "songs":
     default:
       return (

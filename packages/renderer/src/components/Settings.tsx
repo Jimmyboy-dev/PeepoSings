@@ -1,6 +1,10 @@
-import React, { ReactElement, useEffect } from "react"
-import { Drawer, Button, Group, Modal, Select } from "@mantine/core"
+import type { ReactElement} from "react"
+import React, { useEffect } from "react"
+import { Drawer, Button, Group, Modal, Select, Checkbox } from "@mantine/core"
 import { PeepoSingConfig } from "../../../../types/store"
+import { useSelector } from "react-redux"
+import { useAppDispatch, useAppSelector } from "../store"
+import { setOutputDevice, toggleRunOnStartup } from "../store/slices/config"
 
 interface Props {
   opened: boolean
@@ -8,33 +12,24 @@ interface Props {
 }
 
 export default function Settings({ opened, toggle }: Props): ReactElement {
-  const [settings, setSettings] = React.useState<PeepoSingConfig | null>(null)
+  const config = useAppSelector((store) => store.config)
+  const dispatch = useAppDispatch()
 
   const [audioDevices, setAudioDevices] = React.useState<MediaDeviceInfo[]>([])
   useEffect(() => {
     const doIt = async () => {
-      //Get and display config
-      setSettings((await window.electron.config.get()) as PeepoSingConfig)
       //Get and display audio devices
       const devices = await navigator.mediaDevices.enumerateDevices()
       const audioDevices = devices.filter((device) => device.kind === "audiooutput")
       setAudioDevices(audioDevices)
     }
     doIt()
-  }, [])
-
-  const changeSetting = function <T extends keyof PeepoSingConfig>(key: T, value: PeepoSingConfig[T]) {
-    setSettings((cfg) => {
-      cfg[key] = value
-      return cfg
-    })
-    window.electron.config.set(key, value)
-  }
+  }, [audioDevices, setAudioDevices])
 
   const onChange = (deviceId: string) => {
-    changeSetting("outputDevice", deviceId)
+    dispatch(setOutputDevice(deviceId))
   }
-  if (settings === null)
+  if (!config)
     return (
       <Modal centered opened={opened} onClose={toggle}>
         Loading...
@@ -56,10 +51,15 @@ export default function Settings({ opened, toggle }: Props): ReactElement {
             style={{ width: "50%" }}
             onChange={(e) => onChange(e)}
             defaultValue={
-              audioDevices.find((device) => settings.outputDevice === device.deviceId)?.deviceId ||
+              audioDevices.find((device) => config.outputDevice === device.deviceId)?.deviceId ||
               audioDevices[0]?.deviceId
             }
             data={audioDevices.map((dev) => ({ label: dev.label, value: dev.deviceId }))}
+          />
+          <Checkbox
+            checked={config.runOnStartup}
+            label="Launch on Startup"
+            onChange={() => toggleRunOnStartup(dispatch)}
           />
         </Group>
       </Modal>

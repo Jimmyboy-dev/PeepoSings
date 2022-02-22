@@ -3,15 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "/@/*": [
-        "./src/*"
-      ]
-    }
+      "/@/*": ["./src/*"]
+    },
+    "jsx": "preserve"
   },
-  "files": [
-    "src/index.ts"
-  ],
-  "include": [
-    "../../types/**/*.d.ts"
-  ]
+  "files": ["src/index.ts"],
+  "include": ["../../types/**/*.d.ts", "../renderer/src/store/**/*"]
 }

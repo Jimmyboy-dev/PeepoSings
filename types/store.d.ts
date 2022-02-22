@@ -1,7 +1,6 @@
-import { MoreVideoDetails, VideoDetails } from "ytdl-core";
-import { Item, Result } from "ytsr";
-import { Song } from "./src/store";
-import { Mood } from "./src/store";
+import type { MoreVideoDetails, VideoDetails } from "ytdl-core"
+import type ytdl from "ytdl-core"
+import type { Item } from "ytsr"
 
 export interface MusicStore {
   songs: SongJSON[]
@@ -10,6 +9,7 @@ export interface MusicStore {
 
 export interface SettingsStore {
   config: PeepoSingConfig
+
 }
 
 export interface PeepoSingConfig {
@@ -24,7 +24,10 @@ export interface PeepoSingConfig {
 
 declare global {
 
+  interface DownloadInfo { start?: number, vidInfo: ytdl.videoInfo, savePath: string }
+
   interface SongJSON {
+    id: string;
     filePath: string;
     title: string;
     artist: string;
@@ -35,7 +38,7 @@ declare global {
     favorite?: boolean;
     in: number;
     out: number;
-    mood?: MoodJSON
+    mood: (MoodJSON["id"])[]
   }
 
   type ffmpegProgress = {
@@ -48,7 +51,10 @@ declare global {
   }
 
   interface MoodJSON {
+    id: string;
     name: string;
+    color?: string;
+    icon?: string;
   }
 
   type MakeAllOptional<T> = { [K in keyof T]?: T[K] extends object ? MakeAllOptional<T[K]> : T[K] }

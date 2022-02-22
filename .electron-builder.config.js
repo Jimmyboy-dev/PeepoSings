@@ -16,17 +16,23 @@ const config = {
   appId: "com.devJimmyboy.PeepoSings",
   productName: "Peepo Sings",
   copyright: "Copyright © 2021 devJimmyboy",
+  icon: "build/icon.png",
   win: {
     target: "nsis",
     icon: "build/icon.ico",
     publish: { provider: "github" },
   },
+  nsis: {
+    oneClick: false,
+    allowElevation: true,
+    allowToChangeInstallationDirectory: true,
+  },
 
   directories: {
     output: "dist",
-    buildResources: "buildResources",
+    buildResources: "build",
   },
-  files: ["packages/**/dist/**"],
+  files: ["packages/**/dist/**", "build/**/*"],
   extraMetadata: {
     version: process.env.VITE_APP_VERSION,
   },

@@ -1,16 +1,61 @@
 import { Icon } from "@iconify/react"
 import { ActionIcon, Box, Button, Col, Grid, Modal, Tabs } from "@mantine/core"
-import React, { ReactElement } from "react"
+import type { ReactElement } from "react"
+import React, { useEffect } from "react"
 import AudioPlayer from "./components/AudioPlayer"
 import Music from "./components/Music"
-import { CurrentSongProvider } from "./hooks/useCurrentSong"
 import TitleBar from "./components/TitleBar"
-import PeepoSings from "./components/PeepoSings"
+import { setUpNotifications } from "reapop"
+import { useAppDispatch, useAppSelector } from "./store"
+import { addSong } from "./store/slices/songs"
 
-interface Props {}
+// run this function when your application starts before creating any notifications
 
-export default function App({}: Props): ReactElement {
+declare global {
+  interface Window {
+    media: MediaDevices
+  }
+  interface MediaDevices {
+    selectAudioOutput: (options: { deviceId: string }) => Promise<{ deviceId: string }>
+  }
+}
+
+export default function App(): ReactElement {
   const [currentTab, setCurrentTab] = React.useState("songs")
+  const dispatch = useAppDispatch()
+  useEffect(() => {
+    setUpNotifications({
+      defaultProps: {
+        position: "top-center",
+        dismissible: true,
+      },
+    })
+    // const onDlEnd = (e, dl) => {
+    //   console.log("Download finished", dl)
+    //   const {
+    //     ownerChannelName: artist,
+    //     lengthSeconds: duration,
+    //     title,
+    //     thumbnails: [{ url: albumArt }],
+    //     media: { category: album },
+    //   } = dl.dlInfo.vidInfo.videoDetails
+    //   dispatch(
+    //     addSong({
+    //       artist,
+    //       duration: parseInt(duration),
+    //       title,
+    //       filePath: dl.path,
+    //       metadata: dl.dlInfo.vidInfo.videoDetails,
+    //       album,
+    //       albumArt,
+    //     })
+    //   )
+    // }
+    // const dlEndListener = window.electron.listeners.onDownloadEnd(onDlEnd)
+    // return () => {
+    //   dlEndListener.removeListener("download-end", onDlEnd)
+    // }
+  }, [])
 
   return (
     <div

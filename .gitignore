@@ -55,3 +55,4 @@ thumbs.db
 .idea/httpRequests
 /.idea/csv-plugin.xml
 /packages/renderer/src/icons/**/*.json
+buildResources/.gitkeep
