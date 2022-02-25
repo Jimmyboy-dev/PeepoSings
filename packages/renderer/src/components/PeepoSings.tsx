@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import React from "react"
-import peepoTalk from "/peepoTalk.gif"
-import peepoIdle from "/peepoTalk-idle.png"
+import peepoTalk from "../assets/peepoTalk.gif"
+import peepoIdle from "../assets/peepoTalk-idle.png"
 import { motion, useAnimation, useAnimationFrame, Variants } from "framer-motion"
 import { Icon } from "@iconify/react"
 
