@@ -87,14 +87,14 @@ export default function App(): ReactElement {
       <TitleBar currentTab={currentTab} onTabChange={setCurrentTab} />
       <Box className="w-full relative text-neutral-content m-0 h-full px-2">
         <Music currentTab={currentTab} />
-        <ActionIcon
+        {/* <ActionIcon
           className="absolute top-0 left-2"
           variant="filled"
           onClick={() => {
             window.electron.music.openInEditor()
           }}>
           <Icon icon="fas:arrow-up-right-from-square" />
-        </ActionIcon>
+        </ActionIcon> */}
       </Box>
       <AudioPlayer />
     </div>
