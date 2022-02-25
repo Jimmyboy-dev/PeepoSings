@@ -1,7 +1,7 @@
 import { Center, Title } from "@mantine/core"
 import { useBooleanToggle } from "@mantine/hooks"
 import { useEffect } from "react"
-import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom"
 import PeepoSings from "./components/PeepoSings"
 import Home from "./pages/Home"
 
@@ -13,7 +13,9 @@ function App() {
       <div className="App">
         <Routes>
           <Route index element={<Home />} />
-          <Route path="" element={<Home />} />
+          <Route path="Windows" element={<DownloadPage />} />
+          <Route path="MacOS" element={<DownloadPage />} />
+          <Route path="Linux" element={<DownloadPage />} />
 
           <Route
             path="*"
@@ -33,3 +35,10 @@ function App() {
 }
 
 export default App
+
+const DownloadPage = () => {
+  useEffect(() => {
+    window.location.assign("https://github.com/Jimmyboy-dev/PeepoSings/releases/latest")
+  })
+  return null
+}
