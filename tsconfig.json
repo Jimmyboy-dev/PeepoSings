@@ -1,19 +1,17 @@
 {
+  "extends": "./paths.json",
   "compilerOptions": {
-    "module": "esnext",
-    "target": "esnext",
-    "sourceMap": true,
-    "moduleResolution": "Node",
+    "target": "ESNext",
+    "module": "ESNext",
+    "allowJs": true,
     "skipLibCheck": true,
-    // "strict": true,
-    "isolatedModules": true,
-    "types": ["node"],
-    "typeRoots": ["node_modules/@types", "types"],
-    "lib": ["ESNext"],
-    "allowSyntheticDefaultImports": true,
-    "useDefineForClassFields": true,
-    "paths": {
-      "types/*": ["./types/*"]
-    }
-  }
+    "skipDefaultLibCheck": true,
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "strict": true,
+    "types": ["node", "vite/client"],
+    "jsx": "react-jsx"
+  },
+  "exclude": ["node_modules", "dist"]
 }

@@ -1,8 +1,7 @@
 import type { ReactElement } from "react"
 import React from "react"
-import peepoTalk from "/assets/peepoTalk.gif"
-import peepoIdle from "/assets/peepoTalk-idle.png"
-import { Image } from "@mantine/core"
+import peepoTalk from "@/assets/peepoTalk.gif"
+import peepoIdle from "@/assets/peepoTalk-idle.png"
 import gsap from "gsap"
 import { Icon } from "@iconify/react"
 
@@ -47,7 +46,7 @@ function MusicNote({ x, y, paused }: NoteProps): ReactElement {
     tween.current = gsap.fromTo(
       ref.current,
       { x, y, autoAlpha: 1 },
-      { yPercent: -400, x: "+=20px", autoAlpha: 0, duration: 5, repeat: -1, ease: "linear" },
+      { yPercent: -400, x: "+=20px", autoAlpha: 0, duration: 5, repeat: -1, ease: "linear" }
     )
   }, [ref.current])
   React.useEffect(() => {

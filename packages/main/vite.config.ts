@@ -1,6 +1,8 @@
 import { node } from "../../.electron-vendors.cache.json"
 import { join } from "path"
 import { builtinModules } from "module"
+import { defineConfig } from "vite"
+import pkg from "../../package.json"
 
 const PACKAGE_ROOT = __dirname
 
@@ -8,7 +10,7 @@ const PACKAGE_ROOT = __dirname
  * @type {import('vite').UserConfig}
  * @see https://vitejs.dev/config/
  */
-const config = {
+export default defineConfig({
   mode: process.env.MODE,
   root: PACKAGE_ROOT,
   envDir: process.cwd(),
@@ -18,24 +20,23 @@ const config = {
     },
   },
   build: {
+    outDir: "../../dist/main",
     sourcemap: "inline",
     target: `node${node}`,
-    outDir: "dist",
     assetsDir: ".",
     minify: process.env.MODE !== "development",
     lib: {
-      entry: "src/index.ts",
+      entry: "index.ts",
       formats: ["cjs"],
+      fileName: () => "[name].cjs",
     },
     rollupOptions: {
-      external: ["electron", "electron-devtools-installer", "fluent-ffmpeg", ...builtinModules],
-      output: {
-        entryFileNames: "[name].cjs",
-      },
+      external: [
+        "electron", "electron-devtools-installer", "fluent-ffmpeg",
+        ...builtinModules,
+        ...Object.keys(pkg.dependencies || {}),
+      ],
     },
     emptyOutDir: true,
-    brotliSize: false,
   },
-}
-
-export default config
+})

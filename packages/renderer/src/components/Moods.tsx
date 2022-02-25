@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from "@mantine/core"
 import { useBooleanToggle } from "@mantine/hooks"
-import React from "react"
+import React, { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "../store"
 import { addMood, setMood } from "../store/slices/moods"
 import { motion } from "framer-motion"
@@ -35,7 +35,11 @@ export default function Moods() {
       <ActionIcon size="xl" className="absolute right-2 top-2 bg-green-500 rounded-full" onClick={() => setAddMood()}>
         <Icon fontSize={24} icon="fas:plus" color="white" />
       </ActionIcon>
-      <AddMoodModal opened={addingMood} onClose={setAddMood} mood={!mood ? undefined : { ...mood, type: "editing" }} />
+      <AddMoodModal
+        opened={addingMood}
+        onClose={() => setAddMood(false)}
+        mood={!mood ? undefined : { ...mood, type: "editing" }}
+      />
       <SimpleGrid
         cols={4}
         spacing="lg"
@@ -47,7 +51,7 @@ export default function Moods() {
         style={{ width: "80%" }}>
         {Object.values(moods).map((mood, i) => (
           <MoodItem
-            key={`mood-${i}`}
+            key={mood.id}
             mood={mood}
             onEdit={() => {
               setMood(mood)
@@ -74,9 +78,25 @@ function AddMoodModal({
   const [icon, setIcon] = React.useState(mood.icon)
   const dispatch = useAppDispatch()
 
+  useEffect(() => {
+    if (mood.type === "editing") {
+      setName(mood.name)
+      setColor(mood.color)
+      setIcon(mood.icon)
+    } else {
+      setName("")
+      setColor("#ffffff")
+      setIcon("fas:music")
+    }
+  }, [mood])
+
   const handleSubmit = () => {
     if (mood.type === "new") dispatch(addMood({ name, color, icon, id: nanoid(8) }))
-    else dispatch(setMood({ ...(mood as MoodJSON), name, color, icon }))
+    else {
+      const moodJson = mood
+      delete moodJson.type
+      dispatch(setMood({ ...(moodJson as MoodJSON), name, color, icon }))
+    }
     onClose()
   }
   return (

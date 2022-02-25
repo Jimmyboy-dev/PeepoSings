@@ -17,35 +17,38 @@ const config = {
   productName: "Peepo Sings",
   copyright: "Copyright © 2021 devJimmyboy",
   icon: "build/icon.png",
-  publish: { provider: "github" },
+  asar: true,
   win: {
     target: "nsis",
+    defaultArch: "x64",
     icon: "build/icon.ico",
+    artifactName: "${productName}-${version}-Setup.${ext}",
   },
   nsis: {
     oneClick: false,
-    allowElevation: true,
+    perMachine: false,
     allowToChangeInstallationDirectory: true,
+    deleteAppDataOnUninstall: false,
   },
   mac: {
     category: "music",
+    target: ["dmg"],
+    artifactName: "${productName}-${version}-Installer.${ext}",
   },
   linux: {
     category: "music",
-    target: "AppImage",
+    target: ["AppImage"],
+    artifactName: "${productName}-${version}-Installer.${ext}",
   },
   directories: {
-    output: "dist",
+    output: "release/${version}",
     buildResources: "build",
   },
-  files: ["packages/**/dist/**", "build/**/*"],
+  files: ["dist", "build/**/*"],
   publish: {
     provider: "github",
     owner: "devJimmyboy",
     repo: "PeepoSings",
-  },
-  extraMetadata: {
-    version: process.env.VITE_APP_VERSION,
   },
 }
 

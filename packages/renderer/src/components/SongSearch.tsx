@@ -1,24 +1,9 @@
 import { Icon } from "@iconify/react"
-import {
-  InputWrapper,
-  Group,
-  Input,
-  Button,
-  Image,
-  Text,
-  Collapse,
-  ActionIcon,
-  Center,
-  Loader,
-  ScrollArea,
-  Tooltip,
-  Anchor,
-} from "@mantine/core"
+import { InputWrapper, Group, Input, Button, ActionIcon, Center, Loader, ScrollArea, Tooltip } from "@mantine/core"
 import type { ReactElement } from "react"
-import React, { ChangeEvent } from "react"
+import React from "react"
 import throttle from "lodash.throttle"
 import type { Playlist, Video } from "ytsr"
-import ytsr from "ytsr"
 import { useBooleanToggle } from "@mantine/hooks"
 import type { MoreVideoDetails, videoInfo } from "ytdl-core"
 import { useAppDispatch, useAppSelector } from "../store"
@@ -50,7 +35,7 @@ export default function SongSearch(): ReactElement {
       try {
         const results = await window.electron.music.searchSongs(search)
         setResults(
-          results?.items.filter((res) => res.type === "video" || res.type === "playlist") as Video[] | Playlist[],
+          results?.items.filter((res) => res.type === "video" || res.type === "playlist") as Video[] | Playlist[]
         )
       } catch (e) {
         console.error(e)
@@ -58,7 +43,7 @@ export default function SongSearch(): ReactElement {
       toggleLoading(false)
     },
     500,
-    { trailing: true },
+    { trailing: true }
   )
 
   React.useEffect(() => {

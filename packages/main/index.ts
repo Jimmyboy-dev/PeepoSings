@@ -1,5 +1,5 @@
 import { join } from "path"
-import { URL, fileURLToPath } from "url"
+import { fileURLToPath } from "url"
 // import './security-restrictions';
 import isDev from "electron-is-dev"
 import * as dotenv from "dotenv"
@@ -16,18 +16,25 @@ import { MusicManager } from "./modules/MusicManager"
 import AutoLaunch from "auto-launch"
 import ytsr from "ytsr"
 import type AutoUpdater from "./modules/AutoUpdater"
-
+import { release } from "os"
+const appId = "com.devJimmyboy.PeepoSings"
 let autoLauncher: AutoLaunch
 
-const isSingleInstance = app.requestSingleInstanceLock()
-const isDevelopment = import.meta.env.MODE === "development" || isDev
+// Disable GPU Acceleration for Windows 7
+if (release().startsWith("6.1")) app.disableHardwareAcceleration()
 
-let updater: AutoUpdater = null
+// Set application name for Windows 10+ notifications
+if (process.platform === "win32") app.setAppUserModelId(appId)
 
-if (!isSingleInstance) {
+if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
 }
+
+const isDevelopment = import.meta.env.MODE === "development" || isDev
+
+let updater: AutoUpdater | null = null
+
 
 const disposeCTXMenu = contextMenu({
   showSaveImageAs: true,
@@ -56,7 +63,6 @@ if (isDevelopment) {
 
 
 
-let mainWindow: BrowserWindow
 
 function initTray() {
 
@@ -64,7 +70,7 @@ function initTray() {
 
   const contextMenu = Menu.buildFromTemplate([
     { label: "Play/Pause", click: () => ipc.sendToRenderers("toggle-play") },
-    { label: "Show/Hide", click: () => mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show() },
+    { label: "Show/Hide", click: () => win && (win.isVisible() ? win.hide() : win.show()) },
     { label: "Quit", click: () => app.quit() },
   ])
 
@@ -72,15 +78,17 @@ function initTray() {
   tray.setContextMenu(contextMenu)
 }
 
-const createWindow = async () => {
-  if (mainWindow)
-    mainWindow.close()
+
+let win: BrowserWindow | null = null
+
+async function createWindow() {
+
   const mainWindowState = windowStateKeeper({
     defaultWidth: 1000,
     defaultHeight: 800,
   })
 
-  mainWindow = new BrowserWindow({
+  win = new BrowserWindow({
     show: false, // Use 'ready-to-show' event to show window
     x: mainWindowState.x,
     y: mainWindowState.y,
@@ -90,46 +98,55 @@ const createWindow = async () => {
     frame: false,
     icon: appIcon,
     webPreferences: {
-      nativeWindowOpen: true,
-      preload: join(__dirname, "../../preload/dist/index.cjs"),
-      nodeIntegration: true,
+      preload: join(__dirname, "../preload/index.cjs"),
     },
   })
 
-  mainWindowState.manage(mainWindow)
+  if (app.isPackaged) {
+    win.loadFile(join(__dirname, "../renderer/index.html"))
+  } else {
+    // 🚧 Use ['ENV_NAME'] avoid vite:define plugin
+    const url = `http://${process.env["VITE_DEV_SERVER_HOST"]}:${process.env["VITE_DEV_SERVER_PORT"]}`
+
+    win.loadURL(url)
+    win.webContents.openDevTools()
+  }
+
+  mainWindowState.manage(win)
+  // Test active push message to Renderer-process
+  win.webContents.on("did-finish-load", () => {
+    win?.webContents.send("main-process-message", (new Date).toLocaleString())
+  })
+
+  // Make all links open with the browser, not with the application
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith("https:")) shell.openExternal(url)
+    return { action: "deny" }
+  })
   /**
    * If you install `show: true` then it can cause issues when trying to close the window.
    * Use `show: false` and listener events `ready-to-show` to fix these issues.
    *
    * @see https://github.com/electron/electron/issues/25012
    */
-  mainWindow.on("ready-to-show", () => {
-    mainWindow?.show()
+  win.on("ready-to-show", () => {
+    win?.show()
 
     if (isDevelopment) {
-      mainWindow?.webContents.openDevTools()
+      win?.webContents.openDevTools()
     }
   })
 
-  /**
-   * URL for main window.
-   * Vite dev server for development.
-   * `file://../renderer/index.html` for production and test
-   */
-  const pageUrl = isDevelopment && import.meta.env.VITE_DEV_SERVER_URL !== undefined
-    ? import.meta.env.VITE_DEV_SERVER_URL
-    : new URL("../renderer/dist/index.html", "file://" + __dirname).toString()
-
-
-  await mainWindow.loadURL(pageUrl)
 }
 
 
 ipc.on("windowCmd", (e, msg) => {
-  if (msg === "minimize") mainWindow.minimize()
-  else if (msg === "maximize" && !mainWindow.isMaximized()) mainWindow.maximize()
-  else if (msg === "maximize" && mainWindow.isMaximized()) mainWindow.unmaximize()
-  else if (msg === "close") mainWindow.close()
+  if (win) {
+    if (msg === "minimize") win.minimize()
+    else if (msg === "maximize" && !win.isMaximized()) win.maximize()
+    else if (msg === "maximize" && win.isMaximized()) win.unmaximize()
+    else if (msg === "close") win.close()
+  }
 })
 
 ipc.on("trayTooltip", (e, tip: string) => {
@@ -138,17 +155,16 @@ ipc.on("trayTooltip", (e, tip: string) => {
 
 app.on("second-instance", () => {
   // Someone tried to run a second instance, we should focus our window.
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore()
-    mainWindow.focus()
+  if (win) {
+    if (win.isMinimized()) win.restore()
+    win.focus()
   }
 })
 
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit()
-  }
+  win = null
+  if (process.platform !== "darwin") app.quit()
 })
 
 app.on("activate", () => {
@@ -223,8 +239,8 @@ listeners.musicSearch = ipc.answerRenderer("music-search", async (query: string)
 })
 
 listeners.checkForUpdates = ipc.answerRenderer("check-for-updates", async () => {
-  if (updater) {
-    return await updater.manualCheckForUpdates(mainWindow)
+  if (updater && win) {
+    return await updater.manualCheckForUpdates(win)
   }
   else return false
 })

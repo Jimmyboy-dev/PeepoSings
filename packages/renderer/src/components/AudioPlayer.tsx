@@ -47,8 +47,8 @@ function AudioPlayer(): ReactElement {
   }
   const onProgress = throttle((e: any) => {
     if (audio.current && song) {
-      const { currentTime, duration } = audio.current
-      if (currentTime === duration || currentTime >= song.out) {
+      const { currentTime } = audio.current
+      if (currentTime >= song.out) {
         advSong()
       }
       dispatch(setCurrentTime(calcProgress(currentTime)))
@@ -158,6 +158,7 @@ function AudioPlayer(): ReactElement {
           <audio
             ref={audio}
             src={song ? `resource://${song.filePath}` : ""}
+            onEnded={() => advSong()}
             onCanPlayThrough={() => dispatch(setPlaying(true))}
             onTimeUpdate={onProgress}></audio>
           <Group direction="row" className="w-full h-full px-4 flex-nowrap relative">
