@@ -44,18 +44,25 @@ function MusicNote({ i, paused }: NoteProps): ReactElement {
     if (paused && ref.current.style.display !== "none") {
       ref.current.style.display = "none"
       return
+    } else if (ref.current.style.display !== "block") {
+      ref.current.style.display = "block"
+    }
+    if (t - 2000 * i < 0) {
+      ref.current.style.opacity = "0"
     }
 
     const interval = (t - 2000 * i) % 6000
     if (interval < 0) return
-    const x = Math.sin(interval / 6000 - i * 5) * 25 + interval * 0.02 + ref.current.offsetWidth * 0.75
-    const y = ref.current.offsetHeight * 0.5 + interval / 25
+    const x =
+      (Math.sin(interval / 6000 - i * 5) * 25 + interval * 0.02) * (interval / 6000) +
+      (ref.current.parentElement?.clientWidth ?? 0) * 0.75
+    const y = ref.current.clientHeight * 0.5 + interval / 25
     ref.current.style.transform = `translateY(-${y}px) translateX(${x}px)`
     ref.current.style.opacity = `${1 - interval / 6000}`
   })
   const [size, setSize] = React.useState(Math.random() * 8 + 22)
   return (
-    <div ref={ref} className="absolute -z-10 bottom-0 right-2">
+    <div ref={ref} className="absolute -z-10 bottom-0 left-0">
       <Icon className="text-green-500" fontSize={size} icon="fas:music-note" />
     </div>
   )
