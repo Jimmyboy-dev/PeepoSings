@@ -53,7 +53,8 @@ const player = createSlice({
       state.currentTime = action.payload
     },
     setPlaying(state, action?: PayloadAction<boolean>) {
-      state.playing = action?.payload ?? !state.playing
+      if (action?.payload !== undefined) state.playing = action.payload
+      else state.playing = !state.playing
     },
   },
 })

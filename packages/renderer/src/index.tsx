@@ -2,8 +2,11 @@ import "./index.css"
 import ReactDOM from "react-dom"
 import React from "react"
 import App from "./App"
+import type { Step } from "react-joyride"
+import Joyride from "react-joyride"
 import { MantineProvider } from "@mantine/core"
-import store, { useAppDispatch } from "./store"
+import { NotificationsProvider } from "@mantine/notifications"
+import store from "./store"
 import { Provider as StoreProvider } from "react-redux"
 import theme from "./theme"
 import gsap from "gsap"
@@ -22,19 +25,21 @@ window.iconsLoaded.then(() => {
     <React.StrictMode>
       <StoreProvider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <Root />
+          <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
+            <Root />
+          </MantineProvider>
         </PersistGate>
       </StoreProvider>
     </React.StrictMode>,
-    document.getElementById("root"),
+    document.getElementById("root")
   )
 })
 
 const Root = () => {
   // 1. Retrieve the notifications to display.
   return (
-    <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
+    <NotificationsProvider limit={5}>
       <App />
-    </MantineProvider>
+    </NotificationsProvider>
   )
 }

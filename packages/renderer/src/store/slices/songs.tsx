@@ -1,6 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAction, createAsyncThunk, createSlice, nanoid } from "@reduxjs/toolkit"
 import type { RootState } from ".."
+import { removeMood } from "./moods"
 
 // const fetchSongs = createAction("songs/fetch", (songs: SongJSON[]) => ({ payload: songs }))
 
@@ -73,6 +74,15 @@ export const musicSlice = createSlice({
       const prevSong = state.findIndex((val, i) => action.payload.filePath === val.filePath)
       state[prevSong] = action.payload
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(removeMood, (state, action) => {
+      state.forEach((song) => {
+        if (song.mood.includes(action.payload)) {
+          song.mood.splice(song.mood.indexOf(action.payload), 1)
+        }
+      })
+    })
   },
 })
 

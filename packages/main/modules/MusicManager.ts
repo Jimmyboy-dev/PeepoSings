@@ -107,13 +107,14 @@ export class MusicManager {
       .on("progress", p => {
 
         console.log(`${p.targetSize}kb downloaded`)
-        ipc.sendToRenderers("download-progress", { raw: p, msg: `${p.targetSize}kb downloaded`, dlInfo: this.dlInfo })
+        ipc.callFocusedRenderer("download-progress", { raw: p, msg: `${p.targetSize}kb downloaded`, dlInfo: this.dlInfo })
       })
       .on("end", () => {
         if (!this.dlInfo) return
-        console.log(`\nFinished downloading "${this.dlInfo.vidInfo.videoDetails.title}" by ${this.dlInfo.vidInfo.videoDetails.author}, took ${(Date.now() - this.dlInfo.start) / 1000}s`)
+        console.log(`\nFinished downloading "${this.dlInfo.vidInfo.videoDetails.title}" by ${this.dlInfo.vidInfo.videoDetails.author}, took ${(Date.now() - (this.dlInfo?.start || Date.now())) / 1000}s`)
 
-        ipc.sendToRenderers("download-end", { path: savePath, dlInfo: this.dlInfo })
+        ipc.callFocusedRenderer("download-end", { path: savePath, dlInfo: this.dlInfo })
+
       })
     return savePath
 

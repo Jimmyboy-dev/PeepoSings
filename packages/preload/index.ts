@@ -61,12 +61,16 @@ const api = {
   },
   listeners: {
     onMusicChange: (handler: (e: IpcRendererEvent, songs: SongJSON[]) => void) => ipc.on("music-change", handler),
-    onDownloadProgress: (handler: (e: IpcRendererEvent, download: {
+    onDownloadProgress: (handler: (download: {
       raw: ffmpegProgress;
       msg: `${number}kb downloaded`;
       dlInfo: DownloadInfo
-    }) => void) => ipc.on("download-progress", handler),
-    onDownloadEnd: (handler: (event: IpcRendererEvent, download: { path: string, dlInfo: DownloadInfo }) => void) => ipc.on("download-end", handler),
+    }) => void) => ipc.answerMain("download-progress", (args: {
+      raw: ffmpegProgress;
+      msg: `${number}kb downloaded`;
+      dlInfo: DownloadInfo
+    }) => { handler(args); return true }),
+    onDownloadEnd: (handler: (download: { path: string, dlInfo: DownloadInfo }) => void) => ipc.answerMain("download-end", (args: { path: string, dlInfo: DownloadInfo }) => { handler(args); return true }),
   },
   misc: {
     getVersion: async () => { return await ipc.callMain("get-version") },

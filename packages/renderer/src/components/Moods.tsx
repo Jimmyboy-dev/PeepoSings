@@ -17,7 +17,7 @@ import {
 import { useBooleanToggle } from "@mantine/hooks"
 import React, { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "../store"
-import { addMood, setMood } from "../store/slices/moods"
+import { addMood, removeMood, setMood } from "../store/slices/moods"
 import { motion } from "framer-motion"
 import { nanoid } from "@reduxjs/toolkit"
 import { setCurrentMood, setCurrentSong } from "../store/slices/currentSong"
@@ -83,10 +83,6 @@ function AddMoodModal({
       setName(mood.name)
       setColor(mood.color)
       setIcon(mood.icon)
-    } else {
-      setName("")
-      setColor("#ffffff")
-      setIcon("fas:music")
     }
   }, [mood])
 
@@ -103,7 +99,7 @@ function AddMoodModal({
     <Modal opened={opened} onClose={onClose} title="Introduce yourself!">
       <Group direction="column" position="center">
         <InputWrapper label="Mood Name">
-          <Input value={name} onChange={(e) => setName(e.target.value)} />
+          <Input value={name} onChange={(e) => setName(e.currentTarget.value)} />
         </InputWrapper>
         <ColorInput
           placeholder="#24d896"
@@ -138,7 +134,15 @@ function AddMoodModal({
         </InputWrapper>
 
         <Group direction="row" position="center">
-          <Button variant="white" color="green" onClick={handleSubmit}>
+          {mood.type === "editing" && (
+            <Button
+              variant="outline"
+              color="red"
+              onClick={() => mood && mood.id && dispatch(removeMood(mood.id)) && onClose()}>
+              Delete
+            </Button>
+          )}
+          <Button variant="outline" color="green" onClick={handleSubmit}>
             Submit
           </Button>
         </Group>

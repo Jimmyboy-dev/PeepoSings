@@ -20,9 +20,12 @@ const moods = createSlice({
     setMood: (state, action: PayloadAction<MoodJSON>) => {
       state[action.payload.id] = action.payload
     },
+    removeMood: (state, action: PayloadAction<string>) => {
+      delete state[action.payload]
+    },
   },
 })
 
-export const { addMood, setMood } = moods.actions
+export const { addMood, setMood, removeMood } = moods.actions
 
 export default moods.reducer

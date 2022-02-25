@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react"
-import { ActionIcon, Box, Button, Col, Grid, Modal, Tabs } from "@mantine/core"
+import { ActionIcon, Box, Button, Col, Grid, Modal, Progress, Tabs } from "@mantine/core"
 import type { ReactElement } from "react"
 import React, { useEffect } from "react"
 import AudioPlayer from "./components/AudioPlayer"
@@ -8,6 +8,10 @@ import TitleBar from "./components/TitleBar"
 import { setUpNotifications } from "reapop"
 import { useAppDispatch, useAppSelector } from "./store"
 import { addSong } from "./store/slices/songs"
+import { useNotifications } from "@mantine/notifications"
+import type { IpcRendererEvent } from "electron/renderer"
+import type { Step } from "react-joyride"
+import ReactJoyride from "react-joyride"
 
 // run this function when your application starts before creating any notifications
 
@@ -22,39 +26,57 @@ declare global {
 
 export default function App(): ReactElement {
   const [currentTab, setCurrentTab] = React.useState("songs")
-  const dispatch = useAppDispatch()
+  const [joyrideSteps, setSteps] = React.useState<Step[]>([
+    {
+      target: "",
+      content: "Welcome to Mantine! Click here to learn more about the app.",
+      placement: "bottom",
+    },
+  ])
+  const notifications = useNotifications()
   useEffect(() => {
-    setUpNotifications({
-      defaultProps: {
-        position: "top-center",
-        dismissible: true,
-      },
-    })
-    // const onDlEnd = (e, dl) => {
-    //   console.log("Download finished", dl)
-    //   const {
-    //     ownerChannelName: artist,
-    //     lengthSeconds: duration,
-    //     title,
-    //     thumbnails: [{ url: albumArt }],
-    //     media: { category: album },
-    //   } = dl.dlInfo.vidInfo.videoDetails
-    //   dispatch(
-    //     addSong({
-    //       artist,
-    //       duration: parseInt(duration),
-    //       title,
-    //       filePath: dl.path,
-    //       metadata: dl.dlInfo.vidInfo.videoDetails,
-    //       album,
-    //       albumArt,
-    //     })
-    //   )
-    // }
-    // const dlEndListener = window.electron.listeners.onDownloadEnd(onDlEnd)
-    // return () => {
-    //   dlEndListener.removeListener("download-end", onDlEnd)
-    // }
+    const onDlProgress = (dl: any) => {
+      const {
+        ownerChannelName: artist,
+        lengthSeconds: duration,
+        title,
+        thumbnails: [{ url: albumArt }],
+        media: { category: album },
+      } = dl.dlInfo.vidInfo.videoDetails
+      notifications.updateNotification(title, {
+        loading: true,
+        title: `Downloading ${title}`,
+
+        autoClose: true,
+        message: dl.msg as string,
+        icon: <Icon icon="fas:check" />,
+        disallowClose: true,
+      })
+    }
+    const onDlEnd = (dl) => {
+      console.log("Download finished", dl)
+      const {
+        ownerChannelName: artist,
+        lengthSeconds: duration,
+        title,
+        thumbnails: [{ url: albumArt }],
+        media: { category: album },
+      } = dl.dlInfo.vidInfo.videoDetails
+      notifications.updateNotification(title, {
+        loading: false,
+        title: `Downloaded ${title}`,
+        autoClose: true,
+        message: "Downloaded Finished!",
+        icon: <Icon icon="fas:check" />,
+        disallowClose: false,
+      })
+    }
+    const dlEndListener = window.electron.listeners.onDownloadEnd(onDlEnd)
+    const dlProgressListener = window.electron.listeners.onDownloadProgress(onDlProgress)
+    return () => {
+      dlEndListener()
+      dlProgressListener()
+    }
   }, [])
 
   return (

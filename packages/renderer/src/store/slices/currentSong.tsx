@@ -1,6 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createSlice } from "@reduxjs/toolkit"
 import type { RootState } from ".."
+import { removeMood } from "./moods"
 
 // Define a type for the slice state
 interface SongsState {
@@ -28,6 +29,14 @@ export const currentSongSlice = createSlice({
     setCurrentMood(state, action: PayloadAction<string | null>) {
       state.mood = action.payload
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(removeMood, (state, action) => {
+      if (state.mood === action.payload) {
+        state.mood = null
+        state.song = -1
+      }
+    })
   },
 })
 

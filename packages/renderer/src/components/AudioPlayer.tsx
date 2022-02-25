@@ -8,6 +8,7 @@ import { setCurrentTime, setPlaying, setRepeat, setShuffle, setVolume } from "..
 import { nextSong, prevSong, setCurrentMood, setCurrentSong } from "../store/slices/currentSong"
 import throttle from "lodash.throttle"
 import { editSong } from "../store/slices/songs"
+import peepoShrug from "../assets/peepoShrug.png"
 
 function AudioPlayer(): ReactElement {
   const dispatch = useAppDispatch()
@@ -91,7 +92,10 @@ function AudioPlayer(): ReactElement {
   }, [playing])
 
   useEffect(() => {
-    if (!song || !audio.current) return
+    if (!song || !audio.current) {
+      dispatch(setPlaying(false))
+      return
+    }
     setSource(`resource://${song.filePath}`)
     dispatch(setPlaying(false))
     audio.current.load()
@@ -124,13 +128,18 @@ function AudioPlayer(): ReactElement {
         <PeepoSings talk={playing} />
         {curMood && (
           <div
-            onClick={() => dispatch(setCurrentMood(null))}
+            onClick={() => {
+              dispatch(setCurrentMood(null))
+              dispatch(setCurrentSong(-1))
+            }}
             className="absolute
-            pointer-events-auto cursor-pointer flex flex-row gap-1 items-center right-0 bottom-32 bg-slate-700 text-white h-12 rounded-tl-lg p-2">
-            <Tooltip position="top" label="Clear Current Mood?">
-              <span className="font-semibold">Current Mood:</span>
+            pointer-events-auto cursor-pointer  right-0 bottom-32 bg-slate-700 text-white h-12 rounded-tl-lg p-2">
+            <Tooltip className="flex flex-row  items-center" position="top" label="Clear Current Mood?">
+              <span className="font-semibold mr-1">Current Mood:</span>
 
-              <span className="font-bold text-lg bg-slate-800 rounded-lg p-1" style={{ color: currentMood.color }}>
+              <span
+                className="font-bold text-lg bg-slate-800 rounded-lg py-1 px-2"
+                style={{ color: currentMood.color }}>
                 <Icon className="mr-2  mb-1" style={{ display: "inline-block" }} icon={currentMood.icon} />
                 {currentMood.name}
               </span>
@@ -172,7 +181,7 @@ function AudioPlayer(): ReactElement {
               <ActionIcon
                 size="xl"
                 className="rounded-full bg-green-500 text-2xl"
-                onClick={() => dispatch(setPlaying())}>
+                onClick={() => song && dispatch(setPlaying())}>
                 {playing ? <Icon icon="fas:pause" /> : <Icon icon="fas:play" />}
               </ActionIcon>
               <ActionIcon
@@ -182,17 +191,17 @@ function AudioPlayer(): ReactElement {
                 <Icon icon="fas:forward-step" />
               </ActionIcon>
             </Group>
-            {song && song.albumArt && (
-              <div className="rounded-xl overflow-hidden">
-                <img className="h-24 w-24 p-2 object-cover " src={song.albumArt}></img>
-              </div>
-            )}
-            <Group className="justify-center gap-0 flex-grow truncate" direction="column">
+            <div className="rounded-xl overflow-hidden" style={{ minWidth: "6em", minHeight: "6em" }}>
+              <img className="w-24 h-24 object-cover" src={song?.albumArt || peepoShrug}></img>
+            </div>
+
+            <Group className="justify-center gap-0 flex-shrink truncate" direction="column">
               <Text className="text-lg font-bold">{song?.title || "No Song Selected"}</Text>
               <Text className="text-md font-semibold">{song?.artist || "No Song Selected"}</Text>
             </Group>
-            <Group className="justify-center gap-2 truncate flex-nowrap" direction="row">
-              <Tooltip label="Mark In">
+            <div className="flex-grow" />
+            <Group className="justify-center gap-2 flex-nowrap" direction="row">
+              <Tooltip className="w-8 h-8" label="Mark In">
                 <Button
                   disabled={!song}
                   className="text-lg w-8 h-8 p-0"
@@ -205,7 +214,7 @@ function AudioPlayer(): ReactElement {
                   <Icon icon="fas:bracket-curly" />
                 </Button>
               </Tooltip>
-              <Tooltip label="Mark Out">
+              <Tooltip className="w-8 h-8" label="Mark Out">
                 <Button
                   disabled={!song}
                   className="text-lg w-8 h-8 p-0"
@@ -231,14 +240,15 @@ function AudioPlayer(): ReactElement {
               onChange={(e) => {
                 dispatch(setVolume(e / 100))
                 if (audio.current) audio.current.volume = e / 100
-              }}></Slider>
-            <Group className="justify-center gap-1 p-1 truncate flex-nowrap" direction="row">
-              <Tooltip label="Repeat">
+              }}
+            />
+            <Group className="justify-center gap-1 p-1" direction="row">
+              <Tooltip className="w-8 h-8" label="Repeat">
                 <Button className="text-lg w-8 h-8 p-0" onClick={() => dispatch(setRepeat())}>
                   <Icon icon={repeat ? "fas:repeat" : "fat:repeat"} />
                 </Button>
               </Tooltip>
-              <Tooltip label="Shuffle">
+              <Tooltip className="w-8 h-8" label="Shuffle">
                 <Button className="text-lg w-8 h-8 p-0" onClick={() => dispatch(setShuffle())}>
                   <Icon icon={shuffle ? "fas:shuffle" : "fat:shuffle"} />
                 </Button>
