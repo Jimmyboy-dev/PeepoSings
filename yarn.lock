@@ -495,12 +495,12 @@
     lodash "^4.17.15"
     tmp-promise "^3.0.2"
 
-"@mantine/core@3.6.9":
-  version "3.6.9"
-  resolved "https://registry.yarnpkg.com/@mantine/core/-/core-3.6.9.tgz#7c7852c2c4076f52976f5072631ce37416dda644"
-  integrity sha512-OtRrXWKJm+uh6uPwmj8hEuUZ0tz0UEOJrAVJ8151omuDlmXCSwQ80lRuowUCtYtbWl5Hf0YZeNrJcUY4eXFceQ==
+"@mantine/core@3.6.11":
+  version "3.6.11"
+  resolved "https://registry.yarnpkg.com/@mantine/core/-/core-3.6.11.tgz#5c0cd6f9ae1d06423ec2c0e91f16aee32fb6846d"
+  integrity sha512-WeL10zfO/u6ZBTh6LOxP2WBqdvNpG0BU0tdUfZFUIRW6/rz+vWhZylFwZfxtaoDgas6JaXWm+Hdxqnop9Zix2w==
   dependencies:
-    "@mantine/styles" "3.6.9"
+    "@mantine/styles" "3.6.11"
     "@popperjs/core" "^2.9.3"
     "@radix-ui/react-scroll-area" "^0.1.1"
     clsx "^1.1.1"
@@ -534,10 +534,10 @@
     clsx "^1.1.1"
     react-transition-group "^4.4.2"
 
-"@mantine/styles@3.6.9":
-  version "3.6.9"
-  resolved "https://registry.yarnpkg.com/@mantine/styles/-/styles-3.6.9.tgz#b9d45900de820e40bba1cf4c40e0ff1a7ff849e6"
-  integrity sha512-gvdvEeVHeUqwb2nONWiOZ7+0ml6DPDvLFvrsmvrznjrNk+eofFWX2kCvGK8cYDgIvg8UmyTB49MFByMiL1Hq+A==
+"@mantine/styles@3.6.11":
+  version "3.6.11"
+  resolved "https://registry.yarnpkg.com/@mantine/styles/-/styles-3.6.11.tgz#d2c9c513a909c0fe9ab11f7e31661ec05d0a6d99"
+  integrity sha512-KgDWV1TfaTXbhOKjoE31jDtTHn55VrmurrnXiPFndGlCPwx9RHQF4MNaUEHQof+qq4qTRR/wOLGrC43s21FbDA==
   dependencies:
     "@emotion/cache" "^11.7.1"
     "@emotion/react" "^11.7.1"
