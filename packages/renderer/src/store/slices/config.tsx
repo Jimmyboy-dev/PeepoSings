@@ -8,6 +8,7 @@ const initialState: PeepoSingConfig = {
   autoPlay: true,
   runOnStartup: false,
   scrobblerKeys: { apiKey: "", apiSecret: "" },
+  compactSongView: false,
 }
 
 const config = createSlice({
@@ -23,13 +24,17 @@ const config = createSlice({
     toggleRunOnStartupFinished(state, action: PayloadAction<boolean>) {
       state.runOnStartup = action.payload
     },
+    toggleCompactSongView(state, action?: PayloadAction<boolean | null>) {
+      state.compactSongView = action?.payload || !state.compactSongView
+    },
     setScrobblerKeys(state, action: PayloadAction<{ apiKey: string; apiSecret: string }>) {
       state.scrobblerKeys = action.payload
     },
   },
 })
 
-export const { setOutputDevice, setAutoPlay, setScrobblerKeys, toggleRunOnStartupFinished } = config.actions
+export const { setOutputDevice, setAutoPlay, setScrobblerKeys, toggleRunOnStartupFinished, toggleCompactSongView } =
+  config.actions
 
 export const toggleRunOnStartup = async (dispatch: AppDispatch) => {
   try {

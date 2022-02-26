@@ -41,7 +41,7 @@ const disposeCTXMenu = contextMenu({
   append: (_menu) => [{ label: "Refresh", click: () => BrowserWindow.getFocusedWindow()?.reload() }],
 })
 
-const appIcon = nativeImage.createFromPath(join(__dirname, "../../..", "build", process.platform === "win32" ? "icon.ico" : "icon.png"))
+const appIcon = nativeImage.createFromPath(join(__dirname, "../..", "build", process.platform === "win32" ? "icon.ico" : "icon.png"))
 
 Store.initRenderer()
 
@@ -267,4 +267,12 @@ listeners.toggleAutoLaunch = ipc.answerRenderer("toggle-auto-launch", async () =
 listeners.openURL = ipc.answerRenderer("open-url", (url: string) => {
   if (url.startsWith("http"))
     shell.openExternal(url)
+})
+
+listeners.setCurrentSong = ipc.answerRenderer("set-current-song", (song: SongJSON | null) => {
+  if (song)
+    tray?.setToolTip(`🎵 ${song.title} - ${song.artist}`)
+  else
+    tray?.setToolTip(`🎵 ${app.getName()} - No Song Playing`)
+  return true
 })

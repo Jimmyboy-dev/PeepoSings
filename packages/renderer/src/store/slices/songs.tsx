@@ -1,6 +1,6 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { createAction, createAsyncThunk, createSlice, nanoid } from "@reduxjs/toolkit"
-import type { RootState } from ".."
+import { createSlice, nanoid } from "@reduxjs/toolkit"
+import type { RootState } from "."
 import { removeMood } from "./moods"
 
 // const fetchSongs = createAction("songs/fetch", (songs: SongJSON[]) => ({ payload: songs }))
@@ -49,7 +49,10 @@ export const musicSlice = createSlice({
       state.push(song as SongJSON)
     },
     removeSong(state, action: PayloadAction<SongJSON>) {
-      state.splice(state.indexOf(action.payload), 1)
+      state.splice(
+        state.findIndex((s) => s.id === action.payload.id),
+        1
+      )
     },
     setSongs(state, action: PayloadAction<SongJSON[]>) {
       const songs = action.payload

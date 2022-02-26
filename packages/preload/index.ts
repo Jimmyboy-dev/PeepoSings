@@ -83,6 +83,11 @@ const api = {
   },
   store: electronStore,
   electronStorage,
+  ipc: {
+    async trayTooltip(song: SongJSON | null) {
+      return await ipc.callMain("set-current-song", song) as boolean
+    },
+  },
 }
 
 contextBridge.exposeInMainWorld(

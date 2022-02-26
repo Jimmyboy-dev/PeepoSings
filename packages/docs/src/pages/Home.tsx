@@ -11,7 +11,11 @@ type Props = {}
 export default function Home({}: Props) {
   const navigate = useNavigate()
   return (
-    <header className="App-header flex flex-col gap-4">
+    <header className="App-header flex flex-col gap-4 pb-32">
+      <Title className="text-8xl text-pink-400" style={{ filter: "drop-shadow(10px 10px 5px rgba(0,0,0,0.6))" }}>
+        Peepo Sings <InlineIcon icon="fas:music-note" />
+      </Title>
+      <div className="h-24" />
       <Title order={1}>
         The First{" "}
         <span className="text-twitch-main">

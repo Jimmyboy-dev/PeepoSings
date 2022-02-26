@@ -1,5 +1,5 @@
-import { Icon } from "@iconify/react"
-import { Anchor, Button } from "@mantine/core"
+import { Icon, InlineIcon } from "@iconify/react"
+import { Anchor, Button, Divider, Group } from "@mantine/core"
 import React, { useEffect, useState } from "react"
 import { getOS, OSString } from "../util/utils"
 
@@ -36,17 +36,35 @@ export default function DownloadButton({ onClick }: Props) {
     setOS(getOS())
   }, [])
   return (
-    <Button
-      onClick={() => {
-        onClick(os)
-      }}
-      leftIcon={<Icon icon={mapOStoIcon(os)} />}
-      component="a"
-      variant="gradient"
-      gradient={{ from: "indigo", to: "cyan", deg: 30 }}
-      href={mapOStoLink[os]}
-      target="_blank">
-      Download for {os}
-    </Button>
+    <Group direction="column">
+      <Button
+        onClick={() => {
+          onClick(os)
+        }}
+        size="xl"
+        leftIcon={<InlineIcon icon={mapOStoIcon(os)} />}
+        component="a"
+        variant="gradient"
+        gradient={{ from: "indigo", to: "cyan", deg: 30 }}
+        href={mapOStoLink[os]}
+        target="_blank">
+        Download for {os}
+      </Button>
+      <div className="flex flex-row items-center justify-evenly gap-1 h-6 w-full">
+        <Anchor
+          className="hover:font-semibold hover:no-underline hover:text-blue-300 transition-colors duration-200 w-1/2"
+          href="https://github.com/Jimmyboy-dev/PeepoSings/releases/latest"
+          target="_blank">
+          Latest Release
+        </Anchor>
+        <div className="h-full w-0.5 opacity-60 bg-gray-400 rounded-full" />
+        <Anchor
+          className="hover:font-semibold hover:no-underline hover:text-blue-300 transition-colors duration-200 w-1/2"
+          href="https://github.com/Jimmyboy-dev/PeepoSings/releases"
+          target="_blank">
+          Previous Versions
+        </Anchor>
+      </div>
+    </Group>
   )
 }

@@ -2,9 +2,11 @@ import { configureStore } from "@reduxjs/toolkit"
 import type { TypedUseSelectorHook } from "react-redux"
 import { useDispatch, useSelector } from "react-redux"
 import { persistReducer, FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from "redux-persist"
+import type { RootState } from "./slices"
 import rootReducer from "./slices"
 // ...
 import logger from "redux-logger"
+import { electronMiddleware } from "./middleware"
 
 const persistConfig = {
   key: "root",
@@ -20,12 +22,12 @@ const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(logger),
+    })
+      .concat(logger)
+      .prepend(electronMiddleware),
   devTools: import.meta.env.DEV,
 })
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch
 

@@ -18,7 +18,7 @@ export default function Music({ currentTab }: Props): ReactElement {
     case "songs":
     default:
       return (
-        <Group className="mx-16" direction="column">
+        <Group className="mx-8" direction="column">
           <SongSearch />
           <SongsView />
         </Group>

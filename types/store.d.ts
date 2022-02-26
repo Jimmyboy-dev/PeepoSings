@@ -13,6 +13,7 @@ export interface SettingsStore {
 }
 
 export interface PeepoSingConfig {
+  compactSongView: boolean
   runOnStartup: boolean;
   autoPlay: boolean;
   scrobblerKeys: {

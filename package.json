@@ -1,6 +1,6 @@
 {
   "name": "peepo-sings",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Desktop music player designed for Live Broadcasts - Music based on moods",
   "main": "dist/main/index.cjs",
   "author": "devJimmyboy",
@@ -50,6 +50,7 @@
     "open": "^8.4.0",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",
+    "react-contexify": "^5.0.0",
     "react-dom": "^17.0.2",
     "react-hamburger-menu": "^1.2.1",
     "react-joyride": "^2.3.2",
