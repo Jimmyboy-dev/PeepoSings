@@ -34,6 +34,7 @@ const config = {
     category: "music",
     target: ["dmg"],
     artifactName: "${productName}-Installer.${ext}",
+    identity: null,
   },
   linux: {
     category: "music",
