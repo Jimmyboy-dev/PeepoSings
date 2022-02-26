@@ -50,7 +50,7 @@ jobs:
 
       - name: Get version from current date
         id: version
-        run: echo "::set-output name=build-version::$(node -e "try{console.log(require('./.electron-builder.config.js').extraMetadata.version)}catch(e){console.error(e);process.exit(1)}")"
+        run: echo "::set-output name=build-version::$(node -e "try{console.log(require('./package.json').version)}catch(e){console.error(e);process.exit(1)}")"
 
       # - name: Waiting on All checks
       #   uses: lewagon/wait-on-check-action@v0.2
@@ -107,8 +107,6 @@ jobs:
       # Compile app and upload artifacts
       - name: Compile & release Electron app
         uses: samuelmeuli/action-electron-builder@v1
-        env:
-          VITE_APP_VERSION: ${{ needs.draft.outputs.version }}
         with:
           build_script_name: build
           args: --config .electron-builder.config.js
