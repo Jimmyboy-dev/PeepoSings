@@ -24,9 +24,10 @@ export default function Home({}: Props) {
       <div className="h-24" />
       <DownloadButton
         onClick={(os) => {
-          navigate(`/${os.toLowerCase()}`)
+          navigate(`/download`)
         }}
       />
+      <div className="flex flex-row gap-1 "></div>
     </header>
   )
 }

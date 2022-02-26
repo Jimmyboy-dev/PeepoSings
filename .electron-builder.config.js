@@ -22,7 +22,7 @@ const config = {
     target: "nsis",
     defaultArch: "x64",
     icon: "build/icon.ico",
-    artifactName: "${productName}-${version}-Setup.${ext}",
+    artifactName: "${productName}-Setup.${ext}",
   },
   nsis: {
     oneClick: false,
@@ -33,12 +33,12 @@ const config = {
   mac: {
     category: "music",
     target: ["dmg"],
-    artifactName: "${productName}-${version}-Installer.${ext}",
+    artifactName: "${productName}-Installer.${ext}",
   },
   linux: {
     category: "music",
     target: ["AppImage"],
-    artifactName: "${productName}-${version}-Installer.${ext}",
+    artifactName: "${productName}-Installer.${ext}",
   },
   directories: {
     output: "release/${version}",
