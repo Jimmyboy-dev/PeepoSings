@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "paths": {
+      "/@/*": ["./*"]
+    },
+    "experimentalDecorators": true
+  },
+
+  "include": ["./**/*.ts", "../../types/**/*.d.ts"],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts", "*.config.js", "dist"]
+}
