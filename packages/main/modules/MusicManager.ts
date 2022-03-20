@@ -1,45 +1,50 @@
+import type { BrowserWindow } from "electron"
 import { app } from "electron"
 import { ipcMain as ipc } from "electron-better-ipc"
 import fs from "fs"
 import path from "path"
+import ffmpegInstall from "@ffmpeg-installer/ffmpeg"
 import ytdl from "ytdl-core"
+import type { FfmpegCommand } from "fluent-ffmpeg"
+
 import ffmpeg from "fluent-ffmpeg"
+import ffmetadata from "ffmetadata"
 import type { Readable } from "stream"
 import sanitize from "sanitize-filename"
 
-
-
-
+const ffmpegPath = ffmpegInstall.path.replace("app.asar", "app.asar.unpacked")
+ffmpeg.setFfmpegPath(ffmpegPath)
+ffmetadata.setFfmpegPath(ffmpegPath)
 
 export class MusicManager {
-
   private static instance: MusicManager
   musicPath: string
   currentDownload?: Readable
   dlInfo?: DownloadInfo
+  win?: BrowserWindow
 
-  private constructor() {
+  private constructor(curWindow?: BrowserWindow) {
     if (MusicManager.instance) {
       throw new Error("Error: Instantiation failed: Use MusicManager.getInstance() instead of new.")
-    }
-    else {
+    } else {
       const musicDir = app.getPath("music")
       this.musicPath = path.join(musicDir, "twitch-music-manager")
       this.readCurrentData()
+      if (curWindow) {
+        this.win = curWindow
+      }
       MusicManager.instance = this
     }
   }
 
-
-  public static getInstance() {
+  public static getInstance(window: BrowserWindow) {
     if (!MusicManager.instance) {
-      MusicManager.instance = new MusicManager()
+      MusicManager.instance = new MusicManager(window)
     }
     return MusicManager.instance
   }
 
   removeSong(path: string) {
-
     try {
       if (fs.existsSync(path)) {
         fs.rmSync(path, { maxRetries: 5 })
@@ -51,7 +56,7 @@ export class MusicManager {
 
   async addSong(url: string): Promise<Omit<SongJSON, "id" | "mood">> {
     const info = await this.getYoutubeVideoInfo(url)
-    const path = await this.getYoutubeVideo(url).catch(e => {
+    const path = await this.getYoutubeVideo(url).catch((e) => {
       console.log(e)
       return null
     })
@@ -70,7 +75,6 @@ export class MusicManager {
   }
 
   private readCurrentData() {
-
     if (!fs.existsSync(this.musicPath)) {
       fs.mkdirSync(this.musicPath, { recursive: true })
     }
@@ -104,26 +108,22 @@ export class MusicManager {
     ffmpeg(this.currentDownload)
       .audioBitrate(128)
       .save(savePath)
-      .on("progress", p => {
-
+      .on("progress", (p) => {
         console.log(`${p.targetSize}kb downloaded`)
-        ipc.callFocusedRenderer("download-progress", { raw: p, msg: `${p.targetSize}kb downloaded`, dlInfo: this.dlInfo })
+        if (this.win) ipc.callRenderer(this.win, "download-progress", { raw: p, msg: `${p.targetSize}kb downloaded`, dlInfo: this.dlInfo })
       })
       .on("end", () => {
         if (!this.dlInfo) return
-        console.log(`\nFinished downloading "${this.dlInfo.vidInfo.videoDetails.title}" by ${this.dlInfo.vidInfo.videoDetails.author}, took ${(Date.now() - (this.dlInfo?.start || Date.now())) / 1000}s`)
+        console.log(
+          `\nFinished downloading "${this.dlInfo.vidInfo.videoDetails.title}" by ${this.dlInfo.vidInfo.videoDetails.author}, took ${(Date.now() - (this.dlInfo?.start || Date.now())) / 1000}s`,
+        )
 
-        ipc.callFocusedRenderer("download-end", { path: savePath, dlInfo: this.dlInfo })
-
+        if (this.win) ipc.callRenderer(this.win, "download-end", { path: savePath, dlInfo: this.dlInfo })
       })
     return savePath
-
-
   }
 
   public async getYoutubeVideoInfo(url: string) {
     return await ytdl.getBasicInfo(url)
-
   }
 }
-

@@ -1,109 +1,240 @@
-import type { ReactElement, RefObject } from "react"
-import React from "react"
-import peepoTalk from "/peepoTalk.gif"
+import React, { useEffect, useRef, useState } from "react"
+import Matter, {
+  Body,
+  Composite,
+  Constraint,
+  Engine,
+  Events,
+  Mouse,
+  MouseConstraint,
+  Render,
+  Runner,
+  Svg,
+  Vector,
+} from "matter-js"
+import { gsap } from "gsap"
 import peepoSprite from "/peepoReal.png"
-import { motion, useAnimation, useAnimationFrame, Variants } from "framer-motion"
-import { Icon } from "@iconify/react"
-import { useSpring, animated } from "react-spring"
-import { useDrag } from "@use-gesture/react"
-import { useWindowSize } from "react-use"
+const STATIC_DENSITY = 15
 
-interface Props {
-  talk: boolean
+// const musicNote = Svg.pathToVertices(318)
+declare global {
+  interface Window {
+    engine: Engine
+    runner: Runner
+  }
 }
-const to = () => ({ x: 50, y: window.innerHeight - window.innerWidth * 0.1 * 0.65, scale: 1, rotateZ: 0 })
 
-export default function PeepoSings({ talk }: Props): ReactElement {
-  const notes = [
-    { x: "50%", y: "35%" },
-    { x: "25%", y: "50%" },
-    { x: "60%", y: "65%" },
-  ]
-  const { width: windowWidth, height: windowHeight } = useWindowSize()
-  const [style, api] = useSpring(() => ({
-    from: { x: 50, y: windowHeight, scale: 0.9, rotateZ: 5 },
-    to: to(),
-    config: { duration: 500, mass: 1, tension: 500, friction: 50 },
-    delay: 1000,
-  }))
-  const ref = React.useRef<HTMLDivElement>(null)
-  // useDrag<MouseEvent, { readonly target: HTMLDivElement }>(
-  //   ({
-  //     values: [px, py],
-  //     movement: [mx, my],
-  //     lastOffset: [lx, ly],
-  //     direction: [xDir, yDir],
-  //     velocity: [vx, vy],
-  //     scrolling,
-  //     event,
-  //     active,
-  //     first,
-  //   }) => {
-  //     const target = event.target as HTMLDivElement
-  //     const currentX = style.x.get()
-  //     const currentY = style.y.get()
-  //     if (first) console.log(target.className)
+export const PeepoSings = () => {
+  const boxRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const engineRef = useRef<Engine | undefined>(Engine.create(undefined, { gravity: { y: 0 } }))
+  const [constraints, setContraints] = useState<DOMRect>()
+  const [scene, setScene] = useState<Render>()
 
-  //     const scale = active ? 1.1 : 1 // Active cards lift up a bit
+  const handleResize = () => {
+    setContraints(boxRef.current?.getBoundingClientRect())
+  }
 
-  //     api.start((t, c) => {
-  //       const x = currentX + mx
-  //       const y = currentY + my
-  //       const rotateZ = (Math.atan2(vy, vx) * 180) / Math.PI
-  //       const scaleX = xDir === 0 ? 1 : xDir
+  useEffect(() => {
+    if (!boxRef.current || !canvasRef.current) return
+    if (!engineRef.current) engineRef.current = Engine.create(undefined, { gravity: { y: 0 } })
+    let Render = Matter.Render
+    let World = Matter.World
+    let Bodies = Matter.Bodies
 
-  //       return { x, y, rotateZ, scaleX }
-  //     })
-  //   },
-  //   { target: ref }
-  // )
+    let engine = engineRef.current
+    let mouse = Mouse.create(document.body)
+
+    let cw = window.innerWidth
+    let ch = window.innerHeight
+
+    let mouseCon = MouseConstraint.create(engine, {
+      mouse,
+      collisionFilter: {
+        category: 0x0001,
+        mask: 0x0001,
+      },
+      constraint: {
+        stiffness: 0.2,
+        render: {
+          visible: import.meta.env.DEV,
+        },
+      } as any,
+    })
+
+    let render = Render.create({
+      element: boxRef.current,
+      engine: engine,
+      canvas: canvasRef.current,
+      options: { showPositions: true, background: "transparent", wireframes: false, showMousePosition: true },
+    })
+    render.mouse = mouse
+
+    var offset = 10,
+      options = {
+        collisionFilter: {
+          group: 1,
+          category: 0x0010,
+          mask: 0x0011,
+        },
+        isStatic: true,
+        render: {
+          visible: true,
+        },
+      }
+    const walls = [
+      Bodies.rectangle(cw / 2, -offset, cw + 2 * offset, 50.5, options),
+      Bodies.rectangle(cw / 2, ch + offset, cw + 2 * offset, 50.5, options),
+      Bodies.rectangle(cw + offset, ch / 2, 50.5, ch + 0.5 + 2 * offset, options),
+      Bodies.rectangle(-offset, ch / 2, 50.5, ch + 0.5 + 2 * offset, options),
+    ]
+
+    const peepo = Body.create({
+      position: { x: 150, y: ch + cw * 0.1 * 0.21 },
+
+      vertices: [
+        { x: 59, y: 53 },
+        { x: 223, y: 29 },
+        { x: 215, y: 250 },
+        { x: 150, y: 350 },
+        { x: 50, y: 350 },
+        { x: 9, y: 250 },
+      ],
+      restitution: 0.9,
+      render: {
+        sprite: {
+          texture: peepoSprite,
+        } as any,
+      },
+      label: "Peepo",
+
+      collisionFilter: {
+        category: 0x0001,
+        mask: 0x0001,
+      },
+      isStatic: true,
+    })
+
+    // const emitter = Bodies.fromVertices(peepo.position.x, peepo.position.y, [musicNote])
+    Events.on(mouseCon, "startdrag", (e: MouseEventMatter) => {
+      if (e.body.label === "Peepo") {
+        Body.setStatic(e.body, false)
+      }
+    })
+    Events.on(mouseCon, "enddrag", (e: MouseEventMatter) => {
+      if (e.body.label === "Peepo") {
+        Body.set(e.body, "collisionFilter", { group: 1, category: 0x0001, mask: 0x0011 })
+      }
+    })
+
+    window.engine = engine
+
+    engine.world.bodies = []
+    const wallRoot = Composite.create()
+    Composite.add(wallRoot, walls)
+
+    World.add(engine.world, [wallRoot, peepo, mouseCon])
+    window.runner = Runner.create()
+    Runner.run(window.runner, engine)
+    Render.run(render)
+
+    setContraints(boxRef.current.getBoundingClientRect())
+    setScene(render)
+    Render.lookAt(render, {
+      min: { x: 0, y: 0 },
+      max: { x: cw, y: ch },
+    })
+
+    // const onClick = (e: MouseEvent) => {
+    //   e.preventDefault()
+    // }
+    // document.addEventListener("click", onClick)
+    window.addEventListener("resize", handleResize)
+    return () => {
+      window.removeEventListener("resize", handleResize)
+      // document.removeEventListener("click", onClick)
+      engineRef.current = undefined
+      setScene(undefined)
+    }
+  }, [boxRef, canvasRef])
+
+  useEffect(() => {
+    if (!scene || !engineRef.current) return
+    if (constraints) {
+      let { width: cw, height: ch } = constraints
+
+      // Dynamically update canvas and bounds
+      scene.bounds.max.x = cw
+      scene.bounds.max.y = ch
+      scene.options.width = cw
+      scene.options.height = ch
+      scene.canvas.width = cw
+      scene.canvas.height = ch
+
+      // Dynamically update floor
+      const bounds = engineRef.current.world.composites[0].bodies
+
+      bounds.forEach((bdy, i) => {
+        var offset = 10
+        var x = cw / 2,
+          y = -offset,
+          w = cw + 2 * offset,
+          h = 50.5
+        switch (i) {
+          case 1: // bottom
+            y = ch + offset
+            break
+          case 2: // right
+            x = cw + offset
+            y = ch / 2
+            w = 50.5
+            h = ch + 0.5 + 2 * offset
+            break
+          case 3: // left
+            x = -offset
+            y = ch / 2
+            w = 50.5
+            h = ch + 0.5 + 2 * offset
+            break
+        }
+        Matter.Body.setPosition(bdy, {
+          x,
+          y,
+        })
+
+        Matter.Body.setVertices(bdy, [
+          { x: 0, y: 0 },
+          { x: w, y: 0 },
+          { x: w, y: h },
+          { x: 0, y: h },
+        ])
+      })
+      Render.lookAt(scene, {
+        min: { x: 0, y: 0 },
+        max: { x: cw, y: ch },
+      })
+    }
+  }, [scene, constraints])
 
   return (
-    <div className="select-none z-10 fixed w-screen h-screen pointer-events-none top-0 left-0">
-      <animated.div ref={ref} style={{ ...style, width: "10vw" }} className="absolute pointer-events-auto  touch-none">
-        <img className="select-none pointer-events-none" id="peepo-sings" style={{ zIndex: 1 }} src={peepoSprite} />
-      </animated.div>
-      {notes.map((note, i) => (
-        <MusicNote key={i} x={note.x} i={i} peepoRef={ref} paused={!talk} />
-      ))}
+    <div
+      ref={boxRef}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+      }}>
+      <canvas ref={canvasRef} />
     </div>
   )
 }
 
-interface NoteProps {
-  x: string
-  i: number
-  paused: boolean
-  peepoRef: RefObject<HTMLDivElement>
-}
-
-function MusicNote({ i, paused, peepoRef }: NoteProps): ReactElement {
-  const ref = React.useRef<HTMLDivElement>(null)
-  useAnimationFrame((t) => {
-    if (!ref.current) return
-    if (paused && ref.current.style.display !== "none") {
-      ref.current.style.display = "none"
-      return
-    } else if (ref.current.style.display !== "block") {
-      ref.current.style.display = "block"
-    }
-    if (t - 2000 * i < 0) {
-      ref.current.style.opacity = "0"
-    }
-
-    const interval = (t - 2000 * i) % 6000
-    if (interval < 0) return
-    const x =
-      (Math.sin(interval / 6000 - i * 5) * 25 + interval * 0.02) * (interval / 6000) +
-      (peepoRef.current?.clientWidth ?? 0) * 0.75
-    const y = ref.current.clientHeight * 0.5 + interval / 25
-    ref.current.style.transform = `translateY(-${y}px) translateX(${x}px)`
-    ref.current.style.opacity = `${1 - interval / 6000}`
-  })
-  const [size, setSize] = React.useState(Math.random() * 8 + 22)
-  return (
-    <div ref={ref} className="absolute -z-10 bottom-0 left-0">
-      <Icon className="text-green-500" fontSize={size} icon="fas:music-note" />
-    </div>
-  )
+interface MouseEventMatter {
+  mouse: Mouse
+  body: Body
+  source: any
+  name: string
 }

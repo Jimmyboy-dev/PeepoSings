@@ -1,21 +1,22 @@
-import { Icon } from "@iconify/react"
-import { InputWrapper, Group, Input, Button, ActionIcon, Center, Loader, ScrollArea, Tooltip } from "@mantine/core"
-import type { KeyboardEvent, ReactElement } from "react"
-import React from "react"
-import throttle from "lodash.throttle"
-import type { Playlist, Video } from "ytsr"
-import { useBooleanToggle } from "@mantine/hooks"
-import type { MoreVideoDetails, videoInfo } from "ytdl-core"
-import { useAppDispatch, useAppSelector } from "../store"
-import { addSong } from "../store/slices/songs"
-import { useNotifications } from "@mantine/notifications"
-import ytsr from "ytsr"
-import type { NotificationsContextProps } from "@mantine/notifications/lib/types"
+import { Icon } from '@iconify/react'
+import { InputWrapper, Group, Input, Button, ActionIcon, Center, Loader, ScrollArea, Tooltip } from '@mantine/core'
+import type { KeyboardEvent, ReactElement } from 'react'
+import React from 'react'
+import throttle from 'lodash.throttle'
+import type { Playlist, Video } from 'ytsr'
+import { useBooleanToggle } from '@mantine/hooks'
+import type { MoreVideoDetails, videoInfo } from 'ytdl-core'
+import { getBasicInfo } from 'ytdl-core'
+import { useAppDispatch, useAppSelector } from '../store'
+import { addSong } from '../store/slices/songs'
+import { useNotifications } from '@mantine/notifications'
+import ytsr from 'ytsr'
+import type { NotificationsContextProps } from '@mantine/notifications/lib/types'
 
 type Results = Video[] | videoInfo[] | Playlist[]
 
 export default function SongSearch(): ReactElement {
-  const [search, setSearch] = React.useState("")
+  const [search, setSearch] = React.useState('')
   const [songResults, setResults] = React.useState<Results>([])
   const [loading, toggleLoading] = useBooleanToggle(false)
 
@@ -26,30 +27,27 @@ export default function SongSearch(): ReactElement {
     else window.electron.music.addSong(search)
   }
 
-  const searchSongs = throttle(
-    async () => {
-      if (search.length === 0) {
-        toggleLoading(false)
-        return
-      }
-      if (search.match(/(?<=(https?:\/\/|youtube\.com))/g)) {
-        const video = await window.electron.music.getVideoInfo(search)
-        setResults([video])
-        return
-      }
-      try {
-        const results = await window.electron.music.searchSongs(search)
-        setResults(
-          results?.items.filter((res) => res.type === "video" || res.type === "playlist") as Video[] | Playlist[]
-        )
-      } catch (e) {
-        console.error(e)
-      }
+  const searchSongs = throttle(async () => {
+    if (search.length === 0) {
       toggleLoading(false)
-    },
-    500,
-    { trailing: true }
-  )
+      return
+    }
+    if (search.match(/(?<=(https?:\/\/|youtube\.com))/g)) {
+      // window.electron.music.getVideoInfo(
+      const video = await window.electron.music.getVideoInfo(search)
+      setResults([video])
+      toggleLoading(false)
+
+      return
+    }
+    try {
+      const results = await window.electron.music.searchSongs(search)
+      setResults(results?.items.filter((res) => res.type === 'video' || res.type === 'playlist') as Video[] | Playlist[])
+    } catch (e) {
+      console.error(e)
+    }
+    toggleLoading(false)
+  }, 500)
 
   React.useEffect(() => {
     toggleLoading(true)
@@ -60,14 +58,14 @@ export default function SongSearch(): ReactElement {
   const dispatch = useAppDispatch()
   return (
     <div className="rounded-xl transition-all border-2 w-full border-green-500 overflow-hidden">
-      <InputWrapper className="w-full top-0 bg-base-200 p-4" label="Add a Video:" style={{ height: "33%" }}>
+      <InputWrapper className="w-full top-0 bg-base-200 p-4" label="Add a Video:" style={{ height: '33%' }}>
         <Group className="w-full" direction="row">
           <Input
             icon={<Icon icon="fas:music-note" />}
             id="add-song"
             value={search}
             onKeyPress={(e: KeyboardEvent) => {
-              if (e.key === " ") {
+              if (e.key === ' ') {
                 e.stopPropagation()
                 e.bubbles = false
                 // e.preventDefault()
@@ -83,7 +81,7 @@ export default function SongSearch(): ReactElement {
             rightSectionWidth={36}
             rightSection={
               search.length > 0 && (
-                <ActionIcon radius="xl" onClick={(e) => setSearch("")}>
+                <ActionIcon radius="xl" onClick={() => setSearch('')}>
                   <Icon icon="fas:xmark" />
                 </ActionIcon>
               )
@@ -91,7 +89,7 @@ export default function SongSearch(): ReactElement {
           />
           <Button
             variant="filled"
-            disabled={!search.startsWith("https://")}
+            disabled={!search.startsWith('https://')}
             onClick={() => {
               window.electron.music.getVideoInfo(search).then((video) => {
                 const vid = video.videoDetails
@@ -99,7 +97,7 @@ export default function SongSearch(): ReactElement {
                   id: vid.title,
                   title: `Downloading ${vid.title}`,
                   loading: true,
-                  message: "Starting Download",
+                  message: 'Starting Download',
                   autoClose: false,
                   disallowClose: true,
                 })
@@ -113,9 +111,9 @@ export default function SongSearch(): ReactElement {
       <ScrollArea
         type="hover"
         style={{
-          display: search.length === 0 ? "none" : undefined,
+          display: search.length === 0 ? 'none' : undefined,
           height: 250,
-          scrollBehavior: "smooth",
+          scrollBehavior: 'smooth',
         }}>
         <div>
           {loading ? (
@@ -132,8 +130,8 @@ export default function SongSearch(): ReactElement {
                     key={result.videoDetails.videoId}
                     result={result}
                     onAdd={(result) => {
-                      console.log("added song: ", result)
-                      dispatch(addSong({ ...result, mood: [currentMood] }))
+                      console.log('added song: ', result)
+                      dispatch(addSong({ ...result, mood: currentMood ? [currentMood] : [] }))
                     }}
                   />
                 ))}
@@ -145,9 +143,9 @@ export default function SongSearch(): ReactElement {
                     key={result.url}
                     result={result}
                     onAdd={(result) => {
-                      console.log("added song: ", result)
+                      console.log('added song: ', result)
 
-                      dispatch(addSong({ ...result, mood: [currentMood] }))
+                      dispatch(addSong({ ...result, mood: currentMood ? [currentMood] : [] }))
                     }}
                   />
                 ))}
@@ -160,7 +158,7 @@ export default function SongSearch(): ReactElement {
 }
 
 type ResultViewProps = {
-  type: "direct" | "search"
+  type: 'direct' | 'search'
   result: Video | Playlist | videoInfo
   onAdd: (result: SongJSON) => void
   notifs: NotificationsContextProps
@@ -169,32 +167,23 @@ type ResultViewProps = {
 function ResultView({ type, result, onAdd, notifs }: ResultViewProps): ReactElement {
   // const [opened, open] = useBooleanToggle(false)
   const [hovering, setHover] = useBooleanToggle(false)
-  const res = type === "direct" ? (result as videoInfo).videoDetails : (result as Video | Playlist)
-  const imgSrc =
-    type === "direct"
-      ? (res as videoInfo["videoDetails"])?.thumbnails[0]?.url
-      : (res as Video)?.bestThumbnail?.url || (res as Playlist)?.firstVideo?.bestThumbnail.url
+  const res = type === 'direct' ? (result as videoInfo).videoDetails : (result as Video | Playlist)
+  const imgSrc = type === 'direct' ? (res as videoInfo['videoDetails'])?.thumbnails[0]?.url : (res as Video)?.bestThumbnail?.url || (res as Playlist)?.firstVideo?.bestThumbnail.url
   const title = res.title
-  const channel =
-    type === "direct"
-      ? (res as videoInfo["videoDetails"]).author?.name
-      : (res as Video).author?.name || (res as Playlist)?.owner?.name
-  const url = type === "direct" ? (res as MoreVideoDetails).video_url : (result as Video | Playlist).url
+  const channel = type === 'direct' ? (res as videoInfo['videoDetails']).author?.name : (res as Video).author?.name || (res as Playlist)?.owner?.name
+  const url = type === 'direct' ? (res as MoreVideoDetails).video_url : (result as Video | Playlist).url
 
   const tooltip = (
     <div className="">
-      <Button onClick={(e) => window.electron.misc.openURL(url)}>Video URL</Button>
+      <Button onClick={() => window.electron.misc.openURL(url)}>Video URL</Button>
     </div>
   )
   return (
-    <div
-      className="flex flex-col p-2  hover:bg-neutral-focus transition-all w-full -z-0"
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}>
+    <div className="flex flex-col p-2  hover:bg-neutral-focus transition-all w-full -z-0" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <div className="flex flex-row transition-all h-16 w-full items-center ">
-        <Tooltip allowPointerEvents label={tooltip} delay={500}>
+        <Tooltip allowPointerEvents label={tooltip} closeDelay={500}>
           <div className="h-16 min-w-32">
-            <img src={imgSrc} className="h-full aspect-video rounded-lg" />
+            <img src={imgSrc || undefined} className="h-full aspect-video rounded-lg" />
           </div>
         </Tooltip>
         <div className="inline-flex  flex-col p-2 truncate max-w-sm">
@@ -215,15 +204,13 @@ function ResultView({ type, result, onAdd, notifs }: ResultViewProps): ReactElem
                   id: result.title,
                   title: `Downloading ${result.title}`,
                   loading: true,
-                  message: "Starting Download",
+                  message: 'Starting Download',
                   autoClose: false,
                   disallowClose: true,
                 })
-                window.electron.music
-                  .addSong(result.type === "video" ? result.url : result.firstVideo?.url)
-                  .then((addedInfo) => {
-                    onAdd(addedInfo)
-                  })
+                window.electron.music.addSong(result.type === 'video' ? result.url : result.firstVideo?.url || '').then((addedInfo) => {
+                  onAdd(addedInfo)
+                })
               }
             }) as React.MouseEventHandler<HTMLButtonElement>
           }>

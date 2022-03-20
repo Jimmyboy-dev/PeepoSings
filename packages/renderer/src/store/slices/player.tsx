@@ -1,5 +1,5 @@
-import type { PayloadAction } from "@reduxjs/toolkit"
-import { createSlice } from "@reduxjs/toolkit"
+import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 
 interface PlayerState {
   shuffle: boolean
@@ -12,7 +12,7 @@ interface PlayerState {
     mood: string
     sort: {
       type: string
-      order: "asc" | "desc"
+      order: 'asc' | 'desc'
     }
   }
 }
@@ -25,16 +25,16 @@ const initialState: PlayerState = {
   currentTime: 0,
   playing: false,
   filter: {
-    mood: "",
+    mood: '',
     sort: {
-      type: "name",
-      order: "asc",
+      type: 'name',
+      order: 'asc',
     },
   },
 }
 
 const player = createSlice({
-  name: "player",
+  name: 'player',
   initialState,
   reducers: {
     setShuffle(state) {
@@ -52,7 +52,7 @@ const player = createSlice({
     setCurrentTime(state, action: PayloadAction<number>) {
       state.currentTime = action.payload
     },
-    setPlaying(state, action?: PayloadAction<boolean>) {
+    setPlaying(state, action?: PayloadAction<boolean | undefined>) {
       if (action?.payload !== undefined) state.playing = action.payload
       else state.playing = !state.playing
     },

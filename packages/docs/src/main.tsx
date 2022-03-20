@@ -6,10 +6,8 @@ import { MantineProvider } from "@mantine/core"
 import theme from "./util/theme"
 
 ReactDOM.render(
-  <React.StrictMode>
-    <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
-      <App />
-    </MantineProvider>
-  </React.StrictMode>,
+  <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
+    <App />
+  </MantineProvider>,
   document.getElementById("root")
 )

@@ -3,10 +3,10 @@ import { useBooleanToggle } from "@mantine/hooks"
 import { useEffect } from "react"
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom"
 import { Helmet } from "react-helmet"
-import PeepoSings from "./components/PeepoSings"
 import DownloadPage from "./pages/DownloadPage"
 import Home from "./pages/Home"
 import { Icon } from "@iconify/react"
+import { PeepoSings } from "./components/PeepoSings"
 
 function App() {
   const [talking, setTalking] = useBooleanToggle(false)
@@ -16,8 +16,10 @@ function App() {
       <Helmet titleTemplate="Peepo Sings - %s">
         <title>Home</title>
       </Helmet>
+      <PeepoSings />
+
       <BrowserRouter>
-        <div className="App">
+        <div className="App z-20">
           <Routes>
             <Route index element={<Home />} />
             <Route path="download" element={<DownloadPage />} />
@@ -31,7 +33,6 @@ function App() {
               }
             />
           </Routes>
-          <PeepoSings talk={talking} />
         </div>
       </BrowserRouter>
       <div className="fixed bottom-8 right-8">

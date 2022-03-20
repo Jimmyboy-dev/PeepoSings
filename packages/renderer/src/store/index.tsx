@@ -1,17 +1,28 @@
-import { configureStore } from "@reduxjs/toolkit"
-import type { TypedUseSelectorHook } from "react-redux"
-import { useDispatch, useSelector } from "react-redux"
-import { persistReducer, FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from "redux-persist"
-import type { RootState } from "./slices"
-import rootReducer from "./slices"
+import { configureStore } from '@reduxjs/toolkit'
+import type { TypedUseSelectorHook } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { persistReducer, FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
+import type { RootState } from './slices'
+import rootReducer from './slices'
 // ...
-import logger from "redux-logger"
-import { electronMiddleware } from "./middleware"
+import { createLogger } from 'redux-logger'
+import { electronMiddleware } from './middleware'
+const logger = createLogger({
+  collapsed: true,
+  level: 'debug',
+  colors: {
+    action: () => `#008080`,
+    error: () => `#FF0000`,
+    nextState: () => `#0000FF`,
+    prevState: () => `#00FF00`,
+    title: () => `#008080`,
+  },
+})
 
 const persistConfig = {
-  key: "root",
+  key: 'root',
   storage: window.electron.electronStorage,
-  blacklist: ["currentSong"],
+  blacklist: ['currentSong'],
 }
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
@@ -22,6 +33,7 @@ const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
+      immutableCheck: false,
     })
       .concat(logger)
       .prepend(electronMiddleware),

@@ -16,7 +16,7 @@ export default function PromoMessage({}: Props) {
   }, 3000)
   return (
     <>
-      <div className="flex flex-row items-center h-min gap-2 relative">
+      <div className="flex flex-row items-center h-min gap-2 relative select-none">
         <Title order={2}>Stream Better With </Title>
         <div
           className="text-twitch-accent-legend  inline-block overflow-hidden w-28 h-12 font-bold relative"

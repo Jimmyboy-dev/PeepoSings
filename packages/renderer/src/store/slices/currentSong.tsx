@@ -1,7 +1,7 @@
-import type { PayloadAction } from "@reduxjs/toolkit"
-import { createSlice } from "@reduxjs/toolkit"
-import type { RootState } from ".."
-import { removeMood } from "./moods"
+import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
+import type { RootState } from '.'
+import { removeMood } from './moods'
 
 // Define a type for the slice state
 interface SongsState {
@@ -13,7 +13,7 @@ interface SongsState {
 const initialState: SongsState = { song: -1, mood: null }
 
 export const currentSongSlice = createSlice({
-  name: "currentSong",
+  name: 'currentSong',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
@@ -43,7 +43,6 @@ export const currentSongSlice = createSlice({
 export const { nextSong, prevSong, setCurrentSong, setCurrentMood } = currentSongSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectCurrentSong = (state: RootState) =>
-  state.songs.filter((v) => v.mood.includes(state.currentSong.mood))[state.currentSong.song]
+export const selectCurrentSong = (state: RootState) => state.songs.filter((v) => v.mood.includes(state.currentSong.mood))[state.currentSong.song]
 
 export default currentSongSlice.reducer

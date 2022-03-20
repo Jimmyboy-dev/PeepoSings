@@ -31,12 +31,13 @@ export default defineConfig({
       fileName: () => "[name].cjs",
     },
     rollupOptions: {
-      external: [
-        "electron", "electron-devtools-installer", "fluent-ffmpeg",
-        ...builtinModules,
-        ...Object.keys(pkg.dependencies || {}),
-      ],
+      external: ["electron", "electron-devtools-installer", "fluent-ffmpeg", "@ffmpeg-installer/ffmpeg", "ffmetadata", ...builtinModules.flatMap((p) => [p, `node:${p}`])],
+
+      output: {
+        entryFileNames: "[name].cjs",
+      },
     },
     emptyOutDir: true,
+    brotliSize: false,
   },
 })

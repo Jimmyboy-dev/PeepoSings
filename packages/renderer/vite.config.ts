@@ -14,21 +14,20 @@ export default defineConfig({
   root: __dirname,
   plugins: [
     react(),
-    resolveElectron(
-      /**
-       * Here you can specify other modules
-       * 🚧 You have to make sure that your module is in `dependencies` and not in the` devDependencies`,
-       *    which will ensure that the electron-builder can package it correctly
-       * @example
-       * {
-       *   'electron-store': 'const Store = require("electron-store"); export default Store;',
-       * }
-       */
-    ),
+    resolveElectron(),
+    /**
+     * Here you can specify other modules
+     * 🚧 You have to make sure that your module is in `dependencies` and not in the` devDependencies`,
+     *    which will ensure that the electron-builder can package it correctly
+     * @example
+     * {
+     *   'electron-store': 'const Store = require("electron-store"); export default Store;',
+     * }
+     */
   ],
   base: "./",
   build: {
-    emptyOutDir: true,
+    sourcemap: true,
     outDir: "../../dist/renderer",
   },
   resolve: {
@@ -36,18 +35,13 @@ export default defineConfig({
       "@": join(__dirname, "src"),
     },
   },
-  server: {
-    port: pkg.env.PORT,
-  },
 })
 
 /**
  * For usage of Electron and NodeJS APIs in the Renderer process
  * @see https://github.com/caoxiemeihao/electron-vue-vite/issues/52
  */
-export function resolveElectron(
-  resolves: Parameters<typeof resolve>[0] = {},
-): Plugin {
+export function resolveElectron(resolves: Parameters<typeof resolve>[0] = {}): Plugin {
   const builtins = builtinModules.filter((t) => !t.startsWith("_"))
 
   /**

@@ -1,11 +1,11 @@
-import { join } from "path"
+import { join, resolve } from "path"
 import { fileURLToPath } from "url"
-// import './security-restrictions';
 import isDev from "electron-is-dev"
 import * as dotenv from "dotenv"
 dotenv.config()
 
 import type { ProtocolRequest } from "electron"
+import { nativeTheme } from "electron"
 import { app, BrowserWindow, Tray, Menu, session, protocol, nativeImage, shell } from "electron"
 import { ipcMain as ipc } from "electron-better-ipc"
 import contextMenu from "electron-context-menu"
@@ -17,9 +17,12 @@ import AutoLaunch from "auto-launch"
 import ytsr from "ytsr"
 import type AutoUpdater from "./modules/AutoUpdater"
 import { release } from "os"
+import Platform from "./modules/platform"
+
 const appId = "com.devJimmyboy.PeepoSings"
 let autoLauncher: AutoLaunch
 
+app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required")
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith("6.1")) app.disableHardwareAcceleration()
 
@@ -29,23 +32,36 @@ if (process.platform === "win32") app.setAppUserModelId(appId)
 if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
+} else {
+  app.on("second-instance", async (event, commandLine) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.focus()
+    }
+  })
+}
+
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient("peepo", process.execPath, [resolve(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient("peepo")
 }
 
 const isDevelopment = import.meta.env.MODE === "development" || isDev
 
 let updater: AutoUpdater | null = null
 
-
 const disposeCTXMenu = contextMenu({
   showSaveImageAs: true,
   append: (_menu) => [{ label: "Refresh", click: () => BrowserWindow.getFocusedWindow()?.reload() }],
 })
 
-const appIcon = nativeImage.createFromPath(join(__dirname, "../..", "build", process.platform === "win32" ? "icon.ico" : "icon.png"))
+const appIcon = nativeImage.createFromPath(join(__dirname, "../..", "buildResources", process.platform === "win32" ? "icon.ico" : "icon.png"))
 
 Store.initRenderer()
-
-
 
 // const loadURL = serve({ directory: "dist" })
 
@@ -55,17 +71,14 @@ let tray: Tray | undefined
 
 // Install "react devtools"
 if (isDevelopment) {
-  app.whenReady()
+  app
+    .whenReady()
     .then(() => import("electron-devtools-installer"))
     .then(({ default: installExtension, REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS }) => installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS]))
-    .catch(e => console.error("Failed install extension:", e))
+    .catch((e) => console.error("Failed install extension:", e))
 }
 
-
-
-
 function initTray() {
-
   tray = new Tray(appIcon)
 
   const contextMenu = Menu.buildFromTemplate([
@@ -78,11 +91,9 @@ function initTray() {
   tray.setContextMenu(contextMenu)
 }
 
-
 let win: BrowserWindow | null = null
 
 async function createWindow() {
-
   const mainWindowState = windowStateKeeper({
     defaultWidth: 1000,
     defaultHeight: 800,
@@ -98,10 +109,23 @@ async function createWindow() {
     frame: false,
     icon: appIcon,
     webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: false,
       preload: join(__dirname, "../preload/index.cjs"),
     },
   })
 
+  if (Platform.isMac()) {
+    app.dock.setIcon(appIcon)
+  }
+
+  if (Platform.isWindows()) {
+    win.flashFrame(true)
+    win.once("focus", () => win?.flashFrame(false))
+  }
+
+  musicManager = MusicManager.getInstance(win)
   if (app.isPackaged) {
     win.loadFile(join(__dirname, "../renderer/index.html"))
   } else {
@@ -115,7 +139,7 @@ async function createWindow() {
   mainWindowState.manage(win)
   // Test active push message to Renderer-process
   win.webContents.on("did-finish-load", () => {
-    win?.webContents.send("main-process-message", (new Date).toLocaleString())
+    win?.webContents.send("main-process-message", new Date().toLocaleString())
   })
 
   // Make all links open with the browser, not with the application
@@ -136,9 +160,7 @@ async function createWindow() {
       win?.webContents.openDevTools()
     }
   })
-
 }
-
 
 ipc.on("windowCmd", (e, msg) => {
   if (win) {
@@ -153,15 +175,6 @@ ipc.on("trayTooltip", (e, tip: string) => {
   if (tray) tray.setToolTip(tip)
 })
 
-app.on("second-instance", () => {
-  // Someone tried to run a second instance, we should focus our window.
-  if (win) {
-    if (win.isMinimized()) win.restore()
-    win.focus()
-  }
-})
-
-
 app.on("window-all-closed", () => {
   win = null
   if (process.platform !== "darwin") app.quit()
@@ -173,41 +186,43 @@ app.on("activate", () => {
   }
 })
 
-
-app.whenReady().then(() => {
-  autoLauncher = new AutoLaunch({
-    name: "Peepo Sings",
-    path: process.execPath || app.getPath("exe"),
-  })
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        "Access-Control-Allow-Origin": "https://* http://localhost:* file://*",
-      },
+app
+  .whenReady()
+  .then(() => {
+    autoLauncher = new AutoLaunch({
+      name: "Peepo Sings",
+      path: process.execPath || app.getPath("exe"),
     })
-  })
-  protocol.interceptFileProtocol("resource", async (req: ProtocolRequest, callback: (filePath: string) => void) => {
-    const url = fileURLToPath(req.url.replace("resource", "file"))
-    callback(url)
-  })
-  musicManager = MusicManager.getInstance()
+    nativeTheme.themeSource = "system"
 
-  initTray()
+    // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    //   callback({
+    //     responseHeaders: {
+    //       ...details.responseHeaders,
+    //       "Access-Control-Allow-Origin": "https://* http://localhost:* file://*",
+    //     },
+    //   })
+    // })
+    protocol.interceptFileProtocol("resource", async (req: ProtocolRequest, callback: (filePath: string) => void) => {
+      const url = fileURLToPath(req.url.replace("resource", "file"))
+      callback(url)
+    })
 
-})
+    initTray()
+  })
   .then(createWindow)
   .catch((e) => console.error("Failed create window:", e))
 
-
 // Auto-updates
 if (import.meta.env.PROD) {
-  app.whenReady()
+  app
+    .whenReady()
     .then(() => import("./modules/AutoUpdater"))
-    .then(({ default: AutoUpdater }) => { updater = new AutoUpdater() })
+    .then(({ default: AutoUpdater }) => {
+      updater = new AutoUpdater()
+    })
     .catch((e) => console.error("Failed check updates:", e))
 }
-
 
 // Listeners
 const listeners: { [key: string]: () => void } = {}
@@ -218,7 +233,6 @@ listeners.openLocation = ipc.answerRenderer("open-location", async (url: string)
   return true
 })
 
-
 listeners.musicAdd = ipc.answerRenderer("music-add", async (url: string) => {
   const song = musicManager.addSong(url)
   return await song
@@ -228,7 +242,6 @@ listeners.musicRemove = ipc.answerRenderer("music-remove", async (path: string) 
   const song = musicManager.removeSong(path)
   return song
 })
-
 
 listeners.videoInfo = ipc.answerRenderer("video-info", async (url: string) => {
   return await musicManager.getYoutubeVideoInfo(url)
@@ -241,23 +254,19 @@ listeners.musicSearch = ipc.answerRenderer("music-search", async (query: string)
 listeners.checkForUpdates = ipc.answerRenderer("check-for-updates", async () => {
   if (updater && win) {
     return await updater.manualCheckForUpdates(win)
-  }
-  else return false
+  } else return false
 })
 
 listeners.getVersion = ipc.answerRenderer("get-version", () => {
   return app.getVersion()
 })
 
-
 listeners.toggleAutoLaunch = ipc.answerRenderer("toggle-auto-launch", async () => {
   const enabled = await autoLauncher.isEnabled()
   if (enabled) {
     await autoLauncher.disable()
     console.log("Disabled auto-launch")
-
-  }
-  else {
+  } else {
     await autoLauncher.enable()
     console.log("Enabled auto-launch")
   }
@@ -265,14 +274,11 @@ listeners.toggleAutoLaunch = ipc.answerRenderer("toggle-auto-launch", async () =
 })
 
 listeners.openURL = ipc.answerRenderer("open-url", (url: string) => {
-  if (url.startsWith("http"))
-    shell.openExternal(url)
+  if (url.startsWith("http")) shell.openExternal(url)
 })
 
 listeners.setCurrentSong = ipc.answerRenderer("set-current-song", (song: SongJSON | null) => {
-  if (song)
-    tray?.setToolTip(`🎵 ${song.title} - ${song.artist}`)
-  else
-    tray?.setToolTip(`🎵 ${app.getName()} - No Song Playing`)
+  if (song) tray?.setToolTip(`🎵 ${song.title} - ${song.artist}`)
+  else tray?.setToolTip(`🎵 ${app.getName()} - No Song Playing`)
   return true
 })
