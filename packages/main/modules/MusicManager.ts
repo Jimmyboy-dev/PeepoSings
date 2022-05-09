@@ -1,18 +1,18 @@
-import type { BrowserWindow } from "electron"
-import { app } from "electron"
-import { ipcMain as ipc } from "electron-better-ipc"
-import fs from "fs"
-import path from "path"
-import ffmpegInstall from "@ffmpeg-installer/ffmpeg"
-import ytdl from "ytdl-core"
-import type { FfmpegCommand } from "fluent-ffmpeg"
+import type { BrowserWindow } from 'electron'
+import { app } from 'electron'
+import { ipcMain as ipc } from 'electron-better-ipc'
+import fs from 'fs'
+import path from 'path'
+import ffmpegInstall from '@ffmpeg-installer/ffmpeg'
+const ffmpegPath = ffmpegInstall.path.replace('app.asar', 'app.asar.unpacked')
+import ytdl from 'ytdl-core'
+import type { FfmpegCommand } from 'fluent-ffmpeg'
 
-import ffmpeg from "fluent-ffmpeg"
-import ffmetadata from "ffmetadata"
-import type { Readable } from "stream"
-import sanitize from "sanitize-filename"
+import ffmpeg from 'fluent-ffmpeg'
+import ffmetadata from 'ffmetadata'
+import type { Readable } from 'stream'
+import sanitize from 'sanitize-filename'
 
-const ffmpegPath = ffmpegInstall.path.replace("app.asar", "app.asar.unpacked")
 ffmpeg.setFfmpegPath(ffmpegPath)
 ffmetadata.setFfmpegPath(ffmpegPath)
 
@@ -25,10 +25,10 @@ export class MusicManager {
 
   private constructor(curWindow?: BrowserWindow) {
     if (MusicManager.instance) {
-      throw new Error("Error: Instantiation failed: Use MusicManager.getInstance() instead of new.")
+      throw new Error('Error: Instantiation failed: Use MusicManager.getInstance() instead of new.')
     } else {
-      const musicDir = app.getPath("music")
-      this.musicPath = path.join(musicDir, "twitch-music-manager")
+      const musicDir = app.getPath('music')
+      this.musicPath = path.join(musicDir, 'twitch-music-manager')
       this.readCurrentData()
       if (curWindow) {
         this.win = curWindow
@@ -54,14 +54,14 @@ export class MusicManager {
     }
   }
 
-  async addSong(url: string): Promise<Omit<SongJSON, "id" | "mood">> {
+  async addSong(url: string): Promise<Omit<SongJSON, 'id' | 'mood'>> {
     const info = await this.getYoutubeVideoInfo(url)
     const path = await this.getYoutubeVideo(url).catch((e) => {
       console.log(e)
       return null
     })
-    if (!path) return Promise.reject("Failed to download video")
-    const song: Omit<SongJSON, "id" | "mood"> = {
+    if (!path) return Promise.reject('Failed to download video')
+    const song: Omit<SongJSON, 'id' | 'mood'> = {
       title: info.videoDetails.title,
       filePath: path,
       artist: info.videoDetails.author.name,
@@ -102,25 +102,26 @@ export class MusicManager {
   public async getYoutubeVideo(url: string) {
     if (!this.isVideo(url)) return
     const info = await this.getYoutubeVideoInfo(url)
-    const savePath = path.join(this.musicPath, sanitize(info.videoDetails.title.trim().replace(/[/|\\]/g, ""), { replacement: "" }) + ".mp3")
-    this.currentDownload = ytdl(url, { quality: "highestaudio" })
+    const savePath = path.join(this.musicPath, sanitize(info.videoDetails.title.trim().replace(/[/|\\]/g, ''), { replacement: '' }) + '.mp3')
+    this.currentDownload = ytdl(url, { quality: 'highestaudio' })
     this.dlInfo = { start: Date.now(), vidInfo: info, savePath }
-    ffmpeg(this.currentDownload)
-      .audioBitrate(128)
-      .save(savePath)
-      .on("progress", (p) => {
-        console.log(`${p.targetSize}kb downloaded`)
-        if (this.win) ipc.callRenderer(this.win, "download-progress", { raw: p, msg: `${p.targetSize}kb downloaded`, dlInfo: this.dlInfo })
-      })
-      .on("end", () => {
-        if (!this.dlInfo) return
-        console.log(
-          `\nFinished downloading "${this.dlInfo.vidInfo.videoDetails.title}" by ${this.dlInfo.vidInfo.videoDetails.author}, took ${(Date.now() - (this.dlInfo?.start || Date.now())) / 1000}s`,
-        )
-
-        if (this.win) ipc.callRenderer(this.win, "download-end", { path: savePath, dlInfo: this.dlInfo })
-      })
-    return savePath
+    return new Promise<string>((resolve, reject) =>
+      ffmpeg(this.currentDownload)
+        .audioBitrate(128)
+        .save(savePath)
+        .on('progress', (p) => {
+          console.log(`${p.targetSize}kb downloaded`)
+          if (this.win) ipc.callRenderer(this.win, 'download-progress', { raw: p, msg: `${p.targetSize}kb downloaded`, dlInfo: this.dlInfo })
+        })
+        .on('end', () => {
+          if (!this.dlInfo) return reject('No download info')
+          console.log(
+            `\nFinished downloading "${this.dlInfo.vidInfo.videoDetails.title}" by ${this.dlInfo.vidInfo.videoDetails.author}, took ${(Date.now() - (this.dlInfo?.start || Date.now())) / 1000}s`
+          )
+          if (this.win) ipc.callRenderer(this.win, 'download-end', { path: savePath, dlInfo: this.dlInfo })
+          return resolve(savePath)
+        })
+    )
   }
 
   public async getYoutubeVideoInfo(url: string) {

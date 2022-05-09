@@ -1,0 +1,86 @@
+@import '../../common';
+
+.context_popup {
+  @include shadow;
+  display: flex;
+  flex-flow: row;
+  background-color: $background !important;
+  color: $white;
+  border-color: $background2 !important;
+  user-select: none;
+
+  &:before {
+    background-color: $background !important;
+  }
+
+  &.bottom:before {
+    box-shadow: -1px -1px 0 0 $bgdefault !important;
+  }
+
+  &.top:before {
+    box-shadow: 1px 1px 0 0 $bgdefault !important;
+  }
+
+  &.visible {
+    animation: fade-in $short-duration normal forwards ease-in-out;
+  }
+
+  hr {
+    margin: 0.5em 0 0 0;
+    border: none;
+    border-bottom: 1px solid $bgdefault;
+  }
+
+  .popup_content > .content {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    height: auto;
+  }
+
+  .popup_header {
+    display: flex;
+    padding: 0.5rem 0;
+    height: auto;
+  }
+
+  .popup_thumb {
+    flex: 0 0 auto;
+    width: 5em;
+    height: 5em;
+    margin-right: 1em;
+
+    img {
+      width: 5em;
+      height: 5em;
+      object-fit: cover;
+    }
+  }
+
+  .popup_info {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+    height: auto;
+  }
+
+  .popup_artist {
+    flex: 0 0 auto;
+    color: rgba($white, 0.6);
+  }
+
+  .popup_title {
+    flex: 0 0 auto;
+    font-weight: bold;
+    font-size: 16px;
+    color: $white;
+  }
+
+  .popup_buttons {
+    display: flex;
+    flex-flow: column;
+    flex: 0 0 auto;
+    padding: 0.5rem 0;
+    height: auto !important;
+  }
+}

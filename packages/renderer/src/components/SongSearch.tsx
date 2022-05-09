@@ -1,16 +1,16 @@
-import { Icon } from '@iconify/react'
-import { InputWrapper, Group, Input, Button, ActionIcon, Center, Loader, ScrollArea, Tooltip } from '@mantine/core'
+import { Icon } from "@iconify/react";
+import { ActionIcon, Button, Center, Group, Input, InputWrapper, Loader, ScrollArea, Tooltip } from "@mantine/core";
+import { useBooleanToggle } from "@mantine/hooks";
+import { useNotifications } from "@mantine/notifications";
+import debounce from "lodash.debounce";
+import React, { useCallback } from "react";
+
+import { useAppDispatch, useAppSelector } from "../store";
+import { addSong } from "../store/slices/songs";
+
 import type { KeyboardEvent, ReactElement } from 'react'
-import React from 'react'
-import throttle from 'lodash.throttle'
 import type { Playlist, Video } from 'ytsr'
-import { useBooleanToggle } from '@mantine/hooks'
 import type { MoreVideoDetails, videoInfo } from 'ytdl-core'
-import { getBasicInfo } from 'ytdl-core'
-import { useAppDispatch, useAppSelector } from '../store'
-import { addSong } from '../store/slices/songs'
-import { useNotifications } from '@mantine/notifications'
-import ytsr from 'ytsr'
 import type { NotificationsContextProps } from '@mantine/notifications/lib/types'
 
 type Results = Video[] | videoInfo[] | Playlist[]
@@ -23,31 +23,38 @@ export default function SongSearch(): ReactElement {
   const notifs = useNotifications()
 
   const addSongFromUrl = (url?: string) => {
-    if (url) window.electron.music.addSong(url)
-    else window.electron.music.addSong(search)
+    if (url) return window.electron.music.addSong(url)
+    else return window.electron.music.addSong(search)
   }
 
-  const searchSongs = throttle(async () => {
-    if (search.length === 0) {
-      toggleLoading(false)
-      return
-    }
-    if (search.match(/(?<=(https?:\/\/|youtube\.com))/g)) {
-      // window.electron.music.getVideoInfo(
-      const video = await window.electron.music.getVideoInfo(search)
-      setResults([video])
-      toggleLoading(false)
+  const searchSongs = useCallback(
+    debounce(
+      async () => {
+        if (search.length === 0) {
+          toggleLoading(false)
+          return
+        }
+        if (search.match(/(?<=(https?:\/\/|youtube\.com))/g)) {
+          // window.electron.music.getVideoInfo(
+          const video = await window.electron.music.getVideoInfo(search)
+          setResults([video])
+          toggleLoading(false)
 
-      return
-    }
-    try {
-      const results = await window.electron.music.searchSongs(search)
-      setResults(results?.items.filter((res) => res.type === 'video' || res.type === 'playlist') as Video[] | Playlist[])
-    } catch (e) {
-      console.error(e)
-    }
-    toggleLoading(false)
-  }, 500)
+          return
+        }
+        try {
+          const results = await window.electron.music.searchSongs(search)
+          setResults(results?.items.filter((res) => res.type === 'video' || res.type === 'playlist') as Video[] | Playlist[])
+        } catch (e) {
+          console.error(e)
+        }
+        toggleLoading(false)
+      },
+      500,
+      {}
+    ),
+    [search, toggleLoading]
+  )
 
   React.useEffect(() => {
     toggleLoading(true)
@@ -99,10 +106,10 @@ export default function SongSearch(): ReactElement {
                   loading: true,
                   message: 'Starting Download',
                   autoClose: false,
-                  disallowClose: true,
+                  disallowClose: false,
                 })
               })
-              addSongFromUrl()
+              addSongFromUrl().then((sng) => dispatch(addSong({ ...sng, mood: currentMood ? [currentMood] : [] })))
             }}>
             Add
           </Button>
@@ -123,11 +130,11 @@ export default function SongSearch(): ReactElement {
           ) : (
             <Group direction="column" spacing={1}>
               {songResults.length === 1 &&
-                (songResults as videoInfo[]).map((result: videoInfo) => (
+                (songResults as videoInfo[]).map((result: videoInfo, i) => (
                   <ResultView
                     notifs={notifs}
                     type="direct"
-                    key={result.videoDetails.videoId}
+                    key={result?.videoDetails?.videoId || i}
                     result={result}
                     onAdd={(result) => {
                       console.log('added song: ', result)
@@ -167,9 +174,9 @@ type ResultViewProps = {
 function ResultView({ type, result, onAdd, notifs }: ResultViewProps): ReactElement {
   // const [opened, open] = useBooleanToggle(false)
   const [hovering, setHover] = useBooleanToggle(false)
-  const res = type === 'direct' ? (result as videoInfo).videoDetails : (result as Video | Playlist)
+  const res = type === 'direct' ? (result as videoInfo).videoDetails || result : (result as Video | Playlist)
   const imgSrc = type === 'direct' ? (res as videoInfo['videoDetails'])?.thumbnails[0]?.url : (res as Video)?.bestThumbnail?.url || (res as Playlist)?.firstVideo?.bestThumbnail.url
-  const title = res.title
+  const title = res?.title
   const channel = type === 'direct' ? (res as videoInfo['videoDetails']).author?.name : (res as Video).author?.name || (res as Playlist)?.owner?.name
   const url = type === 'direct' ? (res as MoreVideoDetails).video_url : (result as Video | Playlist).url
 
@@ -199,7 +206,7 @@ function ResultView({ type, result, onAdd, notifs }: ResultViewProps): ReactElem
               result = result as Video | Playlist
               e.stopPropagation()
               e.preventDefault()
-              if (result && result !== null) {
+              if (result && result.url) {
                 notifs.showNotification({
                   id: result.title,
                   title: `Downloading ${result.title}`,

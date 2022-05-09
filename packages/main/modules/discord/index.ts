@@ -1,0 +1,102 @@
+import DiscordRPC from "discord-rpc";
+import { inject, injectable } from "inversify";
+
+import Config from "../config";
+import Logger, { $mainLogger } from "../logger";
+
+@injectable()
+class Discord {
+  private rpc?: DiscordRPC.Client
+  private isReady = false
+  private baseStart: number
+  private pauseStart: number
+  private pausedTotal = 0
+  private activity?: {
+    details: string
+    startTimestamp: number
+    largeImageKey: string
+  }
+
+  constructor(@inject(Config) private config: Config, @inject($mainLogger) private logger: Logger) {
+    this.baseStart = Date.now()
+    this.pauseStart = Date.now()
+  }
+
+  private async sendActivity() {
+    try {
+      await this.rpc?.setActivity(this.activity)
+      this.logger.log('update discord activity')
+    } catch (err) {
+      this.logger.error('error trying to set discord activity')
+    }
+  }
+
+  async pause() {
+    if (this.isReady && this.activity) {
+      this.pauseStart = Date.now()
+
+      this.activity.details += '\nPaused'
+      this.activity.startTimestamp = this.pauseStart
+      return this.sendActivity()
+    }
+  }
+
+  async play() {
+    if (this.isReady && this.activity) {
+      this.pausedTotal += Date.now() - this.pauseStart
+      if (this.activity) {
+        this.activity.details = this.activity.details.substring(0, this.activity.details.length - 8)
+        this.activity.startTimestamp = this.baseStart + this.pausedTotal
+        return this.sendActivity()
+      }
+    }
+  }
+
+  async init(cb?: () => void) {
+    this.logger.log('Discord ClientID:', this.config.discordClientId)
+    DiscordRPC.register(this.config.discordClientId)
+    this.rpc = new DiscordRPC.Client({ transport: 'ipc' })
+
+    this.rpc.once('ready', () => {
+      this.logger.log('connected to discord')
+      this.isReady = true
+      cb && cb()
+    })
+
+    try {
+      await this.rpc.login({ clientId: this.config.discordClientId })
+    } catch (err) {
+      this.logger.error('error trying to connect discord')
+      this.isReady = true
+    }
+  }
+
+  async trackChange(track: SongJSON) {
+    this.baseStart = Date.now()
+    this.pausedTotal = 0
+    this.activity = {
+      details: `${track.artist} - ${track.title}`,
+      startTimestamp: this.baseStart,
+      largeImageKey: 'logo',
+    }
+    if (!this.rpc) {
+      return null
+    } else if (!this.isReady) {
+      return this.init(() => {
+        this.sendActivity()
+      })
+    } else {
+      this.sendActivity()
+    }
+  }
+
+  async clear() {
+    delete this.activity
+    if (this.isReady) {
+      this.logger.log('clear discord activity')
+      await this.rpc?.clearActivity()
+    }
+  }
+}
+
+export default Discord

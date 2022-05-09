@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "lib": ["DOM"],
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "strict": false,
+    "allowJs": true,
+    "typeRoots": ["../../node_modules/@types", "./lib/typings"],
+    "types": ["vite/client", "node"],
+    "jsx": "react"
+  },
+  "include": ["lib"]
+}

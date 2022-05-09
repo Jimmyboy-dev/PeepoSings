@@ -1,13 +1,14 @@
-import { Icon } from '@iconify/react'
-import { ActionIcon, Anchor, Button, ColorInput, DEFAULT_THEME, Grid, Group, Input, InputWrapper, Modal, SimpleGrid, Text, Tooltip } from '@mantine/core'
-import { useBooleanToggle } from '@mantine/hooks'
-import React, { ChangeEvent, useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from '../store'
-import { addMood, removeMood, setMood } from '../store/slices/moods'
-import { motion } from 'framer-motion'
-import { nanoid } from '@reduxjs/toolkit'
-import { setCurrentMood, setCurrentSong } from '../store/slices/currentSong'
-import { setPlaying } from '../store/slices/player'
+import { Icon } from "@iconify/react"
+import { ActionIcon, Anchor, Button, ColorInput, DEFAULT_THEME, Grid, Group, Input, InputWrapper, Modal, SimpleGrid, Text, Tooltip } from "@mantine/core"
+import { useBooleanToggle } from "@mantine/hooks"
+import type { ChangeEvent} from "react"
+import React, { useEffect } from "react"
+import { useAppDispatch, useAppSelector } from "../store"
+import { addMood, removeMood, setMood } from "../store/slices/moods"
+import { motion } from "framer-motion"
+import { nanoid } from "@reduxjs/toolkit"
+import { setCurrentMood, setCurrentSong } from "../store/slices/currentSong"
+import {  } from "../store/slices/player"
 
 export default function Moods() {
   const [addingMood, setAddMood] = useBooleanToggle(false)
@@ -19,16 +20,16 @@ export default function Moods() {
       <ActionIcon size="xl" className="absolute right-2 top-2 bg-green-500 rounded-full" onClick={() => setAddMood()}>
         <Icon fontSize={24} icon="fas:plus" color="white" />
       </ActionIcon>
-      <AddMoodModal opened={addingMood} onClose={() => setAddMood(false)} mood={!mood ? undefined : { ...mood, type: 'editing' }} />
+      <AddMoodModal opened={addingMood} onClose={() => setAddMood(false)} mood={!mood ? undefined : { ...mood, type: "editing" }} />
       <SimpleGrid
         cols={4}
         spacing="lg"
         breakpoints={[
-          { maxWidth: 1100, cols: 3, spacing: 'md' },
-          { maxWidth: 755, cols: 2, spacing: 'sm' },
-          { maxWidth: 600, cols: 1, spacing: 'sm' },
+          { maxWidth: 1100, cols: 3, spacing: "md" },
+          { maxWidth: 755, cols: 2, spacing: "sm" },
+          { maxWidth: 600, cols: 1, spacing: "sm" },
         ]}
-        style={{ width: '80%' }}>
+        style={{ width: "80%" }}>
         {Object.values(moods).map((mood, i) => (
           <MoodItem
             key={mood.id}
@@ -46,16 +47,16 @@ export default function Moods() {
 interface MoodProps {
   opened: boolean
   onClose: () => void
-  mood?: MoodJSON & { type: 'editing' | 'new' }
+  mood?: MoodJSON & { type: "editing" | "new" }
 }
-function AddMoodModal({ onClose, opened, mood = { name: '', color: '#ffffff', icon: 'fas:music', type: 'new', id: '' } }: MoodProps) {
+function AddMoodModal({ onClose, opened, mood = { name: "", color: "#ffffff", icon: "fas:music", type: "new", id: "" } }: MoodProps) {
   const [name, setName] = React.useState(mood.name)
   const [color, setColor] = React.useState(mood.color)
   const [icon, setIcon] = React.useState(mood.icon)
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    if (mood.type === 'editing') {
+    if (mood.type === "editing") {
       setName(mood.name)
       setColor(mood.color)
       setIcon(mood.icon)
@@ -63,9 +64,9 @@ function AddMoodModal({ onClose, opened, mood = { name: '', color: '#ffffff', ic
   }, [mood])
 
   const handleSubmit = () => {
-    if (mood.type === 'new') dispatch(addMood({ name, color, icon, id: nanoid(8) }))
+    if (mood.type === "new") dispatch(addMood({ name, color, icon, id: nanoid(8) }))
     else {
-      const moodJson = mood as MoodJSON & { type?: 'editing' | 'new' }
+      const moodJson = mood as MoodJSON & { type?: "editing" | "new" }
       delete moodJson.type
       dispatch(setMood({ ...(moodJson as MoodJSON), name, color, icon }))
     }
@@ -91,7 +92,7 @@ function AddMoodModal({ onClose, opened, mood = { name: '', color: '#ffffff', ic
                 closeDelay={500}
                 label={
                   <>
-                    Look up Icons @{' '}
+                    Look up Icons @{" "}
                     <Anchor href="https://icones.netlify.app" target="_blank">
                       Icones
                     </Anchor>
@@ -104,7 +105,7 @@ function AddMoodModal({ onClose, opened, mood = { name: '', color: '#ffffff', ic
         </InputWrapper>
 
         <Group direction="row" position="center">
-          {mood.type === 'editing' && (
+          {mood.type === "editing" && (
             <Button variant="outline" color="red" onClick={() => mood && mood.id && dispatch(removeMood(mood.id)) && onClose()}>
               Delete
             </Button>
@@ -142,7 +143,7 @@ function MoodItem({ mood: { id, name, color, icon }, onEdit }: MoodItemProps) {
         e.stopPropagation()
         onEdit()
       }}>
-      <Icon fontSize={24} color={color} icon={icon || ''} />
+      <Icon fontSize={24} color={color} icon={icon || ""} />
       <div>{name}</div>
     </motion.div>
   )

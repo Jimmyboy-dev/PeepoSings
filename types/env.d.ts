@@ -14,8 +14,20 @@ interface ImportMetaEnv {
    * The value of the variable is set in scripts/watch.js and depend on packages/main/vite.config.js
    */
   readonly VITE_DEV_SERVER_URL: undefined | string
+  readonly VITE_LAST_FM_KEY: string
+  readonly VITE_LAST_FM_SHARED_SECRET: string
+  readonly VITE_DISCORD_CLIENT_ID: string
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
+}
+
+declare namespace NodeJS {
+  export interface ProcessEnv {
+    readonly VITE_DEV_SERVER_URL: undefined | string
+    VITE_ACOUSTIC_ID_KEY: string
+    VITE_DISCORD_CLIENT_ID: string
+    VITE_INVIDIOUS_URL: string
+  }
 }

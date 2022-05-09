@@ -1,12 +1,13 @@
-import { Icon } from '@iconify/react'
-import { ActionIcon, Box, Button, Col, Grid, Modal, Progress, Tabs } from '@mantine/core'
-import type { ReactElement } from 'react'
-import React, { useEffect } from 'react'
-import AudioPlayer from './components/AudioPlayer'
-import Music from './components/Music'
-import TitleBar from './components/TitleBar'
-import { useNotifications } from '@mantine/notifications'
+import { Icon } from "@iconify/react";
+import { ActionIcon, Box } from "@mantine/core";
+import { useNotifications } from "@mantine/notifications";
+import React, { useEffect } from "react";
 
+import AudioPlayer from "./components/AudioPlayer";
+import Music from "./components/Music";
+import TitleBar from "./components/TitleBar";
+
+import type { ReactElement } from 'react'
 // run this function when your application starts before creating any notifications
 
 declare global {
@@ -41,8 +42,9 @@ export default function App(): ReactElement {
         loading: true,
         title: `Downloading ${title}`,
 
-        autoClose: true,
-        message: dl.msg,
+        autoClose: false,
+        disallowClose: false,
+        message: `By ${artist} ~ Album ${album}\n${dl.msg}`,
         icon: <Icon icon="fas:check" />,
       })
     }
@@ -58,9 +60,14 @@ export default function App(): ReactElement {
       notifications.updateNotification(title, {
         loading: false,
         title: `Downloaded ${title}`,
-        autoClose: true,
+        autoClose: 5000,
         message: 'Downloaded Finished!',
-        icon: <Icon icon="fas:check" />,
+        icon: (
+          <div>
+            <Icon className="absolute top-1/2 left-1/2 transform-gpu -translate-x-1/2 -translate-y-1/2" icon="fas:check" color="green" />
+            <img src={albumArt} alt={album} />
+          </div>
+        ),
         disallowClose: false,
       })
     }

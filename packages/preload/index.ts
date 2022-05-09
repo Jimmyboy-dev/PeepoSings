@@ -1,16 +1,27 @@
-import { ipcRenderer as ipc } from "electron-better-ipc"
-// import Store from "electron-store";
-import { app, contextBridge } from "electron"
-// import $ from "jquery";
-import type { Result } from "ytsr"
-import type { IpcRendererEvent } from "electron/renderer"
-import type { videoInfo } from "ytdl-core"
-import Store from "electron-store"
-import createElectronStorage from "redux-persist-electron-storage"
+import { contextBridge } from "electron";
+import { ipcRenderer as ipc } from "electron-better-ipc";
+import log from "electron-log";
+import Store from "electron-store";
+import createElectronStorage from "redux-persist-electron-storage";
+
+import { useLoading } from "./loading";
+import { domReady } from "./utils";
+
+import type { Result } from 'ytsr'
+import type { IpcRendererEvent } from 'electron/renderer'
+import type { videoInfo } from 'ytdl-core'
+const logger = log.scope('renderer')
 export type ElectronAPI = typeof api
+const { appendLoading, removeLoading } = useLoading()
+
+;(async () => {
+  await domReady()
+
+  appendLoading()
+})()
 
 const electronStore = new Store({
-  name: "store",
+  name: 'store',
   watch: true,
 })
 const electronStorage = createElectronStorage({ electronStore })
@@ -24,77 +35,101 @@ declare global {
 }
 
 const api = {
-  windowControl: (e: "minimize" | "maximize" | "close") => {
-    ipc.send("windowCmd", e)
+  windowControl: (e: 'minimize' | 'maximize' | 'close') => {
+    ipc.send('windowCmd', e)
   },
   music: {
     openLocation: async (path: string) => {
-      ipc.callMain("open-location", path)
+      ipc.callMain('open-location', path)
     },
     saveSong: async (song: SongJSON) => {
-      ipc.callMain("music-save", song)
+      ipc.callMain('music-save', song)
     },
     saveSongs: async (songs: SongJSON[]) => {
-      ipc.callMain("music-save-all", songs)
+      ipc.callMain('music-save-all', songs)
     },
     removeSong: async (...args: [path: string, title: string]) => {
-      return await ipc.callMain("music-remove", args)
+      return await ipc.callMain('music-remove', args)
     },
     getSongs: async () => {
-      return (await ipc.callMain("music-get", "songs")) as SongJSON[]
+      return (await ipc.callMain('music-get', 'songs')) as SongJSON[]
     },
     addSong: async (url: string): Promise<SongJSON> => {
-      return await ipc.callMain("music-add", url)
+      return await ipc.callMain('music-add', url)
     },
     openInEditor: () => {
       electronStore.openInEditor()
     },
     getLastSong: async () => {
-      return (await ipc.callMain("music-get", "lastSong")) as SongJSON
+      return (await ipc.callMain('music-get', 'lastSong')) as SongJSON
     },
     setLastSong: async (song: SongJSON): Promise<void> => {
-      return await ipc.callMain("music-set", ["lastSong", song])
+      return await ipc.callMain('music-set', ['lastSong', song])
     },
     getVideoInfo: async (url: string): Promise<videoInfo> => {
-      return await ipc.callMain("video-info", url)
+      return await ipc.callMain('video-info', url)
     },
     searchSongs: async (query: string): Promise<Result> => {
-      if (query.length <= 0) throw new Error("Query is empty")
-      return (await ipc.callMain("music-search", query)) as Result
+      if (query?.length <= 0) throw new Error('Query is empty')
+      return (await ipc.callMain('music-search', query)) as Result
     },
   },
   listeners: {
-    onMusicChange: (handler: (e: IpcRendererEvent, songs: SongJSON[]) => void) => ipc.on("music-change", handler),
+    onMusicChange: (handler: (e: IpcRendererEvent, songs: SongJSON[]) => void) => ipc.on('music-change', handler),
     onDownloadProgress: (handler: (download: { raw: ffmpegProgress; msg: `${number}kb downloaded`; dlInfo: DownloadInfo }) => void) =>
-      ipc.answerMain("download-progress", (args: { raw: ffmpegProgress; msg: `${number}kb downloaded`; dlInfo: DownloadInfo }) => {
+      ipc.answerMain('download-progress', (args: { raw: ffmpegProgress; msg: `${number}kb downloaded`; dlInfo: DownloadInfo }) => {
         handler(args)
         return true
       }),
     onDownloadEnd: (handler: (download: { path: string; dlInfo: DownloadInfo }) => void) =>
-      ipc.answerMain("download-end", (args: { path: string; dlInfo: DownloadInfo }) => {
+      ipc.answerMain('download-end', (args: { path: string; dlInfo: DownloadInfo }) => {
         handler(args)
         return true
       }),
   },
   misc: {
     getVersion: async (): Promise<string> => {
-      return await ipc.callMain("get-version")
+      return await ipc.callMain('get-version')
     },
     openURL: (url: string): void => {
-      ipc.callMain("open-url", url)
+      ipc.callMain('open-url', url)
     },
     toggleAutoLaunch: async (): Promise<boolean> => {
-      return await ipc.callMain("toggle-auto-launch")
+      return await ipc.callMain('toggle-auto-launch')
     },
   },
   store: electronStore,
   electronStorage,
   ipc: {
     async trayTooltip(song: SongJSON | null) {
-      return (await ipc.callMain("set-current-song", song)) as boolean
+      return (await ipc.callMain('set-current-song', song)) as boolean
     },
   },
 }
+contextBridge.exposeInMainWorld('electron', api)
+contextBridge.exposeInMainWorld('removeLoading', removeLoading)
+contextBridge.exposeInMainWorld('ipc', withPrototype(ipc))
+contextBridge.exposeInMainWorld('store', { electronStorage })
+contextBridge.exposeInMainWorld('logger', logger)
 
-// contextBridge.exposeInMainWorld('electron', api)
-window.electron = api
+// window.electron = api
+// window.ipc = ipc
+
+// `exposeInMainWorld` can't detect attributes and methods of `prototype`, manually patching it.
+function withPrototype(obj: Record<string, any>) {
+  const protos = Object.getPrototypeOf(obj)
+
+  for (const [key, value] of Object.entries(protos)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) continue
+
+    if (typeof value === 'function') {
+      // Some native APIs, like `NodeJS.EventEmitter['on']`, don't work in the Renderer process. Wrapping them into a function.
+      obj[key] = function (...args: any) {
+        return value.call(obj, ...args)
+      }
+    } else {
+      obj[key] = value
+    }
+  }
+  return obj
+}

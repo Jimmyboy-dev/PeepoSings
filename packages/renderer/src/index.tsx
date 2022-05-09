@@ -1,18 +1,23 @@
-import './index.css'
-import { render } from 'react-dom'
-import * as React from 'react'
-import App from './App'
+import "./index.css";
+
+import { MantineProvider } from "@mantine/core";
+import { NotificationsProvider } from "@mantine/notifications";
+import gsap from "gsap";
+import MotionPathPlugin from "gsap/MotionPathPlugin";
+import * as React from "react";
+import { render } from "react-dom";
+import { Provider as StoreProvider } from "react-redux";
+import { persistStore } from "redux-persist";
+import { PersistGate } from "redux-persist/integration/react";
+
+import App from "./App";
+import store from "./store";
+import theme from "./theme";
+
+Object.assign(console, window.logger.functions)
+
 // import type { Step } from 'react-joyride'
 // import Joyride from 'react-joyride'
-import { MantineProvider } from '@mantine/core'
-import { NotificationsProvider } from '@mantine/notifications'
-import store from './store'
-import { Provider as StoreProvider } from 'react-redux'
-import theme from './theme'
-import gsap from 'gsap'
-import MotionPathPlugin from 'gsap/MotionPathPlugin'
-import { persistStore } from 'redux-persist'
-import { PersistGate } from 'redux-persist/integration/react'
 
 gsap.registerPlugin(MotionPathPlugin)
 
@@ -29,7 +34,8 @@ window.iconsLoaded.then(() => {
         </PersistGate>
       </StoreProvider>
     </React.StrictMode>,
-    document.getElementById('root')
+    document.getElementById('root'),
+    window.removeLoading
   )
 })
 

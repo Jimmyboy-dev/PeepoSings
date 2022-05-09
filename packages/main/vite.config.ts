@@ -1,43 +1,22 @@
-import { node } from "../../.electron-vendors.cache.json"
-import { join } from "path"
-import { builtinModules } from "module"
-import { defineConfig } from "vite"
-import pkg from "../../package.json"
+import { builtinModules } from "module";
+import { defineConfig } from "vite";
 
-const PACKAGE_ROOT = __dirname
+import pkg from "../../package.json";
 
-/**
- * @type {import('vite').UserConfig}
- * @see https://vitejs.dev/config/
- */
 export default defineConfig({
-  mode: process.env.MODE,
-  root: PACKAGE_ROOT,
-  envDir: process.cwd(),
-  resolve: {
-    alias: {
-      "/@/": join(PACKAGE_ROOT, "src") + "/",
-    },
-  },
+  root: __dirname,
+  envDir: '../..',
   build: {
-    outDir: "../../dist/main",
-    sourcemap: "inline",
-    target: `node${node}`,
-    assetsDir: ".",
-    minify: process.env.MODE !== "development",
+    outDir: '../../dist/main',
     lib: {
-      entry: "index.ts",
-      formats: ["cjs"],
-      fileName: () => "[name].cjs",
+      entry: 'index.ts',
+      formats: ['cjs'],
+      fileName: () => '[name].cjs',
     },
-    rollupOptions: {
-      external: ["electron", "electron-devtools-installer", "fluent-ffmpeg", "@ffmpeg-installer/ffmpeg", "ffmetadata", ...builtinModules.flatMap((p) => [p, `node:${p}`])],
-
-      output: {
-        entryFileNames: "[name].cjs",
-      },
-    },
+    minify: process.env./* from mode option */ NODE_ENV === 'production',
     emptyOutDir: true,
-    brotliSize: false,
+    rollupOptions: {
+      external: ['electron', ...builtinModules, ...Object.keys(pkg.dependencies || {})],
+    },
   },
 })

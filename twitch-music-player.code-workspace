@@ -17,12 +17,20 @@
       "path": "./packages/preload"
     },
     {
+      "name": "Shared",
+      "path": "./packages/shared"
+    },
+    {
       "name": "Renderer",
       "path": "./packages/renderer"
     },
     {
       "name": "Docs",
       "path": "./packages/docs"
+    },
+    {
+      "name": "UI",
+      "path": "./packages/ui"
     }
   ],
   "settings": {

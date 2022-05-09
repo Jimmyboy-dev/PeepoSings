@@ -1,0 +1,12 @@
+html {
+  --bgdark: #2c2e3a;
+  --bgdarker: #1f212d;
+  --bgdefault: #424557;
+  --bglight: #555977;
+  --bglighter: #6a6f95;
+
+  --background: var(--bgdark);
+  --background2: var(--bgdefault);
+  --background3: var(--bgdarker);
+  --lightbg: var(--bglighter);
+}

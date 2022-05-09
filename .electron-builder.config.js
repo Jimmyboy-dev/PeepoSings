@@ -11,27 +11,40 @@ const config = {
   appId: 'com.devJimmyboy.PeepoSings',
   productName: 'Peepo Sings',
   copyright: 'Copyright © 2021-2022 devJimmyboy',
-  icon: 'build/icon.png',
-  asar: true,
+  icon: 'buildResources/icon.png',
   win: {
     target: 'nsis',
+    extraResources: {
+      filter: ['**/*'],
+      from: './buildResources/bin/windows',
+      to: 'bin',
+    },
     defaultArch: 'x64',
-    icon: 'build/icon.ico',
+    icon: 'buildResources/icon.ico',
     artifactName: '${productName}-Setup.${ext}',
   },
   nsis: {
-    oneClick: false,
+    oneClick: true,
     perMachine: false,
-    allowToChangeInstallationDirectory: true,
+    // allowToChangeInstallationDirectory: true,
     deleteAppDataOnUninstall: false,
   },
   mac: {
+    extraResources: {
+      filter: ['**/*'],
+      from: './buildResources/bin/macos',
+      to: 'bin',
+    },
     category: 'music',
     target: ['dmg'],
     artifactName: '${productName}-Installer.${ext}',
-    identity: null,
   },
   linux: {
+    extraResources: {
+      filter: ['**/*'],
+      from: './buildResources/bin/linux',
+      to: 'bin',
+    },
     category: 'music',
     target: ['AppImage'],
     artifactName: '${productName}-Installer.${ext}',
@@ -40,11 +53,15 @@ const config = {
     output: 'release/${version}',
     buildResources: 'buildResources',
   },
-  files: ['dist/**/*'],
+  files: ['dist/**/*', 'buildResources/*', '!buildResources/bin/**/*'],
   publish: {
     provider: 'github',
     owner: 'devJimmyboy',
     repo: 'PeepoSings',
+  },
+  protocols: {
+    name: 'PeepoSings',
+    schemes: ['irc', 'ircs'],
   },
 }
 

@@ -1,6 +1,7 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import './vars.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 @import url(https://fonts.googleapis.com/css?family=Lilita+One:regular);
 
@@ -30,16 +31,59 @@ body {
   width: 100%;
 }
 
-.scroller::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 8px; /* width of the entire scrollbar */
 }
 
-.scroller::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent; /* color of the tracking area */
 }
 
-.scroller::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   @apply bg-base-content;
   border-radius: 20px; /* roundness of the scroll thumb */
   border: 3px solid #; /* creates padding around scroll thumb */
+}
+
+a {
+  text-decoration: none;
+  color: $white;
+
+  &:hover {
+    text-decoration: none;
+    color: $white;
+    transition: $short-duration;
+  }
+}
+
+a.disabled {
+  color: rgba($grey, 0.25);
+  cursor: default;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: var(--background2) !important;
+    color: rgba($grey, 0.25);
+  }
+}
+
+.link_button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--background2);
+  color: $white !important;
+  width: 2rem;
+  height: 2rem;
+
+  &:hover {
+    background: lighten(var(--background2), 10%);
+    color: $white !important;
+  }
+
+  &:active {
+    background: lighten(var(--background2), 20%);
+    color: $white !important;
+  }
 }
