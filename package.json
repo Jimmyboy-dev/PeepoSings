@@ -1,6 +1,6 @@
 {
   "name": "peepo-sings",
-  "version": "v0.4.4",
+  "version": "0.4.4",
   "description": "Desktop music player designed for Live Broadcasts - Music based on moods",
   "main": "dist/main/index.cjs",
   "author": "devJimmyboy",
