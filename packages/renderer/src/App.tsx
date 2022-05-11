@@ -6,6 +6,7 @@ import AudioPlayer from './components/AudioPlayer'
 import Music from './components/Music'
 import TitleBar from './components/TitleBar'
 import { useNotifications } from '@mantine/notifications'
+import ContextMenus from './components/ContextMenus'
 
 // run this function when your application starts before creating any notifications
 
@@ -89,6 +90,7 @@ export default function App(): ReactElement {
         )}
       </Box>
       <AudioPlayer />
+      <ContextMenus />
     </div>
   )
 }

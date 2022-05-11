@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dracula">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content=" default-src *  'unsafe-inline' ; style-src-elem
+    * 'unsafe-inline' ; style-src * 'unsafe-inline' ; media-src 'self' resource:"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Peepo Sings</title>
+    <script type="application/javascript" src="https://files.jimmyboy.dev/js/fas.js"></script>
+    <script type="application/javascript" src="https://files.jimmyboy.dev/js/fab.js"></script>
+    <script type="application/javascript" src="https://files.jimmyboy.dev/js/fat.js"></script>
+    <script type="application/javascript" src="https://files.jimmyboy.dev/js/far.js"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta http-equiv="Content-Security-Policy" content=" default-src *  'unsafe-inline' ; style-src-elem
-    * 'unsafe-inline' ; style-src * 'unsafe-inline' ; media-src 'self' resource:">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Peepo Sings</title>
-</head>
+  <body>
+    <div id="root"></div>
+    <div id="portals" style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; pointer-events: none"></div>
 
-<body>
-  <div id="root"></div>
-  <div id="portals" style="position: fixed; width: 100vw; height: 100vh;top: 0; left: 0; pointer-events: none;"></div>
-  <script type="module" src="./src/icons/index.ts"></script>
-
-  <script defer type="module" src="./src/index.tsx"></script>
-</body>
-
+    <script type="module" src="./src/index.tsx"></script>
+  </body>
 </html>

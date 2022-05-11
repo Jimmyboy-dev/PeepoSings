@@ -1,10 +1,10 @@
-import { join } from "path"
-import { builtinModules } from "module"
-import type { Plugin } from "vite"
-import { defineConfig } from "vite"
-import react from "@vitejs/plugin-react"
-import resolve from "vite-plugin-resolve"
-import pkg from "../../package.json"
+import { join } from 'path'
+import { builtinModules } from 'module'
+import type { Plugin } from 'vite'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import resolve from 'vite-plugin-resolve'
+import pkg from '../../package.json'
 
 /**
  * @see https://vitejs.dev/config/
@@ -13,7 +13,7 @@ export default defineConfig({
   mode: process.env.NODE_ENV,
   root: __dirname,
   plugins: [
-    react(),
+    react({ jsxRuntime: 'automatic', jsxImportSource: '@emotion/react' }),
     resolveElectron(),
     /**
      * Here you can specify other modules
@@ -25,14 +25,14 @@ export default defineConfig({
      * }
      */
   ],
-  base: "./",
+  base: './',
   build: {
     sourcemap: true,
-    outDir: "../../dist/renderer",
+    outDir: '../../dist/renderer',
   },
   resolve: {
     alias: {
-      "@": join(__dirname, "src"),
+      '@': join(__dirname, 'src'),
     },
   },
 })
@@ -42,7 +42,7 @@ export default defineConfig({
  * @see https://github.com/caoxiemeihao/electron-vue-vite/issues/52
  */
 export function resolveElectron(resolves: Parameters<typeof resolve>[0] = {}): Plugin {
-  const builtins = builtinModules.filter((t) => !t.startsWith("_"))
+  const builtins = builtinModules.filter((t) => !t.startsWith('_'))
 
   /**
    * @see https://github.com/caoxiemeihao/vite-plugins/tree/main/packages/resolve#readme
@@ -90,11 +90,11 @@ export {
       .map((moduleId) => {
         const nodeModule = require(moduleId)
         const requireModule = `const M = require("${moduleId}");`
-        const exportDefault = "export default M;"
+        const exportDefault = 'export default M;'
         const exportMembers =
           Object.keys(nodeModule)
             .map((attr) => `export const ${attr} = M.${attr}`)
-            .join(";\n") + ";"
+            .join(';\n') + ';'
         const nodeModuleCode = `
 ${requireModule}
 ${exportDefault}

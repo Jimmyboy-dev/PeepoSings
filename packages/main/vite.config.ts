@@ -1,8 +1,8 @@
-import { node } from "../../.electron-vendors.cache.json"
-import { join } from "path"
-import { builtinModules } from "module"
-import { defineConfig } from "vite"
-import pkg from "../../package.json"
+import { node } from '../../.electron-vendors.cache.json'
+import { join } from 'path'
+import { builtinModules } from 'module'
+import { defineConfig } from 'vite'
+import pkg from '../../package.json'
 
 const PACKAGE_ROOT = __dirname
 
@@ -16,25 +16,25 @@ export default defineConfig({
   envDir: process.cwd(),
   resolve: {
     alias: {
-      "/@/": join(PACKAGE_ROOT, "src") + "/",
+      '/@/': join(PACKAGE_ROOT) + '/',
     },
   },
   build: {
-    outDir: "../../dist/main",
-    sourcemap: "inline",
+    outDir: '../../dist/main',
+    sourcemap: 'inline',
     target: `node${node}`,
-    assetsDir: ".",
-    minify: process.env.MODE !== "development",
+    assetsDir: '.',
+    minify: process.env.MODE !== 'development',
     lib: {
-      entry: "index.ts",
-      formats: ["cjs"],
-      fileName: () => "[name].cjs",
+      entry: 'index.ts',
+      formats: ['cjs'],
+      fileName: () => '[name].cjs',
     },
     rollupOptions: {
-      external: ["electron", "electron-devtools-installer", "fluent-ffmpeg", "@ffmpeg-installer/ffmpeg", "ffmetadata", ...builtinModules.flatMap((p) => [p, `node:${p}`])],
+      external: ['electron', 'electron-devtools-installer', 'fluent-ffmpeg', '@ffmpeg-installer/ffmpeg', 'ffmetadata', 'node-fetch', ...builtinModules.flatMap((p) => [p, `node:${p}`])],
 
       output: {
-        entryFileNames: "[name].cjs",
+        entryFileNames: '[name].cjs',
       },
     },
     emptyOutDir: true,

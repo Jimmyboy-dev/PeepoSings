@@ -1,5 +1,5 @@
 import './index.css'
-import { render } from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import * as React from 'react'
 import App from './App'
 // import type { Step } from 'react-joyride'
@@ -18,21 +18,6 @@ gsap.registerPlugin(MotionPathPlugin)
 
 const persistor = persistStore(store)
 
-window.iconsLoaded.then(() => {
-  render(
-    <React.StrictMode>
-      <StoreProvider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
-            <Root />
-          </MantineProvider>
-        </PersistGate>
-      </StoreProvider>
-    </React.StrictMode>,
-    document.getElementById('root')
-  )
-})
-
 const Root = () => {
   // 1. Retrieve the notifications to display.
   return (
@@ -41,3 +26,15 @@ const Root = () => {
     </NotificationsProvider>
   )
 }
+const root = createRoot(document.getElementById('root')!)
+root.render(
+  <React.StrictMode>
+    <StoreProvider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
+          <Root />
+        </MantineProvider>
+      </PersistGate>
+    </StoreProvider>
+  </React.StrictMode>
+)

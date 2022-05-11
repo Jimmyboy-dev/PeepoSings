@@ -2,16 +2,16 @@ import { Icon } from '@iconify/react'
 import { InputWrapper, Group, Input, Button, ActionIcon, Center, Loader, ScrollArea, Tooltip } from '@mantine/core'
 import type { KeyboardEvent, ReactElement } from 'react'
 import React from 'react'
-import throttle from 'lodash.throttle'
+import { debounce } from 'lodash'
 import type { Playlist, Video } from 'ytsr'
 import { useBooleanToggle } from '@mantine/hooks'
 import type { MoreVideoDetails, videoInfo } from 'ytdl-core'
-import { getBasicInfo } from 'ytdl-core'
 import { useAppDispatch, useAppSelector } from '../store'
 import { addSong } from '../store/slices/songs'
 import { useNotifications } from '@mantine/notifications'
-import ytsr from 'ytsr'
 import type { NotificationsContextProps } from '@mantine/notifications/lib/types'
+import { useContextMenu } from 'react-contexify'
+import { CTX_MENU } from './ContextMenus'
 
 type Results = Video[] | videoInfo[] | Playlist[]
 
@@ -27,32 +27,34 @@ export default function SongSearch(): ReactElement {
     else window.electron.music.addSong(search)
   }
 
-  const searchSongs = throttle(async () => {
-    if (search.length === 0) {
-      toggleLoading(false)
-      return
-    }
-    if (search.match(/(?<=(https?:\/\/|youtube\.com))/g)) {
-      // window.electron.music.getVideoInfo(
-      const video = await window.electron.music.getVideoInfo(search)
-      setResults([video])
-      toggleLoading(false)
+  const searchSongs = React.useCallback(
+    debounce(async () => {
+      if (search.length === 0) {
+        toggleLoading(false)
+        return
+      }
+      if (search.match(/(?<=(https?:\/\/|youtube\.com))/g)) {
+        // window.electron.music.getVideoInfo(
+        const video = await window.electron.music.getVideoInfo(search)
+        setResults([video])
+        toggleLoading(false)
 
-      return
-    }
-    try {
-      const results = await window.electron.music.searchSongs(search)
-      setResults(results?.items.filter((res) => res.type === 'video' || res.type === 'playlist') as Video[] | Playlist[])
-    } catch (e) {
-      console.error(e)
-    }
-    toggleLoading(false)
-  }, 500)
+        return
+      }
+      try {
+        const results = await window.electron.music.searchSongs(search)
+        setResults(results?.items.filter((res) => res.type === 'video' || res.type === 'playlist') as Video[] | Playlist[])
+      } catch (e) {
+        console.error(e)
+      }
+      toggleLoading(false)
+    }, 500),
+    [search, toggleLoading]
+  )
 
-  React.useEffect(() => {
-    toggleLoading(true)
-    searchSongs()
-  }, [search])
+  // React.useEffect(() => {
+
+  // }, [search])
 
   const currentMood = useAppSelector((state) => state.currentSong.mood)
   const dispatch = useAppDispatch()
@@ -63,18 +65,29 @@ export default function SongSearch(): ReactElement {
           <Input
             icon={<Icon icon="fas:music-note" />}
             id="add-song"
-            value={search}
-            onKeyPress={(e: KeyboardEvent) => {
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === ' ') {
                 e.stopPropagation()
                 e.bubbles = false
                 // e.preventDefault()
+              } else if (e.key === 'Enter') {
+                e.stopPropagation()
+                e.preventDefault()
+                setSearch(e.currentTarget.value)
+                toggleLoading(true)
+                searchSongs()
               }
+            }}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+              setSearch(e.target.value)
+              if (search.length === 0) return
+              toggleLoading(true)
+              searchSongs()
             }}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               e.preventDefault()
               e.stopPropagation()
-              setSearch(e.target.value)
+              setSearch('')
             }}
             placeholder="Search or Enter URL..."
             className="flex-grow"
@@ -165,6 +178,9 @@ type ResultViewProps = {
 }
 
 function ResultView({ type, result, onAdd, notifs }: ResultViewProps): ReactElement {
+  const { show } = useContextMenu({
+    id: CTX_MENU.RESULTS,
+  })
   // const [opened, open] = useBooleanToggle(false)
   const [hovering, setHover] = useBooleanToggle(false)
   const res = type === 'direct' ? (result as videoInfo).videoDetails : (result as Video | Playlist)
@@ -179,7 +195,15 @@ function ResultView({ type, result, onAdd, notifs }: ResultViewProps): ReactElem
     </div>
   )
   return (
-    <div className="flex flex-col p-2  hover:bg-neutral-focus transition-all w-full -z-0" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+    <div
+      className="flex flex-col p-2  hover:bg-neutral-focus transition-all w-full -z-0"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        show(e)
+      }}>
       <div className="flex flex-row transition-all h-16 w-full items-center ">
         <Tooltip allowPointerEvents label={tooltip} closeDelay={500}>
           <div className="h-16 min-w-32">

@@ -2,16 +2,37 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-
     "paths": {
-      "/@/*": ["./src/*"]
+      "/@/*": [
+        "./src/*"
+      ]
     },
-
-    "lib": ["ESNext", "dom", "dom.iterable"],
+    "lib": [
+      "ESNext",
+      "dom",
+      "dom.iterable"
+    ],
     "jsx": "react-jsx",
-    "types": ["vite/client", "react", "react-dom"],
+    "jsxImportSource": "@emotion/react",
+    "types": [
+      "@emotion/react",
+      "vite/client",
+      "react",
+      "react-dom"
+    ],
     "skipLibCheck": true
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "types/**/*.d.ts", "../../types/**/*.d.ts", "../preload/preload.d.ts"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts", "*.config.js", "dist"]
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    "types/**/*.d.ts",
+    "../../types/**/*.d.ts",
+    "../preload/preload.d.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "*.config.js",
+    "dist"
+  ]
 }

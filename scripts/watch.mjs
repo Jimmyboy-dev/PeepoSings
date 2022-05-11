@@ -56,6 +56,7 @@ function watchMain(server) {
       },
     ],
     build: {
+      sourcemap: true,
       watch: true,
     },
   })
