@@ -43,6 +43,6 @@ export const currentSongSlice = createSlice({
 export const { nextSong, prevSong, setCurrentSong, setCurrentMood } = currentSongSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectCurrentSong = (state: RootState) => state.songs.filter((v) => v.mood.includes(state.currentSong.mood))[state.currentSong.song]
+export const selectCurrentSong = (state: RootState) => state.songs.filter((v) => (state.currentSong.mood ? v.mood.includes(state.currentSong.mood) : true))[state.currentSong.song]
 
 export default currentSongSlice.reducer
