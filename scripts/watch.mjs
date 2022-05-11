@@ -1,16 +1,13 @@
 import { spawn } from 'child_process'
-import { createServer, build, createLogger } from 'vite'
+import { config } from 'dotenv'
 import electron from 'electron'
+import path from 'path'
+import { build, createServer } from 'vite'
 
-/** Messages on stderr that match any of the contained patterns will be stripped from output */
-const stderrFilterPatterns = [
-  // warning about devtools extension
-  // https://github.com/cawa-93/vite-electron-builder/issues/492
-  // https://github.com/MarshallOfSound/electron-devtools-installer/issues/143
-  /ExtensionLoadWarning/,
-]
-/** @type {import('vite').LogLevel} */
-const LOG_LEVEL = 'info'
+config()
+const creds = config({ path: path.resolve(process.cwd(), '.env.local') }).parsed
+
+const mainLogExceptions = ['ExtensionLoadWarning']
 
 /**
  * @type {(server: import('vite').ViteDevServer) => Promise<import('rollup').RollupWatcher>}
@@ -22,41 +19,32 @@ function watchMain(server) {
   let electronProcess = null
   const address = server.httpServer.address()
   const env = Object.assign(process.env, {
+    ...creds,
     VITE_DEV_SERVER_HOST: address.address,
     VITE_DEV_SERVER_PORT: address.port,
-  })
-
-  const logger = createLogger(LOG_LEVEL, {
-    prefix: '[main]',
+    ELECTRON_DISABLE_SECURITY_WARNINGS: 'yep',
+    FORCE_COLOR: 1,
   })
 
   return build({
-    name: 'reload-app-on-main-package-change',
     configFile: 'packages/main/vite.config.ts',
     mode: 'development',
     plugins: [
       {
         name: 'electron-main-watcher',
         writeBundle() {
-          if (electronProcess !== null) {
-            electronProcess.kill('SIGINT')
-            electronProcess = null
-          }
+          electronProcess && electronProcess.kill()
           electronProcess = spawn(electron, ['.'], { stdio: 'pipe', env })
+          electronProcess.stdout.setEncoding('utf8')
 
-          electronProcess.stdout.on('data', (d) => d.toString().trim() && logger.warn(d.toString(), { timestamp: true }))
-          electronProcess.stderr.on('data', (d) => {
-            const data = d.toString().trim()
-            if (!data) return
-            const mayIgnore = stderrFilterPatterns.some((r) => r.test(data))
-            if (mayIgnore) return
-            logger.error(data, { timestamp: true })
+          electronProcess.stdout.on('data', (data) => {
+            if (mainLogExceptions.some((filter) => data.toString().trim().match(filter))) return
+            console.log(data)
           })
         },
       },
     ],
     build: {
-      sourcemap: true,
       watch: true,
     },
   })
@@ -67,7 +55,6 @@ function watchMain(server) {
  */
 function watchPreload(server) {
   return build({
-    name: 'reload-page-on-preload-package-change',
     configFile: 'packages/preload/vite.config.ts',
     mode: 'development',
     plugins: [
@@ -84,19 +71,9 @@ function watchPreload(server) {
   })
 }
 
-// bootstrap:
-;(async () => {
-  try {
-    const viteDevServer = await createServer({
-      configFile: 'packages/renderer/vite.config.ts',
-    })
+// bootstrap
+const server = await createServer({ configFile: 'packages/renderer/vite.config.ts' })
 
-    await viteDevServer.listen()
-
-    await watchPreload(viteDevServer)
-    await watchMain(viteDevServer)
-  } catch (e) {
-    console.error(e)
-    process.exit(1)
-  }
-})()
+await server.listen()
+await watchPreload(server)
+await watchMain(server)

@@ -1,19 +1,27 @@
 {
+  "extends": "./paths.json",
   "compilerOptions": {
-    "module": "esnext",
-    "target": "esnext",
-    "sourceMap": false,
+    "noEmit": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "node",
-    "skipLibCheck": true,
-    "strict": true,
-    "isolatedModules": true,
-
-    "types": ["node"],
-    "typeRoots": ["./types"],
-    "resolveJsonModule": true,
+    "importHelpers": true,
+    "jsx": "react",
+    "allowJs": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "lib": [
+      "esnext",
+      "es6",
+      "dom",
+      "webworker"
+    ],
+    "strict": true,
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "exclude": ["node_modules", "dist", "docs"]
+    "skipDefaultLibCheck": true
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "peepo-sings",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Desktop music player designed for Live Broadcasts - Music based on moods",
   "main": "dist/main/index.cjs",
   "author": "devJimmyboy",
@@ -51,6 +51,7 @@
     "gsap": "^3.10.4",
     "howler": "^2.2.3",
     "jquery": "^3.6.0",
+    "kbar": "^0.1.0-beta.34",
     "lastfmapi": "^0.1.1",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
@@ -111,6 +112,7 @@
     "postcss": "8.4.13",
     "postcss-import": "^14.1.0",
     "postcss-nesting": "^10.1.4",
+    "sass": "^1.51.0",
     "tailwindcss": "3.0.24",
     "ts-node": "^10.7.0",
     "ts-node-dev": "^1.1.8",

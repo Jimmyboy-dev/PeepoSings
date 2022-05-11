@@ -21,5 +21,19 @@
     <div id="portals" style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; pointer-events: none"></div>
 
     <script type="module" src="./src/index.tsx"></script>
+    <script>
+      document.addEventListener('drop', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        for (const f of e.dataTransfer.files) {
+          console.log('File(s) you dragged here: ', f.path)
+        }
+      })
+      document.addEventListener('dragover', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+      })
+    </script>
   </body>
 </html>

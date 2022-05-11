@@ -1,8 +1,37 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-
+@import url(https://fonts.googleapis.com/css?family=DM+Sans:regular,italic,500,500italic,700,700italic);
 @import url(https://fonts.googleapis.com/css?family=Lilita+One:regular);
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+* {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  box-sizing: border-box;
+}
 
 .noDrag {
   -webkit-app-region: no-drag;
@@ -12,6 +41,17 @@
   -webkit-app-region: drag;
   -webkit-user-select: none;
 }
+
+:root {
+  --background: rgb(28 28 29);
+  --a1: rgb(53 53 54);
+  --a2: rgba(255 255 255 / 0.1);
+  --foreground: rgba(252 252 252 / 0.9);
+  --shadow: rgb(0 0 0 / 50%) 0px 16px 70px;
+
+  --unit: 8px;
+}
+
 html,
 body {
   @apply overflow-hidden;
@@ -42,4 +82,11 @@ body {
   @apply bg-base-content;
   border-radius: 20px; /* roundness of the scroll thumb */
   border: 3px solid #; /* creates padding around scroll thumb */
+}
+
+kbd {
+  font-family: monospace;
+  background: var(--a2);
+  padding: calc(var(--unit) * 0.5);
+  border-radius: calc(var(--unit) * 0.5);
 }
