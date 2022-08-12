@@ -16,5 +16,9 @@
     "packages/**/*",
     "types/**/*.d.ts",
     "!packages/ui/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "packages/docs/**/*"
   ]
 }

@@ -61,6 +61,7 @@ const config = {
   },
   protocols: {
     name: 'PeepoSings',
+    role: 'Viewer',
     schemes: ['irc', 'ircs'],
   },
 }

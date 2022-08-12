@@ -1,5 +1,6 @@
 import { ipcRenderer as ipc } from 'electron-better-ipc'
 // import Store from "electron-store";
+// import LastFMTyped from 'lastfm-typed'
 import { app, contextBridge } from 'electron'
 // import $ from "jquery";
 import type { Result } from 'ytsr'

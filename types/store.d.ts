@@ -1,3 +1,4 @@
+import { getSession } from 'lastfm-typed/dist/interfaces/authInterface'
 import type { MoreVideoDetails, VideoDetails } from 'ytdl-core'
 import type ytdl from 'ytdl-core'
 import type { Item } from 'ytsr'
@@ -18,6 +19,11 @@ export interface PeepoSingConfig {
   scrobblerKeys: {
     apiKey: string | null
     apiSecret: string | null
+  }
+  scrobbler: {
+    connected: boolean
+    userInfo: ReturnType<import('lastfm-typed').default['prototype']['user']['getInfo']>
+    session: getSession | null
   }
   outputDevice: string | null
 }

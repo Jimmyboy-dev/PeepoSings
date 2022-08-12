@@ -22,6 +22,7 @@ import { release } from 'os'
 import Platform from './modules/platform'
 import initRPC from './modules/DiscordRPC'
 import type { Client } from 'discord-rpc'
+import { Scrobbler } from './modules/Scrobbler'
 
 const appId = 'com.devJimmyboy.PeepoSings'
 let autoLauncher: AutoLaunch
@@ -33,12 +34,12 @@ if (release().startsWith('6.1')) app.disableHardwareAcceleration()
 
 // Set application name for Windows 10+ notifications
 if (process.platform === 'win32') app.setAppUserModelId(appId)
-
-if (!app.requestSingleInstanceLock()) {
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
   app.quit()
   process.exit(0)
 } else {
-  app.on('second-instance', async (event, commandLine) => {
+  app.on('second-instance', async (event, commandLine, workingDirectory) => {
     // Someone tried to run a second instance, we should focus our window.
     if (win) {
       if (win.isMinimized()) win.restore()
@@ -46,6 +47,21 @@ if (!app.requestSingleInstanceLock()) {
     }
   })
 }
+
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
+export const ROOT_PATH = {
+  // /dist
+  dist: join(__dirname, '..'),
+  // /dist or /public
+  public: join(__dirname, app.isPackaged ? '..' : '../../../public'),
+}
+
+let win: BrowserWindow | null = null
+// Here, you can also use other preload
+const preload = join(__dirname, '../preload/index.js')
+// 🚧 Use ['ENV_NAME'] avoid vite:define plugin
+const url = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}`
+const indexHtml = join(ROOT_PATH.dist, 'index.html')
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
@@ -69,6 +85,10 @@ const appIcon = nativeImage.createFromPath(join(__dirname, '../..', 'buildResour
 Store.initRenderer()
 
 // const loadURL = serve({ directory: "dist" })
+let scrobbler: Scrobbler = new Scrobbler(import.meta.env.VITE_LAST_FM_KEY, {
+  apiSecret: import.meta.env.VITE_LAST_FM_SHARED_SECRET,
+  userAgent: 'Peepo Sings',
+})
 
 let musicManager: MusicManager
 
@@ -84,6 +104,7 @@ function installDevtoolsIfDevelopment() {
       .catch((e) => console.error('Failed install extension:', e))
   }
 }
+
 function initTray() {
   tray = new Tray(appIcon)
 
@@ -96,8 +117,6 @@ function initTray() {
   tray.setToolTip('Peepo Sings')
   tray.setContextMenu(contextMenu)
 }
-
-let win: BrowserWindow | null = null
 
 async function createWindow() {
   const mainWindowState = windowStateKeeper({
@@ -117,7 +136,7 @@ async function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      preload: join(__dirname, '../preload/index.cjs'),
+      preload,
     },
   })
 
@@ -132,11 +151,8 @@ async function createWindow() {
 
   musicManager = MusicManager.getInstance(win)
   if (app.isPackaged) {
-    win.loadFile(join(__dirname, '../renderer/index.html'))
+    win.loadFile(indexHtml)
   } else {
-    // 🚧 Use ['ENV_NAME'] avoid vite:define plugin
-    const url = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}`
-
     win.loadURL(url)
     win.webContents.openDevTools()
   }
@@ -159,17 +175,11 @@ async function createWindow() {
     win?.webContents.send('main-process-message', new Date().toLocaleString())
   })
 
-  // Make all links open with the browser, not with the application
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('https:')) shell.openExternal(url)
     return { action: 'deny' }
   })
-  /**
-   * If you install `show: true` then it can cause issues when trying to close the window.
-   * Use `show: false` and listener events `ready-to-show` to fix these issues.
-   *
-   * @see https://github.com/electron/electron/issues/25012
-   */
+
   win.on('ready-to-show', () => {
     win?.show()
 
@@ -192,6 +202,16 @@ ipc.on('trayTooltip', (e, tip: string) => {
   if (tray) tray.setToolTip(tip)
 })
 
+app.on('open-url', (event, url) => {
+  const pUrl = new URL(url)
+  const query = pUrl.searchParams
+  const path = pUrl.hostname
+  switch (path) {
+    case 'lastfm-redirect':
+      scrobbler.authCallback(query.get('token'))
+  }
+})
+
 app.on('window-all-closed', () => {
   win = null
   if (process.platform !== 'darwin') app.quit()
@@ -212,14 +232,14 @@ app
     })
     nativeTheme.themeSource = 'dark'
 
-    // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    //   callback({
-    //     responseHeaders: {
-    //       ...details.responseHeaders,
-    //       "Access-Control-Allow-Origin": "https://* http://localhost:* file://*",
-    //     },
-    //   })
-    // })
+    /*session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Access-Control-Allow-Origin": "https://* http://localhost:* file://*",
+        },
+      })
+    })*/
     protocol.interceptFileProtocol('resource', async (req: ProtocolRequest, callback: (filePath: string) => void) => {
       const url = fileURLToPath(req.url.replace('resource', 'file'))
       callback(url)
@@ -252,18 +272,20 @@ listeners.openLocation = ipc.answerRenderer('open-location', async (url: string)
 })
 
 listeners.musicAdd = ipc.answerRenderer('music-add', async (url: string) => {
-  const song = musicManager.addSong(url)
-  return await song
+  const song = await musicManager.addSong(url)
+  return song
 })
 
 listeners.onSong = ipc.answerRenderer('on-song', async (song: SongJSON | null) => {
   if (!song) rpcClient.clearActivity()
-  else
+  else {
     rpcClient.setActivity({
       startTimestamp: new Date(),
-      details: song?.title || song?.artist || 'Unknown Artist',
+      details: song?.title || 'Unknown Title' + ' - ' + song?.artist || 'Unknown Artist',
       state: 'Listening',
     })
+    scrobbler.onSong(song)
+  }
 })
 
 listeners.musicRemove = ipc.answerRenderer('music-remove', async (path: string) => {
