@@ -25,14 +25,22 @@ function AudioPlayer(): ReactElement {
   const audio = React.useRef<HTMLAudioElement & { setSinkId(deviceId: string): void }>(null!)
   const audioCtx = React.useRef<AudioContext>()
 
-  useEffect(() => {
-    if (audioDevice !== null) audio.current.setSinkId(audioDevice)
-  }, [audioDevice])
+  const setSinkId = React.useCallback(() => {
+    if (!audioDevice) return
+    let shouldPlay = false
+    if (!playing) {
+      audio.current.pause()
+      shouldPlay = true
+    }
+    audio.current.setSinkId(audioDevice)
+    if (shouldPlay) audio.current.play()
+  }, [audioDevice, playing])
+  useEffect(() => {}, [audioDevice])
   useEffect(() => {
     audio.current.volume = volume
   }, [volume])
   useEffect(() => {
-    audio.current.setSinkId(audioDevice || 'default')
+    audio.current.setSinkId(audioDevice ?? 'default')
     audio.current.addEventListener('play', () => {
       if (!audioCtx.current) {
         const AudioContext = window.AudioContext || ((window as any).webkitAudioContext as AudioContext)
@@ -146,123 +154,126 @@ function AudioPlayer(): ReactElement {
   }, [])
 
   return (
-    <Stack spacing={0} className="justify-end gap-0 pointer-events-none" style={{ position: 'fixed', width: '100vw', height: '100vh', top: 0, left: 0, zIndex: 9999 }}>
-      <PeepoSings talk={playing} />
-      {curMood && (
-        <div
-          onClick={() => {
-            dispatch(setCurrentMood(null))
-            dispatch(setCurrentSong(-1))
-          }}
-          className="absolute
-            pointer-events-auto cursor-pointer  right-0 bottom-32 bg-slate-700 text-white h-12 rounded-tl-lg p-2">
-          <Tooltip className="flex flex-row  items-center" position="top" label="Clear Current Mood?">
-            <div className="">
-              <span className="font-semibold mr-1">Current Mood:</span>
-
-              <span className="font-bold text-lg bg-slate-800 rounded-lg py-1 px-2" style={{ color: currentMood?.color }}>
-                <Icon className="mr-2  mb-1" style={{ display: 'inline-block' }} icon={currentMood?.icon || 'fas:note'} />
-                {currentMood?.name}
-              </span>
-            </div>
-          </Tooltip>
-        </div>
-      )}
-
-      <div style={{ pointerEvents: 'all' }} className="w-full z-10 bg-neutral h-32 bottom-0  m-0">
-        <Progress
-          className="absolute z-50 pointer-events-auto cursor-pointer rounded-none w-full m-0"
-          value={currentTime * 100}
-          styles={{
-            label: { display: 'none' },
-            root: {
-              transition: 'transform 0.2s ease-in-out',
-              transformOrigin: 'bottom',
-              '&:hover': {
-                transform: 'scaleY(2)',
-              },
-            },
-          }}
-          onClick={(e) => song && onSeek(e)}
-          style={{ cursor: 'pointer' }}
-        />
-        <audio ref={audio} src={song ? `resource://${song.filePath}` : ''} onEnded={() => advSong()} onCanPlayThrough={() => dispatch(setPlaying(true))} onTimeUpdate={onProgress}></audio>
-        <Group className="w-full h-full px-4 flex-nowrap relative">
-          <Group position="center" className="flex-nowrap" spacing={1}>
-            <ActionIcon size="lg" className="rounded-full text-lg" onClick={() => dispatch(currentSong !== 0 ? prevSong() : setCurrentSong(queue.length - 1))}>
-              <Icon icon="fas:backward-step" />
-            </ActionIcon>
-            <ActionIcon size="xl" className="rounded-full bg-green-500 text-2xl" onClick={() => song && dispatch(setPlaying())}>
-              {playing ? <Icon icon="fas:pause" /> : <Icon icon="fas:play" />}
-            </ActionIcon>
-            <ActionIcon size="lg" className="rounded-full text-lg" onClick={() => advSong()}>
-              <Icon icon="fas:forward-step" />
-            </ActionIcon>
-          </Group>
-          <div className="rounded-xl overflow-hidden" style={{ minWidth: '6em', minHeight: '6em' }}>
-            <img className="w-24 h-24 object-cover" src={song?.albumArt || peepoShrug}></img>
-          </div>
-
-          <Stack className="justify-center gap-0 flex-shrink truncate">
-            <Text className="text-lg font-bold">{song?.title || 'No Song Selected'}</Text>
-            <Text className="text-md font-semibold">{song?.artist || 'No Song Selected'}</Text>
-          </Stack>
-          <div className="flex-grow" />
-          <Group className="justify-center gap-2 flex-nowrap">
-            <Tooltip className="w-8 h-8" label="Mark In">
-              <Button
-                disabled={!song}
-                className="text-lg w-8 h-8 p-0"
-                onClick={() => song && dispatch(editSong({ ...song, in: song.duration * currentTime }))}
-                onContextMenu={(e: React.MouseEvent) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  if (song) dispatch(editSong({ ...song, in: 0 }))
-                }}>
-                <Icon icon="fas:bracket-curly" />
-              </Button>
-            </Tooltip>
-            <Tooltip className="w-8 h-8" label="Mark Out">
-              <Button
-                disabled={!song}
-                className="text-lg w-8 h-8 p-0"
-                onClick={() => song && dispatch(editSong({ ...song, out: (song.duration - song.in) * currentTime + song.in }))}
-                onContextMenu={(e: React.MouseEvent) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  if (song) dispatch(editSong({ ...song, out: song.duration }))
-                }}>
-                <Icon icon="fas:bracket-curly-right" />
-              </Button>
-            </Tooltip>
-          </Group>
-
-          <Slider
-            className="w-24 "
-            min={0}
-            step={1}
-            max={100}
-            value={Math.round(volume * 100)}
-            onChange={(e) => {
-              dispatch(setVolume(e / 100))
-              if (audio.current) audio.current.volume = e / 100
+    <>
+      <audio ref={audio} src={song ? `resource://${song.filePath}` : ''} onEnded={() => advSong()} onCanPlayThrough={() => dispatch(setPlaying(true))} onTimeUpdate={onProgress}></audio>
+      <Stack spacing={0} className="justify-end gap-0 pointer-events-none" style={{ position: 'fixed', width: '100vw', height: '100vh', top: 0, left: 0, zIndex: 9999 }}>
+        <PeepoSings talk={playing} />
+        {curMood && (
+          <div
+            onClick={() => {
+              dispatch(setCurrentMood(null))
+              dispatch(setCurrentSong(-1))
             }}
+            className="absolute
+            pointer-events-auto cursor-pointer  right-0 bottom-32 bg-slate-700 text-white h-12 rounded-tl-lg p-2">
+            <Tooltip className="flex flex-row  items-center" position="top" label="Clear Current Mood?">
+              <div className="">
+                <span className="font-semibold mr-1">Current Mood:</span>
+
+                <span className="font-bold text-lg bg-slate-800 rounded-lg py-1 px-2" style={{ color: currentMood?.color }}>
+                  <Icon className="mr-2  mb-1" style={{ display: 'inline-block' }} icon={currentMood?.icon || 'fas:note'} />
+                  {currentMood?.name}
+                </span>
+              </div>
+            </Tooltip>
+          </div>
+        )}
+
+        <div style={{ pointerEvents: 'all' }} className="w-full z-10 bg-neutral h-32 bottom-0  m-0">
+          <Progress
+            className="absolute z-50 pointer-events-auto cursor-pointer rounded-none w-full m-0"
+            value={currentTime * 100}
+            styles={{
+              label: { display: 'none' },
+              root: {
+                transition: 'transform 0.2s ease-in-out',
+                transformOrigin: 'bottom',
+                '&:hover': {
+                  transform: 'scaleY(2)',
+                },
+              },
+            }}
+            onClick={(e) => song && onSeek(e)}
+            style={{ cursor: 'pointer' }}
           />
-          <Group className="justify-center gap-1 p-1">
-            <Tooltip className="w-8 h-8" label="Repeat">
-              <Button className="text-lg w-8 h-8 p-0" onClick={() => dispatch(setRepeat())}>
-                <Icon icon={repeat ? 'fas:repeat' : 'fat:repeat'} />
-              </Button>
-            </Tooltip>
-            <Tooltip className="w-8 h-8" label="Shuffle">
-              <Button className="text-lg w-8 h-8 p-0" onClick={() => dispatch(setShuffle())}>
-                <Icon icon={shuffle ? 'fas:shuffle' : 'fat:shuffle'} />
-              </Button>
-            </Tooltip>
+
+          <Group className="w-full h-full px-4 flex-nowrap relative">
+            <Group position="center" className="flex-nowrap" spacing={1}>
+              <ActionIcon size="lg" className="rounded-full text-lg" onClick={() => dispatch(currentSong !== 0 ? prevSong() : setCurrentSong(queue.length - 1))}>
+                <Icon icon="fas:backward-step" />
+              </ActionIcon>
+              <ActionIcon size="xl" className="rounded-full bg-green-500 text-2xl" onClick={() => song && dispatch(setPlaying())}>
+                {playing ? <Icon icon="fas:pause" /> : <Icon icon="fas:play" />}
+              </ActionIcon>
+              <ActionIcon size="lg" className="rounded-full text-lg" onClick={() => advSong()}>
+                <Icon icon="fas:forward-step" />
+              </ActionIcon>
+            </Group>
+            <div className="rounded-xl overflow-hidden" style={{ minWidth: '6em', minHeight: '6em' }}>
+              <img className="w-24 h-24 object-cover" src={song?.albumArt || peepoShrug}></img>
+            </div>
+
+            <Stack className="justify-center gap-0 flex-shrink truncate">
+              <Text className="text-lg font-bold">{song?.title || 'No Song Selected'}</Text>
+              <Text className="text-md font-semibold">{song?.artist || 'No Song Selected'}</Text>
+            </Stack>
+            <div className="flex-grow" />
+            <Group className="justify-center gap-2 flex-nowrap">
+              <Tooltip className="w-8 h-8" label="Mark In">
+                <Button
+                  disabled={!song}
+                  className="text-lg w-8 h-8 p-0"
+                  onClick={() => song && dispatch(editSong({ ...song, in: song.duration * currentTime }))}
+                  onContextMenu={(e: React.MouseEvent) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    if (song) dispatch(editSong({ ...song, in: 0 }))
+                  }}>
+                  <Icon icon="fas:bracket-curly" />
+                </Button>
+              </Tooltip>
+              <Tooltip className="w-8 h-8" label="Mark Out">
+                <Button
+                  disabled={!song}
+                  className="text-lg w-8 h-8 p-0"
+                  onClick={() => song && dispatch(editSong({ ...song, out: (song.duration - song.in) * currentTime + song.in }))}
+                  onContextMenu={(e: React.MouseEvent) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    if (song) dispatch(editSong({ ...song, out: song.duration }))
+                  }}>
+                  <Icon icon="fas:bracket-curly-right" />
+                </Button>
+              </Tooltip>
+            </Group>
+
+            <Slider
+              className="w-24 "
+              min={0}
+              step={1}
+              max={100}
+              value={Math.round(volume * 100)}
+              onChange={(e) => {
+                dispatch(setVolume(e / 100))
+                if (audio.current) audio.current.volume = e / 100
+              }}
+            />
+            <Group className="justify-center gap-1 p-1">
+              <Tooltip className="w-8 h-8" label="Repeat">
+                <Button className="text-lg w-8 h-8 p-0" onClick={() => dispatch(setRepeat())}>
+                  <Icon icon={repeat ? 'fas:repeat' : 'fat:repeat'} />
+                </Button>
+              </Tooltip>
+              <Tooltip className="w-8 h-8" label="Shuffle">
+                <Button className="text-lg w-8 h-8 p-0" onClick={() => dispatch(setShuffle())}>
+                  <Icon icon={shuffle ? 'fas:shuffle' : 'fat:shuffle'} />
+                </Button>
+              </Tooltip>
+            </Group>
           </Group>
-        </Group>
-      </div>
-    </Stack>
+        </div>
+      </Stack>
+    </>
     // </Affix>
   )
 }

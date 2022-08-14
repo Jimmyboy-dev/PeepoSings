@@ -69,17 +69,18 @@ function RenderResults() {
 
   return (
     <KBarResults
+      maxHeight={600}
       items={results}
       onRender={({ item, active }) =>
         typeof item === 'string' ? (
-          <div>{item}</div>
+          <div className="bg-gray-800 flex flex-row items-center p-2">{item}</div>
         ) : (
-          <div
-            style={{
-              background: active ? '#eee' : 'transparent',
-            }}>
-            {item.name}
-          </div>
+          <>
+            <div className="bg-gray-800 flex flex-row gap-1 items-center p-2">
+              {item.icon}
+              {item.name}
+            </div>
+          </>
         )
       }
     />

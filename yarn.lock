@@ -33,7 +33,7 @@
   resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.18.8.tgz#2483f565faca607b8535590e84e7de323f27764d"
   integrity sha512-HSmX4WZPPK3FUxYp7g2T6EyO8j96HlZJlxmKPSh6KAcqwyDrfx7hKjXpAW/0FhFfTJsR0Yt4lAjLI2coMptIHQ==
 
-"@babel/core@^7.18.6":
+"@babel/core@^7.18.10":
   version "7.18.10"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.18.10.tgz#39ad504991d77f1f3da91be0b8b949a5bc466fb8"
   integrity sha512-JQM6k6ENcBFKVtWvLavlvi/mPcpYZ3+R+2EySDEMSMbp7Mn4FexlbbJVrx2R7Ijhr01T8gyqrOaABWIOgxeUyw==
@@ -227,7 +227,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.18.6"
 
-"@babel/plugin-transform-react-jsx@^7.18.6":
+"@babel/plugin-transform-react-jsx@^7.18.10", "@babel/plugin-transform-react-jsx@^7.18.6":
   version "7.18.10"
   resolved "https://registry.yarnpkg.com/@babel/plugin-transform-react-jsx/-/plugin-transform-react-jsx-7.18.10.tgz#ea47b2c4197102c196cbd10db9b3bb20daa820f1"
   integrity sha512-gCy7Iikrpu3IZjYZolFE4M1Sm+nrh1/6za2Ewj77Z+XirT4TsbJcvOFOyF+fRPwU6AKKK136CZxx6L8AbSFG6A==
@@ -667,56 +667,56 @@
     lodash "^4.17.15"
     tmp-promise "^3.0.2"
 
-"@mantine/core@^5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@mantine/core/-/core-5.1.3.tgz#609d9fc7814254f6d2e8e13e76194ca1097698aa"
-  integrity sha512-p9gczCJxa4IBAivpAFgAi3tb7uKubQ09urs+sdBcvfaRUhPaHbBpRLnrpkPhFl4iv83ANBehKEWlkjy2bx04Mw==
+"@mantine/core@^5.1.4":
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/@mantine/core/-/core-5.1.4.tgz#9d1fb4339b19b10b6045d0ab3f17488d9533513e"
+  integrity sha512-+80FsYfhAqHbBeM+CtO1l1ShALsPoqg8xjqDcwd9f+APRSuu2j0eQ5h91kTKFRHkLuDBCYNsBjmWd+VY9HGKkQ==
   dependencies:
     "@floating-ui/react-dom-interactions" "0.6.6"
-    "@mantine/styles" "5.1.3"
-    "@mantine/utils" "5.1.3"
+    "@mantine/styles" "5.1.4"
+    "@mantine/utils" "5.1.4"
     "@radix-ui/react-scroll-area" "1.0.0"
     react-textarea-autosize "8.3.4"
 
-"@mantine/dates@5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@mantine/dates/-/dates-5.1.3.tgz#5a1217faa2118ebe8aa00d7f27eb77b6b46e2140"
-  integrity sha512-4mVxV88VNgq0nV45HPPL5/EQaD2FdIp2lwex5scgynZfO9vzZxmrK/U5RH0j3qF3r9Gruq/2XdoQyet3wkFR2w==
+"@mantine/dates@5.1.4":
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/@mantine/dates/-/dates-5.1.4.tgz#a03c50189f32b246c5ee9970f198e60bc60a23e9"
+  integrity sha512-GBBtHC3YlgbudD3Mj3lRgRWkyCspb8+cs63+/UFiHL7cOP5BiV74NVN0fEXikCLjMLYoVpqQly7WI0yqLXgAhA==
   dependencies:
-    "@mantine/utils" "5.1.3"
+    "@mantine/utils" "5.1.4"
 
-"@mantine/hooks@^5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@mantine/hooks/-/hooks-5.1.3.tgz#2c36510337384c2ce056b6abfe4a02323c5ba203"
-  integrity sha512-ZQqtht0Tdbr9MWlif8WOE1sBJ8xJo9CiWbhrlNLAcb4uDY+BV5nMT6aluOa80Wf6ykv9lbqw0ju7N1xxzZ/A+A==
+"@mantine/hooks@^5.1.4":
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/@mantine/hooks/-/hooks-5.1.4.tgz#728b7daf3098de7d4ac13ff230c0abfaec65a433"
+  integrity sha512-hK0f46+JDP2av7R4sD8s+jkunWszlo0SqX3L0wdFZ7BdjnGC7vTgRrESbu+/K6x0eWSXtAQ0GWXt+0R7jkO3Eg==
 
-"@mantine/modals@5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@mantine/modals/-/modals-5.1.3.tgz#1097b8158394f85071ce0524402c45a611924d50"
-  integrity sha512-wxPTGwYBF03fEiLWjs/mo7G/RkocwSjr/5SQo0eNOBjk0LjGXw5BUVHCswAHGXE/mnVEUksbqdPN3NhqkbUx9g==
+"@mantine/modals@5.1.4":
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/@mantine/modals/-/modals-5.1.4.tgz#a1ac100d53f825cef0dfc8544ddcded0959d9df1"
+  integrity sha512-4L8zvZZYvisS1VAmweGVHo8yrfZrWLeID3RHRlzA5aHEprzypikLUMAYKS8MPQgQ7vwSkucK56PSUEunj0NMpQ==
   dependencies:
-    "@mantine/utils" "5.1.3"
+    "@mantine/utils" "5.1.4"
 
-"@mantine/notifications@^5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@mantine/notifications/-/notifications-5.1.3.tgz#7b9680c877f58ac58d76ac1277ccd90adfb86185"
-  integrity sha512-ypfHh3GwHMh7ATsjn/MsQnVwrXnOfuePBsa4UrO7kbkPW7MIrS2aCfiCFI9A+tRyAObDZ/mlGX8lPu8gb/vaFw==
+"@mantine/notifications@^5.1.4":
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/@mantine/notifications/-/notifications-5.1.4.tgz#9e1cb683b9c2337a71400a353837308b042ef375"
+  integrity sha512-wNH+nYH7X/5lWVpR2f+qx29Du6cvq0oy6M9GOJE1twuMTy8EfBILUWatRslFcvIH8EYC03zEVYPVY4N1yHaLLQ==
   dependencies:
-    "@mantine/utils" "5.1.3"
+    "@mantine/utils" "5.1.4"
     react-transition-group "4.4.2"
 
-"@mantine/styles@5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@mantine/styles/-/styles-5.1.3.tgz#8a2d4eb4b3957464f920ff6c0350ba7c03a16489"
-  integrity sha512-0GtZ8RFOlk8d6RBcN7Kg+U2QwRzKj3NMxYhZQt9faJx0gpfbbr9tFyBaY7aiSC5hmT5v7B8C7HS5jrsPMaI+Ww==
+"@mantine/styles@5.1.4":
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/@mantine/styles/-/styles-5.1.4.tgz#4414dbcdabb4f28d4ce02753eb7339d64a254fbc"
+  integrity sha512-GMzI4km5sxxwPoAj1JMfOTgqfyHtrd+puMc0Nv+mlTTM22+P8Xp5yM00csL0PV94KP7oiuV1XDFJ7xiyRCamLA==
   dependencies:
     clsx "1.1.1"
     csstype "3.0.9"
 
-"@mantine/utils@5.1.3":
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/@mantine/utils/-/utils-5.1.3.tgz#ee50d793e4fd00a3839006459cf10b672c33e221"
-  integrity sha512-Qx+OLMDm/PFqp7nU+5jf+CtnNrm2DNFahupBkrghZdkgQ6Q03ga1Y5CfSmgtKlHXmRj7GLlUN0JrKNxIX9XTuw==
+"@mantine/utils@5.1.4":
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/@mantine/utils/-/utils-5.1.4.tgz#3da8459f77fb98f09c3f9a1939449e0c0a9fe58d"
+  integrity sha512-f2lnKjvGkQrWXSqTRg5uNh2PZpeow1enjX8OFwlOn0B6bJDdKYiHl+YidWe2DObOi36WSvtLbaRS7yKQOG+1XQ==
 
 "@motionone/animation@^10.13.1":
   version "10.13.2"
@@ -1113,10 +1113,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.33.tgz#566713b1b626f781c5c58fe3531307283e00720c"
   integrity sha512-0PJ0vg+JyU0MIan58IOIFRtSvsb7Ri+7Wltx2qAg94eMOrpg4+uuP3aUHCpxXc1i0jCXiC+zIamSZh3l9AbcQA==
 
-"@types/node@^18.7.1":
-  version "18.7.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.1.tgz#352bee64f93117d867d05f7406642a52685cbca6"
-  integrity sha512-GKX1Qnqxo4S+Z/+Z8KKPLpH282LD7jLHWJcVryOflnsnH+BtSDfieR6ObwBMwpnNws0bUK8GI7z0unQf9bARNQ==
+"@types/node@^18.7.2":
+  version "18.7.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.2.tgz#22306626110c459aedd2cdf131c749ec781e3b34"
+  integrity sha512-ce7MIiaYWCFv6A83oEultwhBXb22fxwNOQf5DIxWA4WXvDQ7K+L0fbWl/YOfCzlR5B/uFkSnVBhPcOfOECcWvA==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
@@ -1207,6 +1207,11 @@
   dependencies:
     "@types/mime" "^1"
     "@types/node" "*"
+
+"@types/signal-exit@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/signal-exit/-/signal-exit-3.0.1.tgz#ec9fb8e3fbf0ed5d9f7d22b5647214bece916a5b"
+  integrity sha512-OSitN9PP9E/c4tlt1Qdj3CAz5uHD9Da5rhUqlaKyQRCX1T7Zdpbk6YdeZbR2eiE2ce+NMBgVnMxGqpaPSNQDUQ==
 
 "@types/sizzle@*":
   version "2.3.3"
@@ -1332,13 +1337,13 @@
     "@typescript-eslint/types" "5.33.0"
     eslint-visitor-keys "^3.3.0"
 
-"@vitejs/plugin-react@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@vitejs/plugin-react/-/plugin-react-2.0.0.tgz#12decd097773a00620e44b780b1d2c00df101449"
-  integrity sha512-zHkRR+X4zqEPNBbKV2FvWSxK7Q6crjMBVIAYroSU8Nbb4M3E5x4qOiLoqJBHtXgr27kfednXjkwr3lr8jS6Wrw==
+"@vitejs/plugin-react@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@vitejs/plugin-react/-/plugin-react-2.0.1.tgz#3197c01d8e4a4eb9fed829c7888c467a43aadd4e"
+  integrity sha512-uINzNHmjrbunlFtyVkST6lY1ewSfz/XwLufG0PIqvLGnpk2nOIOa/1CACTDNcKi1/RwaCzJLmsXwm1NsUVV/NA==
   dependencies:
-    "@babel/core" "^7.18.6"
-    "@babel/plugin-transform-react-jsx" "^7.18.6"
+    "@babel/core" "^7.18.10"
+    "@babel/plugin-transform-react-jsx" "^7.18.10"
     "@babel/plugin-transform-react-jsx-development" "^7.18.6"
     "@babel/plugin-transform-react-jsx-self" "^7.18.6"
     "@babel/plugin-transform-react-jsx-source" "^7.18.6"
@@ -2201,10 +2206,10 @@ csstype@^3.0.2:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.10.tgz#2ad3a7bed70f35b965707c092e5f30b327c290e5"
   integrity sha512-2u44ZG2OcNUO9HDp/Jl8C07x6pU/eTR3ncV91SiK3dhG9TWvRVsCoJw14Ckx5DgWkzGA3waZWO3d7pgqpUI/XA==
 
-daisyui@^2.22.0:
-  version "2.22.0"
-  resolved "https://registry.yarnpkg.com/daisyui/-/daisyui-2.22.0.tgz#00ea4948fb886ad5242bd6bd3d1a229a8f28d932"
-  integrity sha512-H08aQP+Mfl2fQOmyaxd1NP54gQbr2xRUj2MmFFvfJ5EDGbthVBICDMNFKyia/zBfR58G8eTJo3CmydglM81/7Q==
+daisyui@^2.22.1:
+  version "2.22.1"
+  resolved "https://registry.yarnpkg.com/daisyui/-/daisyui-2.22.1.tgz#9c10a15067101860238b41027af0c522ee196e0e"
+  integrity sha512-5OjK3kYhqgwKVrun7itvR9Am98SGuhgBx/9vYScBT6GBBhKoVTbSaYDv9Hv+E65Tt5qTgSoEzIxelDlfxQFG7Q==
   dependencies:
     color "^4.2"
     css-selector-tokenizer "^0.8.0"
@@ -2218,10 +2223,10 @@ date-time@^3.1.0:
   dependencies:
     time-zone "^1.0.0"
 
-dayjs@^1.11.4:
-  version "1.11.4"
-  resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.4.tgz#3b3c10ca378140d8917e06ebc13a4922af4f433e"
-  integrity sha512-Zj/lPM5hOvQ1Bf7uAvewDaUcsJoI6JmNqmHhHl3nyumwe0XHwt8sWdOVAPACJzCebL8gQCi+K49w7iKWnGwX9g==
+dayjs@^1.11.5:
+  version "1.11.5"
+  resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.5.tgz#00e8cc627f231f9499c19b38af49f56dc0ac5e93"
+  integrity sha512-CAdX5Q3YW3Gclyo5Vpqkgpj8fSdLQcRuzfX6mC6Phy0nfJ0eGYOeS7m4mt2plDWLAtA4TqTakvbboHvUxfe4iA==
 
 debounce-fn@^4.0.0:
   version "4.0.0"
@@ -2505,10 +2510,10 @@ electron-builder@^23.3.3:
     update-notifier "^5.1.0"
     yargs "^17.0.1"
 
-electron-context-menu@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/electron-context-menu/-/electron-context-menu-3.3.0.tgz#cbcc4544ede2bf5629d4ad9911eaa94ae23cd38f"
-  integrity sha512-7VuDaJQK3ybCm/Buzo9rVhOiZ3VJloHJ/xVtZ4xN6n4fEk1fqOeELSk3tMDVQKnu8pUhayvzsAL0f5tSHwvHAQ==
+electron-context-menu@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/electron-context-menu/-/electron-context-menu-3.4.0.tgz#dab6e671e8578f045a38f66611b2ac8167b0fd35"
+  integrity sha512-UcEsDNX7WCgg8mrot8vdGdmq/vwL7SSMHKRx/Q5YTo94NS1117OauJIfJQxoxm3/Fxsh0QItET//PQwKRYEVww==
   dependencies:
     cli-truncate "^2.1.0"
     electron-dl "^3.2.1"
@@ -4250,6 +4255,11 @@ merge2@^1.3.0, merge2@^1.4.1:
   resolved "https://registry.yarnpkg.com/merge2/-/merge2-1.4.1.tgz#4368892f885e907455a6fd7dc55c0c9d404990ae"
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
+metadata-filter@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/metadata-filter/-/metadata-filter-1.3.0.tgz#abb8bb9249334e8b7768cbe6f7b906b80bb8c030"
+  integrity sha512-fl1I+w6KA+pO0RoRdzABxmgwwvruoHCYTV9hU793hFS/WJmGIRHYOz1s62mQ8zKAaPbywiXnmmL1fW/bqPObxw==
+
 micromatch@^4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-4.0.4.tgz#896d519dfe9db25fce94ceb7a500919bf881ebf9"
@@ -5285,7 +5295,7 @@ roarr@^2.15.3:
     semver-compare "^1.0.0"
     sprintf-js "^1.1.2"
 
-rollup@^2.75.6:
+"rollup@>=2.75.6 <2.77.0 || ~2.77.0":
   version "2.77.3"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.77.3.tgz#8f00418d3a2740036e15deb653bed1a90ee0cc12"
   integrity sha512-/qxNTG7FbmefJWoeeYJFbHehJ2HNWnjkAFRKzWN/45eNBBF/r8lo992CwcJXEzyVxs5FmfId+vTSTQDb+bxA+g==
@@ -5451,6 +5461,11 @@ signal-exit@^3.0.2:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.6.tgz#24e630c4b0f03fea446a2bd299e62b4a6ca8d0af"
   integrity sha512-sDl4qMFpijcGw22U5w63KmD3cZJfBuFlVNbVMKje2keoKML7X2UzWbc4XrmEbDwg0NXJc3yv4/ox7b+JWb57kQ==
+
+signal-exit@^3.0.7:
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.7.tgz#a9a1767f8af84155114eaabd73f99273c8f59ad9"
+  integrity sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==
 
 simple-swizzle@^0.2.2:
   version "0.2.2"
@@ -6172,32 +6187,32 @@ verror@^1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vite-plugin-electron-renderer@0.8.8:
-  version "0.8.8"
-  resolved "https://registry.yarnpkg.com/vite-plugin-electron-renderer/-/vite-plugin-electron-renderer-0.8.8.tgz#f88a8e18a22713d9231037362180a933a9ad53c3"
-  integrity sha512-/3sMoV1pmQJmivXx6JSUE9TsmRI/ykJ25IU2efE2BwDFFuK0dOGUAeoekq04wYInVn3zTTODAtRdcy3Keb/Hxw==
+vite-plugin-electron-renderer@0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/vite-plugin-electron-renderer/-/vite-plugin-electron-renderer-0.9.0.tgz#12da19cf7c6fdb0d1b271a91873ee58883a264cb"
+  integrity sha512-Vc9rB3i0zlw32n5UGfoLmHAOZdH0ZbbA+tI0TPn36HbwXtmsfu+LVLqeccZh88iaQ3VJIm00rUDGMvswN2PLRg==
 
-vite-plugin-electron@^0.8.8:
-  version "0.8.8"
-  resolved "https://registry.yarnpkg.com/vite-plugin-electron/-/vite-plugin-electron-0.8.8.tgz#e724ba17d21fb15de428a2242eb6741754c4118b"
-  integrity sha512-HVQfr9ajs6if6OFpEa6FPvwQdMQzDqHQvOv6wlxkhIt5mvUaI62z2eHin4wVQA66XD5v+QfeCFSWtbwAzft75A==
+vite-plugin-electron@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/vite-plugin-electron/-/vite-plugin-electron-0.9.0.tgz#f5aa8a654eef8f227931a189fa0f6e71a8ff4804"
+  integrity sha512-mN6dpJS74r7p55RAdJUvBuJaTXbHCEY+0m3zTisUm78s+NTwtgq1otkcticOh1g/N5pg/T/bWRbzbHHQ6JAXsA==
   dependencies:
-    vite-plugin-electron-renderer "0.8.8"
+    vite-plugin-electron-renderer "0.9.0"
 
 vite-plugin-resolve@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/vite-plugin-resolve/-/vite-plugin-resolve-2.1.2.tgz#40f3016f62a9c2c1ee9e8108390d2eca0c30b477"
   integrity sha512-u1qAHClpMS6v/UM6yBiLOXEeceeK+zvZYRjYC0ReOy1Y2Anxcbf9oKHqN29MOMPxif5ZFLqy2dSsSdXv3rz9eQ==
 
-vite@^3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-3.0.5.tgz#56b8d52e00bbbd5f21d02f0868dc613b3246ecc6"
-  integrity sha512-bRvrt9Tw8EGW4jj64aYFTnVg134E8hgDxyl/eEHnxiGqYk7/pTPss6CWlurqPOUzqvEoZkZ58Ws+Iu8MB87iMA==
+vite@^3.0.7:
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-3.0.7.tgz#f1e379857e9c5d652126f8b20d371e1365eb700f"
+  integrity sha512-dILhvKba1mbP1wCezVQx/qhEK7/+jVn9ciadEcyKMMhZpsuAi/eWZfJRMkmYlkSFG7Qq9NvJbgFq4XOBxugJsA==
   dependencies:
     esbuild "^0.14.47"
     postcss "^8.4.16"
     resolve "^1.22.1"
-    rollup "^2.75.6"
+    rollup ">=2.75.6 <2.77.0 || ~2.77.0"
   optionalDependencies:
     fsevents "~2.3.2"
 

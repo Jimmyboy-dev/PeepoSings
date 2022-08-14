@@ -12,6 +12,7 @@ import { ipcMain as ipc } from 'electron-better-ipc'
 import contextMenu from 'electron-context-menu'
 import windowStateKeeper from 'electron-window-state'
 import Store from 'electron-store'
+import onExit from 'signal-exit'
 // import serve from "electron-serve"
 
 import { MusicManager } from './modules/MusicManager'
@@ -57,6 +58,7 @@ export const ROOT_PATH = {
 }
 
 let win: BrowserWindow | null = null
+let mainWindowState: ReturnType<typeof windowStateKeeper> | null = null
 // Here, you can also use other preload
 const preload = join(__dirname, '../preload/index.js')
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin
@@ -119,7 +121,7 @@ function initTray() {
 }
 
 async function createWindow() {
-  const mainWindowState = windowStateKeeper({
+  mainWindowState = windowStateKeeper({
     defaultWidth: 1000,
     defaultHeight: 800,
   })
@@ -214,7 +216,10 @@ app.on('open-url', (event, url) => {
 
 app.on('window-all-closed', () => {
   win = null
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') {
+    app.quit()
+    process.exit(0)
+  }
 })
 
 app.on('activate', () => {

@@ -2,6 +2,8 @@ import LastFMTyped from 'lastfm-typed'
 import { ipcMain } from 'electron-better-ipc'
 import { getSession } from 'lastfm-typed/dist/interfaces/authInterface'
 import { BrowserWindow, shell } from 'electron'
+import { getInfo, search } from 'lastfm-typed/dist/interfaces/trackInterface'
+import MetadataFilter from 'metadata-filter'
 
 interface ScrobblerOptions {
   apiSecret?: string
@@ -14,6 +16,9 @@ export class Scrobbler extends LastFMTyped {
   token: string = ''
   apiKey: string
   apiSecret: string
+  currentSong: SongJSON | null = null
+
+  filter = MetadataFilter.createYouTubeFilter()
   constructor(apiKey: string, options?: ScrobblerOptions) {
     super(apiKey, options)
     this.apiKey = apiKey
@@ -36,22 +41,44 @@ export class Scrobbler extends LastFMTyped {
     if (!this.session) {
       throw new Error('No session')
     }
-    const trackName = song.title
-    const artistName = song.artist
+    let artistIsTrue = false
+    const trackName = this.filter.filterField('track', song.title)
+    if (!trackName.includes('-')) {
+      artistIsTrue = true
+    }
+    const artistName = song.artist.replace(' - Topic', '')
     const albumName = song.album
     const searchResults = (
       await this.track.search(trackName, {
         limit: 10,
+        artist: artistIsTrue ? artistName : undefined,
       })
     ).trackMatches
-    const track = searchResults.find((t) => artistName.includes(t.artist) || trackName.includes(t.artist)) ?? searchResults[0]
+    let track: (search['trackMatches'][number] | Partial<Omit<getInfo, 'album' | 'artist'>>) & { album?: string; duration?: number; artist: string; name: string } =
+      searchResults.find((t) => artistName.includes(t.artist) || trackName.includes(t.artist)) ?? searchResults[0]
     if (!track) {
       throw new Error('No track found')
     }
+    const trackFull = await this.track.getInfo({ mbid: track.mbid! }).catch((e) => {
+      console.error(e)
+      return null
+    })
+    track = trackFull
+      ? {
+          ...trackFull,
+          artist: trackFull.artist.name,
+          album: trackFull.album?.title ?? undefined,
+          duration: trackFull.duration ?? undefined,
+        }
+      : track
     await this.track
-      .updateNowPlaying(track.artist, track.name, this.session.key)
+      .updateNowPlaying(track.artist, track.name, this.session.key, {
+        album: track.album,
+        mbid: track.mbid,
+        duration: track.duration ?? undefined,
+      })
       .then(() => {
-        console.log('Now playing', track.artist, track.name)
+        console.log('Now playing', track.artist, ':', track.name)
       })
       .catch((e) => {
         console.error(e)
