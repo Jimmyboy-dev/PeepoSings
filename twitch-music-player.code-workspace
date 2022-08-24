@@ -13,6 +13,10 @@
       "path": "./packages/main"
     },
     {
+      "name": "Core",
+      "path": "./packages/core"
+    },
+    {
       "name": "Preload",
       "path": "./packages/preload"
     },

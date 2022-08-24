@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react'
-import { ActionIcon, Box, Button, Col, Grid, Modal, Progress, Tabs } from '@mantine/core'
+import { ActionIcon, Box, Button, Col, Grid, Modal, Tabs } from '@mantine/core'
 import type { ReactElement } from 'react'
 import React, { useEffect } from 'react'
 import AudioPlayer from './components/AudioPlayer'
@@ -7,8 +7,12 @@ import Music from './components/Music'
 import TitleBar from './components/TitleBar'
 import { updateNotification, useNotifications } from '@mantine/notifications'
 import ContextMenus from './components/ContextMenus'
-import { useAppSelector } from './store'
+import { useAppDispatch, useAppSelector } from './store'
 import { ipcRenderer } from 'electron-better-ipc'
+import { IpcRendererEvent } from 'electron/renderer'
+import { DownloadInfo, IpcEvents, PeepoMeta } from '@peepo/core'
+import { addSong, fetchSongs, setSongs } from './store/slices/songs'
+import { Progress } from 'yt-dlp-wrap'
 
 // run this function when your application starts before creating any notifications
 
@@ -30,20 +34,20 @@ export default function App(): ReactElement {
   //     placement: "bottom",
   //   },
   // ])
-  const session = useAppSelector((state) => state.config.scrobbler.session)
+  const dispatch = useAppDispatch()
   const notifications = useNotifications()
   useEffect(() => {
-    ipcRenderer.callMain('lastfm-session', session)
-  }, [session])
+    dispatch(fetchSongs())
+  }, [])
   useEffect(() => {
-    const onDlProgress = (dl: { dlInfo: DownloadInfo; msg: string }) => {
+    const onDlProgress = (dl: { dlInfo: DownloadInfo; msg: string; raw: Progress }) => {
       const {
-        ownerChannelName: artist,
-        lengthSeconds: duration,
+        artist,
+        duration,
         title,
         thumbnails: [{ url: albumArt }],
-        media: { category: album },
-      } = dl.dlInfo.vidInfo.videoDetails
+        album,
+      } = dl.dlInfo.vidInfo
       updateNotification({
         id: title,
         loading: true,
@@ -54,15 +58,16 @@ export default function App(): ReactElement {
         icon: <Icon icon="fas:check" />,
       })
     }
-    const onDlEnd = (dl: { dlInfo: DownloadInfo }) => {
+    const onDlEnd = (dl: { path: string; dlInfo: DownloadInfo; song: PeepoMeta }) => {
       console.log('Download finished', dl)
+      dispatch(addSong(dl.song))
       const {
-        ownerChannelName: artist,
-        lengthSeconds: duration,
+        artist,
+        duration,
         title,
         thumbnails: [{ url: albumArt }],
-        media: { category: album },
-      } = dl.dlInfo.vidInfo.videoDetails
+        album,
+      } = dl.dlInfo.vidInfo
       updateNotification({
         id: title,
         loading: false,
@@ -73,9 +78,30 @@ export default function App(): ReactElement {
         disallowClose: false,
       })
     }
-    const dlEndListener = window.electron.listeners.onDownloadEnd(onDlEnd)
-    const dlProgressListener = window.electron.listeners.onDownloadProgress(onDlProgress)
+    const onErr = (err: any) => {
+      const {
+        ownerChannelName: artist,
+        lengthSeconds: duration,
+        title,
+        thumbnails: [{ url: albumArt }],
+        media: { category: album },
+      } = err.dlInfo.vidInfo.videoDetails
+      console.log('Error:', err.err)
+      updateNotification({
+        id: err.title,
+        loading: false,
+        title: `Error Downloading ${err.title}`,
+        autoClose: true,
+        message: err.message,
+        icon: <Icon icon="fas:times" />,
+        disallowClose: false,
+      })
+    }
+    const dlErrorListener = window.ipc.answerMain(IpcEvents.MUSIC_ERROR, onErr)
+    const dlEndListener = ipc.answerMain(IpcEvents.MUSIC_FINISHED, onDlEnd)
+    const dlProgressListener = ipc.answerMain(IpcEvents.MUSIC_PROGRESS, onDlProgress)
     return () => {
+      dlErrorListener()
       dlEndListener()
       dlProgressListener()
     }

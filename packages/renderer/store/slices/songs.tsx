@@ -1,71 +1,66 @@
-import type { PayloadAction } from "@reduxjs/toolkit"
-import { createSlice, nanoid } from "@reduxjs/toolkit"
-import type { RootState } from "."
-import { removeMood } from "./moods"
+import { createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, nanoid } from '@reduxjs/toolkit'
+import type { RootState } from '.'
+import { IpcEvents, MoodJSON, PeepoMeta } from '@peepo/core'
+import { removeMood } from './moods'
 
-// const fetchSongs = createAction("songs/fetch", (songs: SongJSON[]) => ({ payload: songs }))
+export const fetchSongs = createAsyncThunk('songs/fetch', async (songs, api) => {
+  return (await ipc.callMain(IpcEvents.INITIAL_INFO)) as {
+    songs: PeepoMeta[]
+    moods?: MoodJSON[]
+    settings: any
+  }
+})
 
 // Define a type for the slice state
-type SongsState = SongJSON[]
+type SongsState = PeepoMeta[]
 
 // Define the initial state using that type
 const initialState: SongsState = []
 
 export const musicSlice = createSlice({
-  name: "songs",
-  // `createSlice` will infer the state type from the `initialState` argument
+  name: 'songs',
   initialState,
   reducers: {
-    addSong(state, action: PayloadAction<Partial<SongJSON>>) {
-      const {
-        album,
-        albumArt,
-        artist,
-        duration,
-        favorite,
-        filePath,
-        id,
-        in: sIn,
-        metadata,
-        mood,
-        out,
-        title,
-      } = action.payload
-      const song: Partial<SongJSON> = {
-        id: id || nanoid(8),
+    addSong(state, action: PayloadAction<Partial<PeepoMeta>>) {
+      const { album, thumbnail, artist, duration, favorite, path, id, in: sIn, metadata, mood, out, title, lastScanned, muid, position } = action.payload
+      const song: Partial<PeepoMeta> = {
+        id: id,
         out: out || duration,
         in: sIn || 0,
-        title: title || "",
-        album: album || "",
-        artist: artist || "",
-        albumArt: albumArt || "",
-        filePath: filePath || "",
+        title: title || '',
+        album: album || '',
+        artist: artist || '',
+        thumbnail: thumbnail || '',
+        path: path || '',
         metadata: metadata || {},
         mood: mood || [],
         duration: duration || 0,
         favorite: favorite || false,
+        lastScanned,
+        position: position || state.length,
+        muid: muid || nanoid(),
       }
 
-      state.push(song as SongJSON)
+      state.push(song as PeepoMeta)
     },
-    removeSong(state, action: PayloadAction<SongJSON>) {
+    removeSong(state, action: PayloadAction<PeepoMeta>) {
       state.splice(
         state.findIndex((s) => s.id === action.payload.id),
         1
       )
     },
-    setSongs(state, action: PayloadAction<SongJSON[]>) {
+    setSongs(state, action: PayloadAction<PeepoMeta[]>) {
       const songs = action.payload
-      songs.forEach((song, i) => {
-        if (!song.id) songs[i].id = nanoid(8)
-      })
       return songs
     },
-    setSongMood(state, action: PayloadAction<{ songId: string; moodId: MoodJSON["id"] | MoodJSON["id"][] }>) {
+    setSongMood(state, action: PayloadAction<{ songId: string; moodId: MoodJSON['id'] | MoodJSON['id'][] }>) {
       const songIndex = state.findIndex((val) => val.id === action.payload.songId)
+      if (songIndex === -1) return
       if (action.payload.moodId instanceof Array) {
         state[songIndex].mood = action.payload.moodId
       } else state[songIndex].mood.push(action.payload.moodId)
+      ipc.callMain(IpcEvents.MUSIC_MOOD, { song: state[songIndex].id, mood: state[songIndex].mood })
     },
     markIn(state, action: PayloadAction<{ index: number; in: number }>) {
       state[action.payload.index].in = action.payload.in
@@ -73,8 +68,11 @@ export const musicSlice = createSlice({
     markOut(state, action: PayloadAction<{ index: number; out: number }>) {
       state[action.payload.index].out = action.payload.out
     },
-    editSong(state, action: PayloadAction<SongJSON>) {
-      const prevSong = state.findIndex((val, i) => action.payload.filePath === val.filePath)
+    editSong(state, action: PayloadAction<PeepoMeta>) {
+      const prevSong = state.findIndex((val, i) => action.payload.path === val.path)
+      if (prevSong !== -1) {
+        ipc.callMain(IpcEvents.DB_UPDATE, ['song', { id: state[prevSong].id }, action.payload])
+      }
       state[prevSong] = action.payload
     },
   },
@@ -83,8 +81,12 @@ export const musicSlice = createSlice({
       state.forEach((song) => {
         if (song.mood.includes(action.payload)) {
           song.mood.splice(song.mood.indexOf(action.payload), 1)
+          ipc.callMain(IpcEvents.MUSIC_MOOD, { song: song.id, mood: action.payload })
         }
       })
+    })
+    builder.addCase(fetchSongs.fulfilled, (state, action) => {
+      return action.payload.songs
     })
   },
 })

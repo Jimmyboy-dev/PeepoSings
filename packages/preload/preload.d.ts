@@ -4,6 +4,6 @@ import type { ipcRenderer } from 'electron-better-ipc'
 declare global {
   interface Window {
     electron: ElectronAPI
-    ipc: typeof ipcRenderer
   }
+  var ipc: typeof ipcRenderer
 }

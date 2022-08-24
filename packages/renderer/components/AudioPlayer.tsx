@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
 import { ActionIcon, Button, Group, Affix, Progress, Slider, Stack, Text, Tooltip } from '@mantine/core'
-import type { ReactElement } from 'react'
+import type { MouseEventHandler, ReactElement } from 'react'
 import React, { useEffect } from 'react'
 import PeepoSings from './PeepoSings'
 import { useAppDispatch, useAppSelector } from '../store'
@@ -9,12 +9,16 @@ import { nextSong, prevSong, setCurrentMood, setCurrentSong } from '../store/sli
 import { throttle } from 'lodash'
 import { editSong } from '../store/slices/songs'
 import peepoShrug from '../assets/peepoShrug.png'
+import { getHotkeyHandler, useDisclosure } from '@mantine/hooks'
+import { motion } from 'framer-motion'
+import EditableText from './EditableText'
 
 function AudioPlayer(): ReactElement {
   const dispatch = useAppDispatch()
   const { currentTime, duration, filter, playing, repeat, shuffle, volume } = useAppSelector((state) => state.player)
   const [{ song: currentSong, mood: curMood }, { songs, moods }] = useAppSelector((state) => [state.currentSong, { songs: state.songs, moods: state.moods }])
   const [source, setSource] = React.useState('')
+  const [seeking, { open: seek, close: unseek }] = useDisclosure(false)
   const audioDevice = useAppSelector((state) => state.config.outputDevice)
 
   const queue = curMood !== null ? songs.filter((song) => song.mood.includes(curMood)) : songs
@@ -35,15 +39,29 @@ function AudioPlayer(): ReactElement {
     audio.current.setSinkId(audioDevice)
     if (shouldPlay) audio.current.play()
   }, [audioDevice, playing])
-  useEffect(() => {}, [audioDevice])
+  useEffect(() => {
+    if (seeking) {
+      document.addEventListener('mousemove', onSeek)
+      document.addEventListener(
+        'mouseup',
+        () => {
+          console.log('mouseup')
+          unseek()
+        },
+        { once: true }
+      )
+    }
+    return () => {
+      document.removeEventListener('mousemove', onSeek)
+    }
+  }, [seeking])
   useEffect(() => {
     audio.current.volume = volume
   }, [volume])
   useEffect(() => {
-    audio.current.setSinkId(audioDevice ?? 'default')
+    setSinkId()
     audio.current.addEventListener('play', () => {
       if (!audioCtx.current) {
-        const AudioContext = window.AudioContext || ((window as any).webkitAudioContext as AudioContext)
         audioCtx.current = new AudioContext()
         const source = audioCtx.current.createMediaElementSource(audio.current!)
         const compressor = audioCtx.current.createDynamicsCompressor()
@@ -111,9 +129,9 @@ function AudioPlayer(): ReactElement {
     }
   }
 
-  const onSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+  const onSeek = (e: MouseEvent) => {
     const { clientX } = e
-    const { offsetLeft, offsetWidth } = e.currentTarget
+    const { offsetLeft, offsetWidth } = e.target as HTMLElement
     const percent = (clientX - offsetLeft) / offsetWidth
     if (audio.current) audio.current.currentTime = calcTime(percent)
   }
@@ -131,7 +149,7 @@ function AudioPlayer(): ReactElement {
       dispatch(setPlaying(false))
       return
     }
-    setSource(`resource://${song.filePath}`)
+    setSource(`resource://${song.path}`)
     dispatch(setPlaying(false))
     audio.current.load()
     dispatch(setCurrentTime(song.in))
@@ -139,15 +157,20 @@ function AudioPlayer(): ReactElement {
   }, [currentSong, song])
 
   useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      if (e.key === ' ') {
-        dispatch(setPlaying())
-        console.log('space pressed')
-      }
-    }
-    // const dlListen = window.electron.listeners.onDownloadEnd((_e, download) => {})
+    const listener = getHotkeyHandler([
+      [
+        ' ',
+        (e) => {
+          if (e.currentTarget instanceof HTMLInputElement) return
+          if (e.key === ' ') {
+            dispatch(setPlaying())
+            console.log('space pressed')
+          }
+        },
+      ],
+    ])
 
-    document.body.addEventListener('keypress', listener, { capture: true, passive: true })
+    document.body.addEventListener('keypress', listener)
     return () => {
       document.removeEventListener('keypress', listener)
     }
@@ -155,7 +178,7 @@ function AudioPlayer(): ReactElement {
 
   return (
     <>
-      <audio ref={audio} src={song ? `resource://${song.filePath}` : ''} onEnded={() => advSong()} onCanPlayThrough={() => dispatch(setPlaying(true))} onTimeUpdate={onProgress}></audio>
+      <audio ref={audio} src={song ? `resource://${song.path}` : ''} onEnded={() => advSong()} onCanPlayThrough={() => dispatch(setPlaying(true))} onTimeUpdate={onProgress}></audio>
       <Stack spacing={0} className="justify-end gap-0 pointer-events-none" style={{ position: 'fixed', width: '100vw', height: '100vh', top: 0, left: 0, zIndex: 9999 }}>
         <PeepoSings talk={playing} />
         {curMood && (
@@ -180,22 +203,45 @@ function AudioPlayer(): ReactElement {
         )}
 
         <div style={{ pointerEvents: 'all' }} className="w-full z-10 bg-neutral h-32 bottom-0  m-0">
-          <Progress
-            className="absolute z-50 pointer-events-auto cursor-pointer rounded-none w-full m-0"
-            value={currentTime * 100}
-            styles={{
-              label: { display: 'none' },
-              root: {
-                transition: 'transform 0.2s ease-in-out',
-                transformOrigin: 'bottom',
-                '&:hover': {
-                  transform: 'scaleY(2)',
+          <motion.div className="group absolute z-50 pointer-events-auto w-full m-0 flex flex-row" whileHover={{ height: 15, y: -5 }} style={{ height: 10, transformOrigin: 'bottom' }}>
+            <Progress
+              className="w-full h-full m-0"
+              value={currentTime * 100}
+              styles={{
+                label: { display: 'none' },
+                bar: {
+                  borderRadius: '0px !important',
                 },
-              },
-            }}
-            onClick={(e) => song && onSeek(e)}
-            style={{ cursor: 'pointer' }}
-          />
+                root: {
+                  borderRadius: '0px !important',
+                  transition: 'transform 0.2s ease-in-out',
+                  transformOrigin: 'bottom',
+                },
+              }}
+              onMouseDown={() => {
+                seek()
+              }}
+              // onMouseMove={(e) => seeking && song}
+              style={{ cursor: 'pointer' }}
+            />
+            <motion.div
+              animate={{
+                left: `${currentTime * 100}%`,
+                top: '50%',
+                width: '20px',
+                height: '20px',
+              }}
+              style={{
+                x: '-50%',
+                y: '-50%',
+                background: 'white',
+                position: 'absolute',
+                transformOrigin: 'bottom',
+
+                borderRadius: '50%',
+              }}
+            />
+          </motion.div>
 
           <Group className="w-full h-full px-4 flex-nowrap relative">
             <Group position="center" className="flex-nowrap" spacing={1}>
@@ -210,12 +256,26 @@ function AudioPlayer(): ReactElement {
               </ActionIcon>
             </Group>
             <div className="rounded-xl overflow-hidden" style={{ minWidth: '6em', minHeight: '6em' }}>
-              <img className="w-24 h-24 object-cover" src={song?.albumArt || peepoShrug}></img>
+              <img className="w-24 h-24 object-cover" src={song?.thumbnail || peepoShrug}></img>
             </div>
 
             <Stack className="justify-center gap-0 flex-shrink truncate">
-              <Text className="text-lg font-bold">{song?.title || 'No Song Selected'}</Text>
-              <Text className="text-md font-semibold">{song?.artist || 'No Song Selected'}</Text>
+              <EditableText
+                onChange={(val) => {
+                  dispatch(editSong({ ...song, title: val }))
+                }}
+                disabled={!song}
+                className="text-lg font-bold">
+                {song?.title || 'No Song Selected'}
+              </EditableText>
+              <EditableText
+                onChange={(val) => {
+                  dispatch(editSong({ ...song, artist: val }))
+                }}
+                disabled={!song}
+                className="text-md font-semibold">
+                {song?.artist || 'No Song Selected'}
+              </EditableText>
             </Stack>
             <div className="flex-grow" />
             <Group className="justify-center gap-2 flex-nowrap">

@@ -4,6 +4,11 @@ import { getSession } from 'lastfm-typed/dist/interfaces/authInterface'
 import { BrowserWindow, shell } from 'electron'
 import { getInfo, search } from 'lastfm-typed/dist/interfaces/trackInterface'
 import MetadataFilter from 'metadata-filter'
+import { IpcEvents, PeepoMeta } from '@peepo/core'
+import { inject, injectable } from 'inversify'
+import Config from './config'
+import Window from './window'
+import Store from './store'
 
 interface ScrobblerOptions {
   apiSecret?: string
@@ -11,25 +16,25 @@ interface ScrobblerOptions {
   secureConnection?: boolean
 }
 
-export class Scrobbler extends LastFMTyped {
+@injectable()
+export default class Scrobbler extends LastFMTyped {
   session: getSession | null = null
   token: string = ''
   apiKey: string
   apiSecret: string
-  currentSong: SongJSON | null = null
+  currentSong: PeepoMeta | null = null
 
   filter = MetadataFilter.createYouTubeFilter()
-  constructor(apiKey: string, options?: ScrobblerOptions) {
-    super(apiKey, options)
+  constructor(@inject(Config) private config: Config, @inject(Window) private window: Window, @inject(Store) private store: Store) {
+    const apiKey = import.meta.env.VITE_LAST_FM_KEY
+    const apiSecret = import.meta.env.VITE_LAST_FM_SHARED_SECRET
+    super(apiKey, { apiSecret, userAgent: 'Peepo Sings' })
     this.apiKey = apiKey
-    this.apiSecret = options?.apiSecret ?? ''
-    ipcMain.answerRenderer('lastfm-login', this.login.bind(this))
-    ipcMain.answerRenderer('lastfm-session', (session: getSession) => {
-      this.session = session
-    })
+    this.apiSecret = apiSecret ?? ''
+    this.session = this.store.getOption('lastfm.session') ?? null
   }
 
-  async onSong(song: SongJSON) {
+  async trackChange(song: PeepoMeta) {
     try {
       await this.scrobble(song)
     } catch (e) {
@@ -37,13 +42,13 @@ export class Scrobbler extends LastFMTyped {
     }
   }
 
-  async scrobble(song: SongJSON) {
+  async scrobble(song: PeepoMeta) {
     if (!this.session) {
       throw new Error('No session')
     }
     let artistIsTrue = false
     const trackName = this.filter.filterField('track', song.title)
-    if (!trackName.includes('-')) {
+    if (!trackName.includes('-') || song.artist.includes(' - Topic')) {
       artistIsTrue = true
     }
     const artistName = song.artist.replace(' - Topic', '')
@@ -86,15 +91,16 @@ export class Scrobbler extends LastFMTyped {
   }
 
   async login() {
-    const curWindow = BrowserWindow.getFocusedWindow()!
+    const curWindow = this.window.getBrowserWindow()
     this.token = await this.auth.getToken()
     await shell.openExternal(`https://www.last.fm/api/auth?api_key=${this.apiKey}&token=${this.token}`)
     curWindow.once('focus', this.authCallback.bind(this))
   }
 
-  async authCallback(token: string | null) {
+  async authCallback() {
     const session = await this.auth.getSession(this.token)
     this.session = session
-    ipcMain.callFocusedRenderer('lastfm-session', session)
+    this.store.setOption('lastfm.session', session)
+    ipcMain.callFocusedRenderer(IpcEvents.LASTFM_SESSION, session)
   }
 }

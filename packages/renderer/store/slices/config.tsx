@@ -4,13 +4,15 @@ import { ipcRenderer } from 'electron-better-ipc'
 import { getSession } from 'lastfm-typed/dist/interfaces/authInterface'
 import { RootState } from '.'
 import type { AppDispatch } from '..'
-import type { PeepoSingConfig } from '../../../../types/store'
+import { IpcEvents, PeepoSingConfig } from '@peepo/core'
+import { fetchSongs } from './songs'
 
 export const connectToLastFM = createAsyncThunk<any, void | string>('config/connectToLastFM', async (userToken, api) => {
   ipcRenderer.callMain('lastfm-login')
   return new Promise((resolve, reject) => {
-    ipcRenderer.answerMain('lastfm-session', (session: getSession | null) => {
+    const unlisten = ipcRenderer.answerMain('lastfm-session', (session: getSession | null) => {
       resolve(session)
+      unlisten()
     })
   })
 })
@@ -22,7 +24,7 @@ const initialState: PeepoSingConfig = {
   scrobblerKeys: { apiKey: '', apiSecret: '' },
   scrobbler: {
     connected: false,
-    userInfo: {},
+    userInfo: undefined,
     session: null,
   },
   compactSongView: false,
@@ -34,6 +36,7 @@ const config = createSlice({
   reducers: {
     setOutputDevice(state, action: PayloadAction<string>) {
       state.outputDevice = action.payload
+      ipc.callMain(IpcEvents.SET_OPTION, ['outputDevice', action.payload])
     },
     setAutoPlay(state, action: PayloadAction<boolean>) {
       state.autoPlay = action.payload
@@ -53,12 +56,38 @@ const config = createSlice({
       if (!state.scrobbler) {
         state.scrobbler = {
           connected: !!action.payload,
-          userInfo: {},
+          userInfo: undefined,
           session: action.payload,
         }
       } else {
         state.scrobbler.connected = !!action.payload
         state.scrobbler.session = action.payload
+      }
+    })
+    builder.addCase(fetchSongs.fulfilled, (state, action) => {
+      // if (!action.payload.moods) return
+
+      const stateKeys = Object.keys(state)
+      console.log('Received config keys:')
+      console.dir(action.payload)
+
+      for (const setting of stateKeys) {
+        switch (setting) {
+          case 'outputDevice':
+            state.outputDevice = action.payload.settings.outputDevice
+            break
+          case 'autoPlay':
+            break
+          case 'runOnStartup':
+            state.runOnStartup = action.payload.settings.runOnStartup
+            break
+          case 'compactSongView':
+            break
+          case 'scrobbler':
+            state.scrobbler.session = action.payload.settings.lastfm?.session
+            state.scrobbler.connected = !!action.payload.settings.lastfm?.session
+            break
+        }
       }
     })
   },

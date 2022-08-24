@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react'
-import { ActionIcon, Anchor, Button, ColorInput, DEFAULT_THEME, Grid, Group, Input, Modal, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Anchor, Box, Button, Checkbox, ColorInput, DEFAULT_THEME, Grid, Group, Input, Modal, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import React, { ChangeEvent, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../store'
@@ -8,6 +8,8 @@ import { motion } from 'framer-motion'
 import { nanoid } from '@reduxjs/toolkit'
 import { setCurrentMood, setCurrentSong } from '../store/slices/currentSong'
 import { setPlaying } from '../store/slices/player'
+import { MoodJSON } from '@peepo/core'
+import FavoritesBar from './FavoritesBar'
 
 export default function Moods() {
   const [addingMood, { open, close, toggle: setAddMood }] = useDisclosure(false)
@@ -15,17 +17,23 @@ export default function Moods() {
 
   const moods = useAppSelector((state) => state.moods)
   return (
-    <Group position="center" align="center">
-      <ActionIcon size="xl" className="absolute right-2 top-2 bg-green-500 rounded-full" onClick={() => setAddMood()}>
+    <Stack justify="center" align="center">
+      <ActionIcon
+        size="xl"
+        className="absolute right-2 top-2 bg-green-500 rounded-full"
+        onClick={() => {
+          setMood(undefined)
+          setAddMood()
+        }}>
         <Icon fontSize={24} icon="fas:plus" color="white" />
       </ActionIcon>
-      <AddMoodModal opened={addingMood} onClose={close} mood={!mood ? undefined : { ...mood, type: 'editing' }} />
+      <AddMoodModal opened={addingMood} onClose={close} mood={mood && { ...mood, type: 'editing' }} />
       <SimpleGrid
         cols={4}
         spacing="lg"
         breakpoints={[
-          { maxWidth: 1100, cols: 3, spacing: 'md' },
-          { maxWidth: 755, cols: 2, spacing: 'sm' },
+          { maxWidth: 1500, cols: 3, spacing: 'md' },
+          { maxWidth: 1100, cols: 2, spacing: 'sm' },
           { maxWidth: 600, cols: 1, spacing: 'sm' },
         ]}
         style={{ width: '80%' }}>
@@ -40,7 +48,8 @@ export default function Moods() {
           />
         ))}
       </SimpleGrid>
-    </Group>
+      <FavoritesBar />
+    </Stack>
   )
 }
 interface MoodProps {
@@ -48,7 +57,8 @@ interface MoodProps {
   onClose: () => void
   mood?: MoodJSON & { type: 'editing' | 'new' }
 }
-function AddMoodModal({ onClose, opened, mood = { name: '', color: '#ffffff', icon: 'fas:music', type: 'new', id: '' } }: MoodProps) {
+function AddMoodModal({ onClose, opened, mood: moodP }: MoodProps) {
+  const mood = moodP || { name: '', color: '#ffffff', icon: 'fas:music', type: 'new' }
   const [name, setName] = React.useState(mood.name)
   const [color, setColor] = React.useState(mood.color)
   const [icon, setIcon] = React.useState(mood.icon)
@@ -63,7 +73,7 @@ function AddMoodModal({ onClose, opened, mood = { name: '', color: '#ffffff', ic
   }, [mood])
 
   const handleSubmit = () => {
-    if (mood.type === 'new') dispatch(addMood({ name, color, icon, id: nanoid(8) }))
+    if (mood.type === 'new') dispatch(addMood({ name, color, icon }))
     else {
       const moodJson = mood as MoodJSON & { type?: 'editing' | 'new' }
       delete moodJson.type
@@ -124,24 +134,52 @@ interface MoodItemProps {
 function MoodItem({ mood: { id, name, color, icon }, onEdit }: MoodItemProps) {
   const dispatch = useAppDispatch()
   const songs = useAppSelector((state) => state.songs)
+  const curMood = useAppSelector((state) => state.currentSong.mood)
   const songsInMood = songs.filter((song) => song.mood.includes(id))
+  const [hovering, setHover] = React.useState(false)
   return (
-    <motion.div
-      className="flex flex-row gap-4 items-center w-full bg-slate-600 justify-start p-4 h-16 rounded-lg cursor-pointer select-none font-bold text-xl"
-      onClick={(e) => {
-        dispatch(setCurrentSong(Math.floor(Math.random() * songsInMood.length)))
-        dispatch(setCurrentMood(id))
-        dispatch(setPlaying())
-      }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
-      onContextMenu={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        onEdit()
-      }}>
-      <Icon fontSize={24} color={color} icon={icon || ''} />
-      <div>{name}</div>
-    </motion.div>
+    <div className="w-full flex flex-row h-full items-center">
+      <motion.div
+        className="flex flex-row items-center bg-slate-600 justify-start p-4 h-16 rounded-lg cursor-pointer select-none font-bold text-xl"
+        onTap={(e) => {
+          dispatch(setCurrentSong(Math.floor(Math.random() * songsInMood.length)))
+          dispatch(setCurrentMood(id))
+          dispatch(setPlaying())
+        }}
+        whileHover={{ scale: 1.1 }}
+        animate={{ width: hovering ? '100%' : '85%', zIndex: 1 }}
+        onHoverStart={(event, info) => setHover(true)}
+        onHoverEnd={(event, info) => setHover(false)}
+        whileTap={{ scale: 0.95 }}
+        onContextMenu={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onEdit()
+        }}>
+        <Icon fontSize={24} color={color} icon={icon || 'fa-solid:music'} />
+        <div className="ml-4">{name}</div>
+      </motion.div>
+      <MBox
+        className="bg-slate-800 flex items-center justify-center rounded-r-md overflow-hidden"
+        animate={{
+          x: hovering ? '-100%' : 0,
+          width: hovering ? '0%' : '15%',
+        }}
+        style={{
+          height: '90%',
+          zIndex: 0,
+        }}
+        transition={{
+          duration: 0.1,
+        }}>
+        <Checkbox
+          checked={curMood === id}
+          onChange={(e) => {
+            dispatch(setCurrentMood(curMood === id ? null : id))
+          }}
+        />
+      </MBox>
+    </div>
   )
 }
+const MBox = motion(Box)

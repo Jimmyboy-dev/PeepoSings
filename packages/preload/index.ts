@@ -1,78 +1,100 @@
 import { ipcRenderer as ipc } from 'electron-better-ipc'
 // import Store from "electron-store";
 // import LastFMTyped from 'lastfm-typed'
-import { app, contextBridge } from 'electron'
+// import { app, contextBridge } from 'electron'
 // import $ from "jquery";
 import type { Result } from 'ytsr'
 import type { IpcRendererEvent } from 'electron/renderer'
-import type { videoInfo } from 'ytdl-core'
-import Store from 'electron-store'
-import createElectronStorage from 'redux-persist-electron-storage'
+import { DownloadInfo, ffmpegProgress, IpcEvents, PeepoMeta, VideoInfo } from '@peepo/core'
+// import Store from 'electron-store'
+// import createElectronStorage from 'redux-persist-electron-storage'
 export type ElectronAPI = typeof api
 
-const electronStore = new Store({
-  name: 'store',
-  watch: true,
-})
-const electronStorage = createElectronStorage({ electronStore })
+// const electronStore = new Store({
+//   name: 'store',
+//   watch: true,
+// })
+// const electronStorage = createElectronStorage({ electronStore })
 
 declare global {
   // interface DocumentEventMap {
-  //   "music-change": CustomEvent<SongJSON[]>;
+  //   "music-change": CustomEvent<PeepoMeta[]>;
   //   "download-progress": CustomEvent<{ raw: unknown & { targetSize: number }, msg: `${number}kb downloaded`, dlInfo: unknown }>;
   //   "download-end": CustomEvent<{ path: string, dlInfo: unknown }>;
   // }
 }
 
+const log = window.console.log
+window.console.log = (...args: any[]) => {
+  ipc.callMain(IpcEvents.RENDERER_LOG, args)
+  log(...args)
+}
+
 const api = {
   windowControl: (e: 'minimize' | 'maximize' | 'close') => {
-    ipc.send('windowCmd', e)
+    switch (e) {
+      case 'minimize':
+        ipc.callMain(IpcEvents.WINDOW_MINIMIZE)
+        break
+      case 'maximize':
+        ipc.callMain(IpcEvents.WINDOW_MAXIMIZE)
+        break
+      case 'close':
+        ipc.callMain(IpcEvents.WINDOW_CLOSE)
+        break
+    }
+  },
+  file: {
+    startDrag: (filePath: string) => {
+      ipc.callMain(IpcEvents.FILE_START_DRAG, filePath)
+    },
   },
   music: {
     openLocation: async (path: string) => {
       ipc.callMain('open-location', path)
     },
-    saveSong: async (song: SongJSON) => {
+    saveSong: async (song: PeepoMeta) => {
       ipc.callMain('music-save', song)
     },
-    saveSongs: async (songs: SongJSON[]) => {
+    saveSongs: async (songs: PeepoMeta[]) => {
       ipc.callMain('music-save-all', songs)
     },
     removeSong: async (...args: [path: string, title: string]) => {
-      return await ipc.callMain('music-remove', args)
+      return await ipc.callMain(IpcEvents.DB_REMOVE, ['song', { path: args[0] }])
     },
     getSongs: async () => {
-      return (await ipc.callMain('music-get', 'songs')) as SongJSON[]
+      return (await ipc.callMain('music-get', 'songs')) as PeepoMeta[]
     },
-    addSong: async (url: string): Promise<SongJSON> => {
-      return await ipc.callMain('music-add', url)
+    addSong: async (url: string): Promise<PeepoMeta> => {
+      return await ipc.callMain(IpcEvents.MUSIC_ADD, url)
     },
     openInEditor: () => {
-      electronStore.openInEditor()
+      ipc.callMain(IpcEvents.MUSIC_OPEN_EDITOR)
+      // electronStore.openInEditor()
     },
     getLastSong: async () => {
-      return (await ipc.callMain('music-get', 'lastSong')) as SongJSON
+      return (await ipc.callMain('music-get', 'lastSong')) as PeepoMeta
     },
-    setLastSong: async (song: SongJSON): Promise<void> => {
+    setLastSong: async (song: PeepoMeta): Promise<void> => {
       return await ipc.callMain('music-set', ['lastSong', song])
     },
-    getVideoInfo: async (url: string): Promise<videoInfo> => {
-      return await ipc.callMain('video-info', url)
+    getVideoInfo: async (url: string): Promise<VideoInfo> => {
+      return await ipc.callMain(IpcEvents.MUSIC_INFO, url)
     },
     searchSongs: async (query: string): Promise<Result> => {
       if (query.length <= 0) throw new Error('Query is empty')
-      return (await ipc.callMain('music-search', query)) as Result
+      return (await ipc.callMain(IpcEvents.MUSIC_SEARCH, query)) as Result
     },
   },
   listeners: {
-    onMusicChange: (handler: (e: IpcRendererEvent, songs: SongJSON[]) => void) => ipc.on('music-change', handler),
+    onMusicChange: (handler: (e: IpcRendererEvent, songs: PeepoMeta[]) => void) => ipc.on('music-change', handler),
     onDownloadProgress: (handler: (download: { raw: ffmpegProgress; msg: `${number}kb downloaded`; dlInfo: DownloadInfo }) => void) =>
-      ipc.answerMain('download-progress', (args: { raw: ffmpegProgress; msg: `${number}kb downloaded`; dlInfo: DownloadInfo }) => {
+      ipc.answerMain(IpcEvents.MUSIC_PROGRESS, (args: { raw: ffmpegProgress; msg: `${number}kb downloaded`; dlInfo: DownloadInfo }) => {
         handler(args)
         return true
       }),
     onDownloadEnd: (handler: (download: { path: string; dlInfo: DownloadInfo }) => void) =>
-      ipc.answerMain('download-end', (args: { path: string; dlInfo: DownloadInfo }) => {
+      ipc.answerMain(IpcEvents.MUSIC_FINISHED, (args: { path: string; dlInfo: DownloadInfo }) => {
         handler(args)
         return true
       }),
@@ -88,17 +110,16 @@ const api = {
       return await ipc.callMain('toggle-auto-launch')
     },
   },
-  store: electronStore,
-  electronStorage,
   ipc: {
-    async trayTooltip(song: SongJSON | null) {
+    async trayTooltip(song: PeepoMeta | null) {
       return (await ipc.callMain('set-current-song', song)) as boolean
     },
-    async onSong(song: SongJSON | null) {
-      await ipc.callMain('on-song', song)
+    async onSong(song: PeepoMeta | null) {
+      await ipc.callMain(IpcEvents.SONG_CHANGE, song)
     },
   },
 }
 
 // contextBridge.exposeInMainWorld('electron', api)
 window.electron = api
+window.ipc = ipc

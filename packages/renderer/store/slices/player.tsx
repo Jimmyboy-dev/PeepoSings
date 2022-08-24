@@ -1,5 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
+import { IpcEvents } from '@peepo/core'
+import { fetchSongs } from './songs'
 
 interface PlayerState {
   shuffle: boolean
@@ -45,6 +47,7 @@ const player = createSlice({
     },
     setVolume(state, action: PayloadAction<number>) {
       state.volume = action.payload
+      ipc.callMain(IpcEvents.SET_OPTION, ['volume', action.payload])
     },
     setDuration(state, action: PayloadAction<number>) {
       state.duration = action.payload
@@ -56,6 +59,11 @@ const player = createSlice({
       if (action?.payload !== undefined) state.playing = action.payload
       else state.playing = !state.playing
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchSongs.fulfilled, (state, action) => {
+      if (action.payload.settings?.volume) state.volume = action.payload.settings.volume
+    })
   },
 })
 

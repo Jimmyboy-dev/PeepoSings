@@ -3,6 +3,11 @@ import path from 'path'
 import { type Plugin, type UserConfig, defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import electron from 'vite-plugin-electron'
+import tsconfigPaths from 'vite-tsconfig-paths'
+import swc from 'unplugin-swc'
+
+// import babel from 'vite-plugin-babel'
+
 import pkg from './package.json'
 
 rmSync(path.join(__dirname, 'dist'), { recursive: true, force: true }) // v14.14.0
@@ -11,19 +16,42 @@ rmSync(path.join(__dirname, 'dist'), { recursive: true, force: true }) // v14.14
 export default defineConfig({
   resolve: {
     alias: {
-      '@': path.join(__dirname, 'packages/renderer'),
+      '@/': path.join(__dirname, 'packages/renderer/src'),
       styles: path.join(__dirname, 'packages/renderer/assets/styles'),
+      '@peepo/core': path.join(__dirname, 'packages/core/src'),
     },
   },
   plugins: [
     react(),
+    tsconfigPaths(),
     electron({
       main: {
         entry: 'packages/main/index.ts',
         vite: withDebug({
+          resolve: {
+            alias: {
+              '@peepo/core': path.join(__dirname, 'packages/core/src'),
+            },
+          },
           build: {
             outDir: 'dist/main',
+            sourcemap: 'inline',
           },
+          plugins: [
+            swc.vite({
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  decorators: true,
+                  tsx: true,
+                },
+                transform: {
+                  legacyDecorator: true,
+                  decoratorMetadata: true,
+                },
+              },
+            }),
+          ],
         }),
       },
       preload: {
@@ -32,6 +60,12 @@ export default defineConfig({
           index: path.join(__dirname, 'packages/preload/index.ts'),
         },
         vite: {
+          resolve: {
+            alias: {
+              '@peepo/core': path.join(__dirname, 'packages/core/src'),
+            },
+          },
+
           build: {
             // For debug
             sourcemap: 'inline',
@@ -41,7 +75,11 @@ export default defineConfig({
       },
       // Enables use of Node.js API in the Electron-Renderer
       // https://github.com/electron-vite/vite-plugin-electron/tree/main/packages/electron-renderer#electron-renderervite-serve
-      renderer: {},
+      renderer: {
+        resolve() {
+          return ['better-sqlite3', 'os']
+        },
+      },
     }),
     renderBuiltUrl(),
   ],
@@ -50,7 +88,7 @@ export default defineConfig({
     port: pkg.env.VITE_DEV_SERVER_PORT,
   },
   build: {
-    minify: false,
+    minify: process.env.NODE_ENV !== 'development',
   },
 })
 

@@ -1,5 +1,5 @@
 import { Center } from '@mantine/core'
-import { useModals } from '@mantine/modals'
+// import { useModals } from '@mantine/modals'
 import React from 'react'
 import ReactPlayer from 'react-player'
 

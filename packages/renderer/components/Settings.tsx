@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import React, { useEffect } from 'react'
 import { Drawer, Button, Group, Modal, Select, Checkbox, Text, TextInput, Stack } from '@mantine/core'
-import { PeepoSingConfig } from '../../../types/store'
+import { PeepoSingConfig } from '@peepo/core'
 import { useSelector } from 'react-redux'
 import { useAppDispatch, useAppSelector } from '../store'
 import { connectToLastFM, setOutputDevice, toggleRunOnStartup } from '../store/slices/config'

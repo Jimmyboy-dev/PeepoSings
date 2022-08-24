@@ -86,3 +86,7 @@ release
 .DS_Store
 dist-ssr
 *.local
+
+# Binaries
+bin
+yarn-error.log

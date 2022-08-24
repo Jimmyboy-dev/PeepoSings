@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import type { TypedUseSelectorHook } from 'react-redux'
 import { useDispatch, useSelector } from 'react-redux'
-import { persistReducer, FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
+// import { persistReducer, FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, PersistConfig } from 'redux-persist'
 import type { RootState } from './slices'
 import rootReducer from './slices'
 // ...
@@ -19,21 +19,23 @@ const logger = createLogger({
   },
 })
 
-const persistConfig = {
-  key: 'root',
-  storage: window.electron.electronStorage,
-  blacklist: ['currentSong'],
-}
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+// const persistConfig: PersistConfig<RootState> = {
+//   key: 'root',
+//   version: 1,
+//   storage: localStorage,
+//   blacklist: ['currentSong'],
+// }
+// // const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-      },
-      immutableCheck: false,
+      serializableCheck: false,
+      // serializableCheck: {
+      //   ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      // },
+      // immutableCheck: false,
     })
       .concat(logger)
       .prepend(electronMiddleware),

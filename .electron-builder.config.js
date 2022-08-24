@@ -35,7 +35,7 @@ const config = {
       from: './buildResources/bin/macos',
       to: 'bin',
     },
-    category: 'music',
+    category: 'public.app-category.music',
     target: ['dmg'],
     artifactName: '${productName}-Installer.${ext}',
   },
@@ -45,7 +45,10 @@ const config = {
       from: './buildResources/bin/linux',
       to: 'bin',
     },
-    category: 'music',
+    desktop: {
+      Name: 'Peepo Sings',
+    },
+    category: 'Audio;AudioVideo;Network;Player;Music',
     target: ['AppImage'],
     artifactName: '${productName}-Installer.${ext}',
   },
@@ -53,7 +56,53 @@ const config = {
     output: 'release/${version}',
     buildResources: 'buildResources',
   },
-  files: ['dist/**/*', 'buildResources/*', '!buildResources/bin/**/*'],
+  fileAssociations: [
+    {
+      ext: 'mp3',
+      mimeType: 'audio/mp3',
+    },
+    {
+      ext: 'mp3',
+      mimeType: 'audio/mpeg',
+    },
+    {
+      ext: 'ogg',
+      mimeType: 'audio/ogg',
+    },
+    {
+      ext: 'opus',
+      mimeType: 'audio/ogg',
+    },
+    {
+      ext: 'aac',
+      mimeType: 'audio/aac',
+    },
+    {
+      ext: 'flac',
+      mimeType: 'audio/flac',
+    },
+    {
+      ext: 'wav',
+      mimeType: 'audio/x-wav',
+    },
+    {
+      ext: 'm4a',
+      mimeType: 'audio/m4a',
+    },
+    {
+      ext: 'weba',
+      mimeType: 'audio/weba',
+    },
+    {
+      ext: 'mp4',
+      mimeType: 'audio/mp4',
+    },
+    {
+      ext: 'webm',
+      mimeType: 'audio/webm',
+    },
+  ],
+  files: ['dist/**/*', 'buildResources/*', 'buildResources/icons/*', '!buildResources/bin/**/*'],
   publish: {
     provider: 'github',
     owner: 'devJimmyboy',
