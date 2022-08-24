@@ -1,4 +1,4 @@
-import { Sx, Text, TextProps, useMantineTheme } from '@mantine/core'
+import { Box, Sx, Text, TextProps, useMantineTheme } from '@mantine/core'
 import React, { ChangeEvent } from 'react'
 
 type Props = {
@@ -17,11 +17,20 @@ export default function EditableText({ children, onChange, className, styles, di
     if (editing) ref.current.focus()
   }, [editing])
   const hoverSx: Sx = {
-    backgroundColor: theme.colors.gray[9] + '66',
+    backgroundColor: theme.colors.dark[9] + '66',
   }
   return (
-    <Text
-      sx={{ ...styles, borderRadius: 4, cursor: editing || disabled ? 'text' : 'pointer', outline: 'none', padding: '0 0.25rem', transition: 'all 150ms ease-in-out', '&:hover': !disabled && hoverSx }}
+    <Box
+      sx={{
+        ...styles,
+
+        borderRadius: 4,
+        cursor: editing || disabled ? 'text' : 'pointer',
+        outline: 'none',
+        padding: '0 0.5rem',
+        transition: 'all 150ms ease-in-out',
+        '&:hover': !disabled && hoverSx,
+      }}
       suppressContentEditableWarning
       ref={ref}
       onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -44,6 +53,6 @@ export default function EditableText({ children, onChange, className, styles, di
       className={className}
       contentEditable={editing}>
       {children}
-    </Text>
+    </Box>
   )
 }

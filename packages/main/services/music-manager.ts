@@ -194,6 +194,9 @@ export class MusicManager {
     try {
       await new Promise<void>((resolve, reject) => {
         stream
+          .on('progress', (prog) => {
+            this.window.setProgressBar(prog.percent / 2)
+          })
           .on('end', () => {
             resolve()
           })
@@ -214,6 +217,9 @@ export class MusicManager {
 
             console.log(`${p.percent}% downloaded`)
           }
+
+          this.window.setProgressBar(0.5 + p.percent / 2)
+
           if (this.window) ipc.callRenderer(this.window.getBrowserWindow(), IpcEvents.MUSIC_PROGRESS, { raw: p, msg: `${p.percent}% downloaded`, dlInfo: this.dlInfo })
         })
         .on('error', (err) => {
@@ -225,12 +231,14 @@ export class MusicManager {
               dlInfo: this.dlInfo,
               title: this.dlInfo?.vidInfo.title,
             })
+          this.window.setProgressBar(-1)
+
           reject(err)
         })
         .on('end', () => {
           // if (!this.dlInfo) return
           console.log(`\nFinished downloading "${this.dlInfo.vidInfo.title}" by ${this.dlInfo.vidInfo.channel}, took ${(Date.now() - (this.dlInfo?.start || Date.now())) / 1000}s`)
-
+          this.window.setProgressBar(-1)
           this.currentDownload = null
           return resolve({ path: savePath, info, stream: this.currentDownload })
         })

@@ -161,6 +161,9 @@ class Window {
       this.browserWindow.restore()
     }
   }
+  setProgressBar(number: number) {
+    this.browserWindow.setProgressBar(number)
+  }
 
   setTitle(title: string) {
     this.browserWindow.setTitle(title)

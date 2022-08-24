@@ -12,13 +12,14 @@ import peepoShrug from '../assets/peepoShrug.png'
 import { getHotkeyHandler, useDisclosure } from '@mantine/hooks'
 import { motion } from 'framer-motion'
 import EditableText from './EditableText'
+import FavoriteButton from './FavoriteButton'
+import ProgressSlider from './ProgressSlider'
 
 function AudioPlayer(): ReactElement {
   const dispatch = useAppDispatch()
   const { currentTime, duration, filter, playing, repeat, shuffle, volume } = useAppSelector((state) => state.player)
   const [{ song: currentSong, mood: curMood }, { songs, moods }] = useAppSelector((state) => [state.currentSong, { songs: state.songs, moods: state.moods }])
   const [source, setSource] = React.useState('')
-  const [seeking, { open: seek, close: unseek }] = useDisclosure(false)
   const audioDevice = useAppSelector((state) => state.config.outputDevice)
 
   const queue = curMood !== null ? songs.filter((song) => song.mood.includes(curMood)) : songs
@@ -37,24 +38,12 @@ function AudioPlayer(): ReactElement {
       shouldPlay = true
     }
     audio.current.setSinkId(audioDevice)
-    if (shouldPlay) audio.current.play()
+    if (shouldPlay)
+      audio.current.play().catch((e) => {
+        console.log(e.message)
+      })
   }, [audioDevice, playing])
-  useEffect(() => {
-    if (seeking) {
-      document.addEventListener('mousemove', onSeek)
-      document.addEventListener(
-        'mouseup',
-        () => {
-          console.log('mouseup')
-          unseek()
-        },
-        { once: true }
-      )
-    }
-    return () => {
-      document.removeEventListener('mousemove', onSeek)
-    }
-  }, [seeking])
+
   useEffect(() => {
     audio.current.volume = volume
   }, [volume])
@@ -75,6 +64,23 @@ function AudioPlayer(): ReactElement {
         compressor.connect(audioCtx.current.destination)
       }
     })
+    try {
+      navigator.mediaSession.setActionHandler('play', () => {
+        // console.log(e.action, 'emitted')
+        dispatch(setPlaying(true))
+      })
+      navigator.mediaSession.setActionHandler('pause', () => {
+        dispatch(setPlaying(false))
+      })
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        dispatch(nextSong())
+      })
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        dispatch(prevSong())
+      })
+    } catch (e) {
+      console.log(e)
+    }
   }, [])
   const calcProgress = function (currentTime: number) {
     if (song && audio.current) {
@@ -99,7 +105,7 @@ function AudioPlayer(): ReactElement {
     }
   }, 750)
 
-  const audioPlay = () => audio.current?.play().catch((e) => console.error(e, audio))
+  const audioPlay = () => audio.current?.play().catch((e) => console.error(e))
 
   const advSong = () => {
     if (song && audio.current) {
@@ -129,10 +135,7 @@ function AudioPlayer(): ReactElement {
     }
   }
 
-  const onSeek = (e: MouseEvent) => {
-    const { clientX } = e
-    const { offsetLeft, offsetWidth } = e.target as HTMLElement
-    const percent = (clientX - offsetLeft) / offsetWidth
+  const onSeek = (percent: number) => {
     if (audio.current) audio.current.currentTime = calcTime(percent)
   }
 
@@ -203,47 +206,24 @@ function AudioPlayer(): ReactElement {
         )}
 
         <div style={{ pointerEvents: 'all' }} className="w-full z-10 bg-neutral h-32 bottom-0  m-0">
-          <motion.div className="group absolute z-50 pointer-events-auto w-full m-0 flex flex-row" whileHover={{ height: 15, y: -5 }} style={{ height: 10, transformOrigin: 'bottom' }}>
-            <Progress
-              className="w-full h-full m-0"
-              value={currentTime * 100}
-              styles={{
-                label: { display: 'none' },
-                bar: {
-                  borderRadius: '0px !important',
-                },
-                root: {
-                  borderRadius: '0px !important',
-                  transition: 'transform 0.2s ease-in-out',
-                  transformOrigin: 'bottom',
-                },
-              }}
-              onMouseDown={() => {
-                seek()
-              }}
-              // onMouseMove={(e) => seeking && song}
-              style={{ cursor: 'pointer' }}
-            />
-            <motion.div
-              animate={{
-                left: `${currentTime * 100}%`,
-                top: '50%',
-                width: '20px',
-                height: '20px',
-              }}
-              style={{
-                x: '-50%',
-                y: '-50%',
-                background: 'white',
-                position: 'absolute',
-                transformOrigin: 'bottom',
+          <ProgressSlider
+            value={currentTime}
+            onChange={(val) => {
+              onSeek(val)
+            }}
+          />
 
-                borderRadius: '50%',
-              }}
-            />
-          </motion.div>
-
-          <Group className="w-full h-full px-4 flex-nowrap relative">
+          <Group position="center" className="w-full h-full px-4 flex-nowrap relative">
+            {song && (
+              <FavoriteButton
+                liked={song.favorite || false}
+                onClick={() => {
+                  if (song) {
+                    dispatch(editSong({ ...song, favorite: !song.favorite }))
+                  }
+                }}
+              />
+            )}
             <Group position="center" className="flex-nowrap" spacing={1}>
               <ActionIcon size="lg" className="rounded-full text-lg" onClick={() => dispatch(currentSong !== 0 ? prevSong() : setCurrentSong(queue.length - 1))}>
                 <Icon icon="fas:backward-step" />
@@ -259,7 +239,7 @@ function AudioPlayer(): ReactElement {
               <img className="w-24 h-24 object-cover" src={song?.thumbnail || peepoShrug}></img>
             </div>
 
-            <Stack className="justify-center gap-0 flex-shrink truncate">
+            <Stack align="start" className="justify-center gap-0 flex-shrink truncate">
               <EditableText
                 onChange={(val) => {
                   dispatch(editSong({ ...song, title: val }))

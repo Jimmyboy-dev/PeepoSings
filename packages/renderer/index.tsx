@@ -15,8 +15,8 @@ import MotionPathPlugin from 'gsap/MotionPathPlugin'
 // import { PersistGate } from 'redux-persist/integration/react'
 import KBarProvider from './components/KBar'
 import { ModalsProvider } from '@mantine/modals'
-import unhandled from 'electron-unhandled'
-unhandled({})
+// import unhandled from 'electron-unhandled'
+// unhandled({})
 
 gsap.registerPlugin(MotionPathPlugin)
 

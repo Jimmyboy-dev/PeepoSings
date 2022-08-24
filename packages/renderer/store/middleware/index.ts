@@ -1,9 +1,10 @@
 import type { Middleware } from 'redux'
 import type { RootState } from '../slices'
-import { setCurrentSong } from '../slices/currentSong'
+import { nextSong, prevSong, setCurrentSong } from '../slices/currentSong'
 import { setCurrentTime, setPlaying } from '../slices/player'
 import { IpcEvents, PeepoMeta } from '@peepo/core'
 import { addSong } from '../slices/songs'
+import { clamp } from 'lodash'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 const electronMiddleware: Middleware<{}, RootState> = (storeAPI) => {
@@ -28,8 +29,8 @@ const electronMiddleware: Middleware<{}, RootState> = (storeAPI) => {
         config,
       } = storeAPI.getState()
       let curSong: PeepoMeta | undefined
-      if (song !== -1) curSong = mood ? songs.filter((s) => s.mood.includes(mood))[song] : songs[song]
-      if (setCurrentSong.match(action)) {
+      if (song !== -1) curSong = mood !== null ? songs.filter((s) => s.mood.includes(mood))[song] : songs[song]
+      if ([setCurrentSong, nextSong, prevSong].some((act) => act.match(action))) {
         if (curSong) {
           ipc.callMain(IpcEvents.SONG_CHANGE, curSong)
 
@@ -40,17 +41,17 @@ const electronMiddleware: Middleware<{}, RootState> = (storeAPI) => {
             artwork: curSong.thumbnail ? [{ src: curSong.thumbnail, type: 'image/png' }] : undefined,
           })
         } else {
-          ipc.callMain(IpcEvents.SONG_CHANGE, curSong)
+          ipc.callMain(IpcEvents.SONG_CHANGE, null)
           navigator.mediaSession.metadata = null
         }
       } else if (setPlaying.match(action)) {
-        navigator.mediaSession.playbackState = action.payload || !player.playing ? 'playing' : 'paused'
+        navigator.mediaSession.playbackState = !player.playing ? 'playing' : 'paused'
       } else if (setCurrentTime.match(action)) {
         if (curSong)
           navigator.mediaSession.setPositionState({
             duration: curSong.duration,
             playbackRate: 1,
-            position: action.payload,
+            position: clamp(action.payload, 0, curSong.duration),
           })
       }
 

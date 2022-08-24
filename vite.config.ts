@@ -77,7 +77,7 @@ export default defineConfig({
       // https://github.com/electron-vite/vite-plugin-electron/tree/main/packages/electron-renderer#electron-renderervite-serve
       renderer: {
         resolve() {
-          return ['better-sqlite3', 'os']
+          return ['os']
         },
       },
     }),
@@ -89,6 +89,9 @@ export default defineConfig({
   },
   build: {
     minify: process.env.NODE_ENV !== 'development',
+    rollupOptions: {
+      input: ['./index.html', './splash.html'],
+    },
   },
 })
 
