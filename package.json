@@ -15,12 +15,12 @@
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development vite",
-    "build": "yarn run typecheck && vite build && yarn run app:dist",
+    "build": "vite build && yarn run app:dist",
     "build:dev": "yarn run typecheck && vite build",
     "app:dir": "electron-builder --dir --config .electron-builder.config.js",
     "app:dist": "electron-builder --config .electron-builder.config.js",
     "typeorm": "typeorm-ts-node-commonjs -d ./cli.ts",
-    "typecheck": "tsc --noEmit -p ./tsconfig.json",
+    "typecheck": "tsc --noEmit ./packages/renderer/**/*",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
