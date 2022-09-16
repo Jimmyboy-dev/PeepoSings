@@ -58,8 +58,8 @@ export default function SongSearch(): ReactElement {
 
   // }, [search])
 
-  const currentMood = useAppSelector((state) => state.currentSong.mood)
-  const dispatch = useAppDispatch()
+  // const currentMood = useAppSelector((state) => state.currentSong.mood)
+  // const dispatch = useAppDispatch()
   return (
     <div className="rounded-xl transition-all border-2 w-full border-green-500 overflow-hidden">
       <Input.Wrapper className="w-full top-0 bg-base-200 p-4" label="Add a Video:" style={{ height: '33%' }}>
@@ -83,6 +83,7 @@ export default function SongSearch(): ReactElement {
               setSearch(e.target.value)
               setResults([])
             }}
+            data-autofocus
             placeholder="Search or Enter URL..."
             className="flex-grow"
             rightSectionWidth={36}
@@ -227,8 +228,8 @@ function ResultView({ type, result, onAdd, notifs }: ResultViewProps): ReactElem
                   title: `Downloading ${result.title}`,
                   loading: true,
                   message: 'Starting Download',
-                  autoClose: 10,
-                  disallowClose: true,
+                  autoClose: false,
+                  disallowClose: false,
                 })
                 ipc
                   .callMain(

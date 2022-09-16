@@ -50,9 +50,9 @@ export default function EditableText({ children, onChange, className, styles, di
         onChange(e.target.innerText)
         setEditing(false)
       }}
+      children={children}
       className={className}
-      contentEditable={editing}>
-      {children}
-    </Box>
+      contentEditable={editing}
+    />
   )
 }

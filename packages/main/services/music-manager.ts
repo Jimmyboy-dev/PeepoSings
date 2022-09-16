@@ -1,4 +1,4 @@
-import type { BrowserWindow } from 'electron'
+import { BrowserWindow, Notification, protocol } from 'electron'
 import { app } from 'electron'
 import { ipcMain as ipc } from 'electron-better-ipc'
 import fs from 'fs'
@@ -92,14 +92,33 @@ export class MusicManager {
       console.log('yt-dlp is up to date, version', currVersion)
     }
 
+    protocol.registerStreamProtocol('preview', (request, callback) => {
+      const url = request.url.replace('preview', 'https')
+
+      callback(this.getPreviewStream(url))
+    })
+
     await this.readCurrentData()
+  }
+
+  private showNotification(title: string, body: string) {
+    new Notification({ title, body }).show()
   }
 
   private async readCurrentData() {
     if (!fs.existsSync(this.musicPath)) {
       fs.mkdirSync(this.musicPath, { recursive: true })
     }
-    await this.db.ready
+    if (!this.db.isInitialized) {
+      await new Promise<void>((resolve) => {
+        const to = setInterval(() => {
+          if (this.db.isInitialized) {
+            clearTimeout(to)
+            resolve()
+          }
+        }, 100)
+      })
+    }
     const files = fs.readdirSync(this.musicPath)
     const knownSongs = await this.db.songs.find()
     console.log('Currently known songs:', knownSongs.map((s) => s.metadata.title).join(', '))
@@ -129,7 +148,7 @@ export class MusicManager {
       if (fs.existsSync(path)) {
         fs.rmSync(path, { maxRetries: 5 })
       }
-      this.db.songs.remove({
+      this.db.songs.delete({
         path,
       })
     } catch (e) {
@@ -137,33 +156,39 @@ export class MusicManager {
     }
   }
 
-  async addSong(url: string): Promise<Omit<PeepoMeta, 'id' | 'mood'>> {
+  async addSong(url: string) {
     // const info = await this.getYoutubeVideoInfo(url)
 
-    const res = (await this.getYoutubeVideo(url).catch((e) => {
-      console.error('YT vid failed dl:', e)
-      return null
-    })) as { path: string; info: VideoInfo; stream: FfmpegCommand } | null
-    if (!res) return Promise.reject('Failed to download video')
+    this.getYoutubeVideo(url)
+      .catch((e) => {
+        console.error('YT vid failed dl:', e)
+        return null
+      })
+      .then(async (res) => {
+        if (!res) return Promise.reject('Failed to download video')
 
-    const { info, path, stream } = res
-    const cleanedMeta = this.cleanMetadata(info)
+        const { info, path, stream } = res
+        const cleanedMeta = this.cleanMetadata(info)
 
-    const song = await this.db.songs.create({
-      title: info.track ?? info.title,
-      path,
-      artist: info.artist ?? info.channel ?? info.creator ?? info.uploader ?? 'Unknown',
-      duration: info.duration,
-      in: 0,
-      out: info.duration,
-      thumbnail: info.thumbnail ?? info.thumbnails.reduceRight((best, cur) => (cur.preference > best.preference ? cur : best)).url,
-      metadata: cleanedMeta,
-      album: info.album ?? undefined,
-      mood: [],
-    })
-    ipc.callRenderer(this.window.getBrowserWindow(), IpcEvents.MUSIC_FINISHED, { path: path, dlInfo: this.dlInfo, song })
-
-    return song
+        const songEntity = this.db.songs.create({
+          title: info.track ?? info.title,
+          path,
+          artist: info.artist ?? info.channel ?? info.creator ?? info.uploader ?? 'Unknown',
+          duration: info.duration,
+          in: 0,
+          out: info.duration,
+          thumbnail: info.thumbnail ?? info.thumbnails.reduceRight((best, cur) => (cur.preference > best.preference ? cur : best)).url,
+          metadata: cleanedMeta,
+          album: info.album ?? undefined,
+          mood: [],
+        })
+        const song = await this.db.songs.save(songEntity)
+        ipc.callRenderer(this.window.getBrowserWindow(), IpcEvents.MUSIC_FINISHED, { path: path, dlInfo: this.dlInfo, song })
+      })
+      .catch((e) => {
+        console.error(e)
+        this.showNotification(`Error Occurred Downloading ${url}`, e || 'Unknown Error')
+      })
   }
   cleanMetadata(info: VideoInfo): VideoInfo {
     const cleanedInfo: VideoInfo = {
@@ -176,7 +201,7 @@ export class MusicManager {
     return cleanedInfo
   }
 
-  public async getYoutubeVideo(url: string): Promise<{ path: string; info: VideoInfo; stream: Readable }> {
+  public async getYoutubeVideo(url: string) {
     // if (!this.isVideo(url)) return
     const info = await this.getYoutubeVideoInfo(url)
 
@@ -188,14 +213,11 @@ export class MusicManager {
     let stream = this.ytdl.execStream([url, '-f', 'bestaudio'])
     this.currentDownload = stream
     stream.pipe(fs.createWriteStream(tempVidPath))
-    // new PassThrough({ autoDestroy: true })
-    // const ytStream =
-    // ytStream.pipe(this.currentDownload, { end: false })
     try {
       await new Promise<void>((resolve, reject) => {
         stream
           .on('progress', (prog) => {
-            this.window.setProgressBar(prog.percent / 2)
+            this.window.setProgressBar(prog.percent / 200)
           })
           .on('end', () => {
             resolve()
@@ -207,45 +229,38 @@ export class MusicManager {
     } catch (e) {
       console.error(e)
     }
-    const dlFinished = await new Promise<{ path: string; info: VideoInfo; stream: Readable }>((resolve, reject) => {
-      ffmpeg(tempVidPath)
-        .audioBitrate(128)
-        .save(savePath)
-        .on('progress', (p) => {
-          if (p.percent - progress > 0.1) {
-            progress = p.percent
+    const dl = ffmpeg(tempVidPath)
+      .audioBitrate(128)
+      .save(savePath)
+      .on('progress', (p) => {
+        if (p.percent - progress > 0.1) {
+          progress = p.percent
 
-            console.log(`${p.percent}% downloaded`)
-          }
-
-          this.window.setProgressBar(0.5 + p.percent / 2)
-
+          console.log(`${p.percent}% downloaded`)
           if (this.window) ipc.callRenderer(this.window.getBrowserWindow(), IpcEvents.MUSIC_PROGRESS, { raw: p, msg: `${p.percent}% downloaded`, dlInfo: this.dlInfo })
-        })
-        .on('error', (err) => {
-          console.error('Cannot process youtube download: ' + err.message)
-          if (this.window)
-            ipc.callRenderer(this.window.getBrowserWindow(), IpcEvents.MUSIC_ERROR, {
-              err,
-              path: savePath,
-              dlInfo: this.dlInfo,
-              title: this.dlInfo?.vidInfo.title,
-            })
-          this.window.setProgressBar(-1)
+        }
 
-          reject(err)
-        })
-        .on('end', () => {
-          // if (!this.dlInfo) return
-          console.log(`\nFinished downloading "${this.dlInfo.vidInfo.title}" by ${this.dlInfo.vidInfo.channel}, took ${(Date.now() - (this.dlInfo?.start || Date.now())) / 1000}s`)
-          this.window.setProgressBar(-1)
-          this.currentDownload = null
-          return resolve({ path: savePath, info, stream: this.currentDownload })
-        })
-    })
-    await rm(tempPath, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 })
-
-    return dlFinished
+        this.window.setProgressBar(0.5 + p.percent / 200)
+      })
+      .on('error', (err) => {
+        console.error('Cannot process youtube download: ' + err.message)
+        if (this.window)
+          ipc.callRenderer(this.window.getBrowserWindow(), IpcEvents.MUSIC_ERROR, {
+            err,
+            path: savePath,
+            dlInfo: this.dlInfo,
+            title: this.dlInfo?.vidInfo.title,
+          })
+        this.window.setProgressBar(-1)
+      })
+      .on('end', () => {
+        // if (!this.dlInfo) return
+        console.log(`\nFinished downloading "${this.dlInfo.vidInfo.title}" by ${this.dlInfo.vidInfo.channel}, took ${(Date.now() - (this.dlInfo?.start || Date.now())) / 1000}s`)
+        this.window.setProgressBar(-1)
+        this.currentDownload = null
+        rm(tempPath, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 })
+      })
+    return { path: savePath, info, stream: dl }
   }
 
   public async getYoutubeVideoInfo(url: string) {
@@ -254,9 +269,14 @@ export class MusicManager {
   }
 
   async getSongs() {
-    return await this.db.songs.find()
+    return await this.db.songs.find({ relations: { mood: true } })
   }
   async getMoods() {
     return await this.db.moods.find()
+  }
+
+  getPreviewStream(url: string) {
+    console.log('getPreviewStream', url)
+    return this.ytdl.execStream([url])
   }
 }

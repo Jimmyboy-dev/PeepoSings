@@ -24,6 +24,7 @@ enum IpcEvents {
   MUSIC_FINISHED = 'music-finished',
   MUSIC_INFO = 'music-info',
   MUSIC_SEARCH = 'music-search',
+  MUSIC_PREVIEW = 'music-preview',
 
   LOCALFOLDER_REMOVE = 'remove-localfolder',
   LOCALFOLDERS_REFRESH = 'refresh-localfolders',
@@ -47,6 +48,7 @@ enum IpcEvents {
 
   GET_OPTION = 'get-option',
   SET_OPTION = 'set-option',
+  SET_OPTION_SENSITIVE = 'set-option-sensitive',
   LASTFM_LOGIN = 'lastfm-login',
   LASTFM_SESSION = 'lastfm-session',
   INITIAL_INFO = 'initial-info',
@@ -59,6 +61,7 @@ enum IpcEvents {
   MUSIC_MOOD = 'music-mood',
 
   MOOD_ADD = 'mood-add',
+  MANUAL_UPDATE = 'manual-update',
 }
 
 export default IpcEvents

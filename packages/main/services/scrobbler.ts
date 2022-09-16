@@ -6,9 +6,14 @@ import { getInfo, search } from 'lastfm-typed/dist/interfaces/trackInterface'
 import MetadataFilter from 'metadata-filter'
 import { IpcEvents, PeepoMeta } from '@peepo/core'
 import { inject, injectable } from 'inversify'
+import axios from 'axios'
+import pako from 'pako'
 import Config from './config'
 import Window from './window'
 import Store from './store'
+import fpcalcAsync from 'fpcalc-async'
+import path from 'path'
+import { FpcalcResult } from 'fpcalc'
 
 interface ScrobblerOptions {
   apiSecret?: string
@@ -23,11 +28,11 @@ export default class Scrobbler extends LastFMTyped {
   apiKey: string
   apiSecret: string
   currentSong: PeepoMeta | null = null
-
+  fpcalc = fpcalcAsync
   filter = MetadataFilter.createYouTubeFilter()
   constructor(@inject(Config) private config: Config, @inject(Window) private window: Window, @inject(Store) private store: Store) {
-    const apiKey = import.meta.env.VITE_LAST_FM_KEY
-    const apiSecret = import.meta.env.VITE_LAST_FM_SHARED_SECRET
+    const apiKey = process.env.VITE_LAST_FM_KEY
+    const apiSecret = process.env.VITE_LAST_FM_SHARED_SECRET
     super(apiKey, { apiSecret, userAgent: 'Peepo Sings' })
     this.apiKey = apiKey
     this.apiSecret = apiSecret ?? ''
@@ -103,4 +108,54 @@ export default class Scrobbler extends LastFMTyped {
     this.store.setOption('lastfm.session', session)
     ipcMain.callFocusedRenderer(IpcEvents.LASTFM_SESSION, session)
   }
+
+  async getMetadata(fingerprint: FpcalcResult<string>) {
+    const metaUrl = `https://api.acoustid.org/v2/lookup`
+    const body = {
+      client: this.config.acousticId.key,
+      meta: 'recordings+releasegroups+compress',
+      duration: fingerprint.duration,
+      fingerprint: fingerprint.fingerprint,
+    }
+    const res = await axios.post<{ status: string; results: AcoustidResult[] }>(metaUrl, body, {
+      headers: {
+        'User-Agent': 'Peepo Sings',
+      },
+      transformRequest: [...(Array.isArray(axios.defaults.transformRequest) ? axios.defaults.transformRequest : [axios.defaults.transformRequest])].concat(function (data, headers) {
+        // compress strings if over 1KB
+        if (typeof data === 'string' && data.length > 1024) {
+          headers['Content-Encoding'] = 'gzip'
+          return pako.gzip(data)
+        } else {
+          // delete is slow apparently, faster to set to undefined
+          headers['Content-Encoding'] = undefined
+          return data
+        }
+      }),
+    })
+  }
+
+  async getFingerprint(file: string) {
+    const result = await this.fpcalc(file, { command: this.config.fpcalcPath })
+    return result
+  }
+}
+
+interface AcoustidResult {
+  score: number
+  id: string
+  recordings: {
+    duration: number
+    id: string
+    title: string
+    releasegroups: {
+      id: string
+      title: string
+      type: string
+    }[]
+    artists: {
+      id: string
+      name: string
+    }[]
+  }[]
 }

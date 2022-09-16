@@ -21,7 +21,7 @@ import Store from './services/store'
 
 import { MusicManager } from './services/music-manager'
 import AutoLaunch from 'auto-launch'
-import type AutoUpdater from './modules/AutoUpdater'
+import type AutoUpdater from './services/AutoUpdater'
 import { release } from 'os'
 import Discord from './services/discord'
 import Scrobbler from './services/scrobbler'
@@ -71,8 +71,6 @@ if (process.defaultApp) {
 } else {
   app.setAsDefaultProtocolClient('peepo')
 }
-
-const isDevelopment = import.meta.env.MODE === 'development' || isDev
 
 let updater: AutoUpdater | null = null
 
@@ -169,15 +167,6 @@ app.whenReady().then(async () => {
 })
 
 // Auto-updates
-if (import.meta.env.PROD) {
-  app
-    .whenReady()
-    .then(() => import('./modules/AutoUpdater'))
-    .then(({ default: AutoUpdater }) => {
-      updater = new AutoUpdater()
-    })
-    .catch((e) => console.error('Failed check updates:', e))
-}
 
 // Listeners
 const listeners: { [key: string]: () => void } = {}
@@ -191,20 +180,13 @@ listeners.openLocation = ipc.answerRenderer('open-location', async (url: string)
   return true
 })
 
-listeners.checkForUpdates = ipc.answerRenderer('check-for-updates', async () => {
-  if (updater) {
-    const window = container.get<Window>(Window)
-    return await updater.manualCheckForUpdates(window.getBrowserWindow())
-  } else return false
-})
-
 listeners.getVersion = ipc.answerRenderer('get-version', () => {
   return app.getVersion()
 })
 
 listeners.toggleAutoLaunch = ipc.answerRenderer('toggle-auto-launch', async () => {
   const store = container.get<Store>(Store)
-  if (import.meta.env.DEV) return false
+  if (process.env.DEV) return false
   const enabled = await autoLauncher.isEnabled()
   if (enabled) {
     await autoLauncher.disable()

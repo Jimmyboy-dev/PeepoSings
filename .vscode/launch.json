@@ -1,19 +1,46 @@
 {
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Debug App",
+      "preLaunchTask": "start .debug.script.mjs",
+      "configurations": [
+        "Debug Main Process",
+        "Debug Renderer Process"
+      ],
+      "presentation": {
+        "hidden": false,
+        "group": "",
+        "order": 1
+      },
+      "stopAll": true
+    }
+  ],
   "configurations": [
     {
       "name": "Debug Main Process",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
       "windows": {
-        "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
+        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
       },
-      "args": [
+      "runtimeArgs": [
+        "--no-sandbox",
+        "--remote-debugging-port=9229",
         "."
       ],
-      "outputCapture": "std"
-    }
+      "envFile": "${workspaceFolder}/.vscode/.debug.env"
+    },
+    {
+      "name": "Debug Renderer Process",
+      "port": 9229,
+      "request": "attach",
+      "type": "chrome",
+      "timeout": 60000
+    },
   ]
 }

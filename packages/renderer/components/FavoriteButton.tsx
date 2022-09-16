@@ -16,12 +16,12 @@ const LikeButton = styled(motion.button)`
     color: #ff3344;
   }
 `
-type Props = {
+interface Props extends React.ComponentProps<typeof LikeButton> {
   liked: boolean
   onClick: () => void
 }
 
-export default function FavoriteButton({ liked, onClick }: Props) {
+export default function FavoriteButton({ liked, onClick, ...props }: Props) {
   return (
     <LikeButton
       whileTap={{ scale: 0.9 }}
@@ -30,7 +30,8 @@ export default function FavoriteButton({ liked, onClick }: Props) {
         e.preventDefault()
         e.stopPropagation()
         onClick()
-      }}>
+      }}
+      {...props}>
       <Icon icon={liked ? 'fa-solid:heart' : 'fa-regular:heart'} />
     </LikeButton>
   )

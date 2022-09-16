@@ -33,7 +33,7 @@
     "git.ignoreLimitWarning": true,
     "files.exclude": {
       "**/twitch-music-player/types": true,
-      "**/packages": true,
+      "**/packages/": true,
       "**/.git": true,
       "**/.svn": true,
       "**/.hg": true,
@@ -44,7 +44,6 @@
     "yaml.schemas": {
       "file:///toc.schema.json": "/toc\\.yml/i",
       "https://json.schemastore.org/github-issue-config.json": "file:///c%3A/Users/jimmy/dev/Node/twitch-music-player/.github/ISSUE_TEMPLATE/config.yml"
-    },
-    "typescript.tsdk": "Root\\node_modules\\typescript\\lib"
+    }
   }
 }

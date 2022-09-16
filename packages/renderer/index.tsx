@@ -13,8 +13,9 @@ import gsap from 'gsap'
 import MotionPathPlugin from 'gsap/MotionPathPlugin'
 // import { persistStore } from 'redux-persist'
 // import { PersistGate } from 'redux-persist/integration/react'
-import KBarProvider from './components/KBar'
 import { ModalsProvider } from '@mantine/modals'
+import Spotlight from './components/Spotlight'
+
 // import unhandled from 'electron-unhandled'
 // unhandled({})
 
@@ -26,8 +27,20 @@ const Root = () => {
   const currentMood = useAppSelector((state) => state.currentSong.mood)
   // 1. Retrieve the notifications to display.
   return (
-    <NotificationsProvider limit={5} position="bottom-right" style={{ bottom: currentMood ? 200 : 142 }}>
-      <App />
+    <NotificationsProvider limit={5} position="bottom-right" style={{ bottom: currentMood ? 200 : 142 }} zIndex={99999}>
+      <ModalsProvider
+        modalProps={{
+          classNames: {
+            modal: 'winDrag',
+            close: 'noDrag',
+          },
+          zIndex: 99998,
+          styles: { overlay: { zIndex: 11111 } },
+        }}>
+        <Spotlight>
+          <App />
+        </Spotlight>
+      </ModalsProvider>
     </NotificationsProvider>
   )
 }
@@ -37,11 +50,7 @@ root.render(
     <StoreProvider store={store}>
       {/* <PersistGate loading={null} persistor={persistor}> */}
       <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
-        <ModalsProvider>
-          <KBarProvider>
-            <Root />
-          </KBarProvider>
-        </ModalsProvider>
+        <Root />
       </MantineProvider>
       {/* </PersistGate> */}
     </StoreProvider>

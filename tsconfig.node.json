@@ -1,13 +1,40 @@
 {
   "compilerOptions": {
     "composite": true,
-    "module": "ESNext",
+    "target": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": true,
+    "importHelpers": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "types": [
+      "node",
+      "vite/client",
+      "reflect-metadata"
+    ],
+    "paths": {
+      "@types": [
+        "types"
+      ],
+      "@peepo/core": [
+        "packages/core/src/index",
+        "packages/core/src/*"
+      ]
+    },
   },
   "include": [
+    "packages/main/**/*",
+    "packages/core/**/*",
+    "cli.ts",
     "vite.config.ts",
     "package.json"
-  ]
+  ],
+  "ts-node": {
+    "files": true
+  }
 }

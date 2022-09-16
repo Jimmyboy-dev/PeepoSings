@@ -6,6 +6,8 @@ import _ from 'lodash'
 import pkg from '../../../package.json'
 import { app, nativeImage } from 'electron'
 import { readdirSync } from 'fs'
+import chalk from 'chalk'
+
 // import { Env } from '../../utils/env';
 // import Logger, { $mainLogger } from '../logger';
 
@@ -23,14 +25,15 @@ class Config {
   supportedFormats: string[]
   // env: Env;
   icon: string
-  icons: { [key: string]: Electron.NativeImage }
-  iconPath: string
+  icons: { [key: string]: { path: string; img: Electron.NativeImage } }
+  buildResourcesPath: string
   macIcon: string
   discordClientId: string
   // discordClientSecret: string
   defaultInvidiousUrl: string
   thumbCleanInterval: number
   sqliteDbName: string
+  fpcalcPath: string
 
   constructor() {
     this.title = 'Peepo Sings'
@@ -39,43 +42,46 @@ class Config {
     this.youtubeSearch = 'https://www.googleapis.com/youtube/v3/search?part=id,snippet&type=video&maxResults=50&q='
     this.supportedFormats = _.uniq(fileAssociations.map(({ ext }) => ext))
 
-    const iconPath = path.resolve(__dirname, this.isProd() ? '../../buildResources/' : '../../buildResources/')
+    const buildResourcesPath = path.resolve(__dirname, this.isProd() ? '../../buildResources/' : '../../buildResources/')
+    console.log('buildResourcesPath:', chalk.green(buildResourcesPath))
+    this.buildResourcesPath = buildResourcesPath
+    const platform = process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : 'linux'
+    this.fpcalcPath = path.join(buildResourcesPath, `bin/${platform}`, `fpcalc${platform === 'windows' ? '.exe' : ''}`)
 
-    this.iconPath = iconPath
-
-    this.icon = path.resolve(iconPath, 'icon.ico')
-    this.macIcon = path.resolve(iconPath, 'icon.png')
+    this.icon = path.resolve(buildResourcesPath, 'icon.ico')
+    this.macIcon = path.resolve(buildResourcesPath, 'icon.png')
     this.mapIcons()
 
     this.thumbCleanInterval = 30
-    this.sqliteDbName = 'nuclear-local-db.sqlite'
-
-    dotenv.config({
-      path: path.resolve(__dirname, '.env'),
-    })
+    this.sqliteDbName = 'peepo-db.sqlite'
 
     console.log('Env variables loaded')
 
-    // this.acousticId = {
-    //   key: process.env.ACOUSTIC_ID_KEY,
-    //   url: 'https://api.acoustid.org/v2/lookup',
-    // }
+    this.acousticId = {
+      key: process.env.VITE_ACOUSTID_KEY,
+      url: 'https://api.acoustid.org/v2/lookup',
+    }
 
-    this.discordClientId = import.meta.env.VITE_DISCORD_CLIENT_ID
-    // this.discordClientSecret = import.meta.env.VITE_DISCORD_CLIENT_SECRET as string
-    // this.defaultInvidiousUrl = import.meta.env.INVIDIOUS_URL;
+    this.discordClientId = process.env.VITE_DISCORD_CLIENT_ID
+    // this.discordClientSecret = process.env.VITE_DISCORD_CLIENT_SECRET as string
+    // this.defaultInvidiousUrl = process.env.INVIDIOUS_URL;
   }
 
   private mapIcons() {
-    const icons = readdirSync(path.join(this.iconPath, 'icons'))
+    const iconPath = path.resolve(this.buildResourcesPath, './icons')
+    const icons = readdirSync(iconPath)
+    console.log('icons:', icons.join())
     this.icons = icons.reduce((acc, icon) => {
-      acc[icon.split('.')[0]] = nativeImage.createFromPath(path.join(this.iconPath, 'icons', icon))
+      acc[icon.split('.')[0]] = {
+        path: path.resolve(iconPath, icon),
+        img: nativeImage.createFromPath(path.join(this.buildResourcesPath, 'icons', icon)),
+      }
       return acc
     }, {})
   }
 
   isDev(): boolean {
-    return import.meta.env.DEV
+    return !!process.env.DEV || process.env.NODE_ENV === 'development'
   }
 
   isProd(): boolean {
@@ -90,7 +96,14 @@ class Config {
     this.isConnected = isConnected
   }
   getIcon(string: string) {
-    return this.icons[string]
+    const icon = this.icons[string]
+    if (!icon) {
+      console.log('Icon not found', string)
+      console.log(chalk.greenBright('Available icons:'), Object.keys(this.icons))
+    } else {
+      console.log('Icon found:', icon.img.getSize())
+    }
+    return icon
   }
 }
 

@@ -12,7 +12,7 @@ export class DownloadController {
   iconName: string
 
   constructor(@inject(MusicManager) private musicManager: MusicManager, @inject(Config) private config: Config) {
-    this.iconName = join(config.iconPath, 'peepoG.png')
+    this.iconName = join(config.buildResourcesPath, 'peepoG.png')
     console.log('DownloadController initialized')
   }
 

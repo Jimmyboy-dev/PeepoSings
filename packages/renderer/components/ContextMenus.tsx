@@ -5,7 +5,8 @@ import { useNotifications } from '@mantine/notifications'
 import { openModal, useModals } from '@mantine/modals'
 import PreviewVideo from './PreviewVideo'
 import { Title } from '@mantine/core'
-import { useAppSelector } from '../store'
+import store, { useAppDispatch, useAppSelector } from '../store'
+import { addUpNext } from '../store/slices/currentSong'
 
 export const CTX_MENU = {
   RESULTS: 'search-results',
@@ -30,7 +31,7 @@ export const showPreviewSongModal = ({ url, title }: { url: string; title: strin
 }
 export default function ContextMenus({}: Props) {
   // const moods = useAppSelector((state) => state.moods)
-
+  const dispatch = useAppDispatch()
   return (
     <>
       <Menu id={CTX_MENU.RESULTS}>
@@ -40,7 +41,9 @@ export default function ContextMenus({}: Props) {
         <Item onClick={({ props, data }) => showPreviewSongModal(props)}>Preview Song</Item>
       </Menu>
       <Menu id={CTX_MENU.SONG}>
-        <Item onClick={({ props, data }) => window.electron.music.openLocation(props)}>Open File Location</Item>
+        <Item onClick={({ props, data }) => dispatch(addUpNext(props.id))}>Add to Up Next</Item>
+        <Item onClick={({ props, data }) => window.electron.music.openLocation(props.path)}>Open File Location</Item>
+        {import.meta.env.DEV && <Item onClick={({ props, data }) => console.dir(props)}>Debug Log Data to Console</Item>}
       </Menu>
     </>
   )

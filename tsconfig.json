@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "noEmit": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "useDefineForClassFields": true,
     "lib": [
       "esnext",
@@ -16,6 +14,8 @@
     "importHelpers": true,
     "allowJs": false,
     "esModuleInterop": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
@@ -45,7 +45,9 @@
     "jsx": "react"
   },
   "include": [
-    "packages/**/*",
+    "packages/renderer/**/*",
+    "packages/core/**/*",
+    "packages/preload/**/*",
     "types/**/*.d.ts"
   ],
   "exclude": [
@@ -57,5 +59,12 @@
     {
       "path": "./tsconfig.node.json"
     }
-  ]
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+      "isolatedModules": false
+    },
+    "files": true
+  }
 }

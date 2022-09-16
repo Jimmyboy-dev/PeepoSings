@@ -5,7 +5,7 @@ import React, { useEffect } from 'react'
 import PeepoSings from './PeepoSings'
 import { useAppDispatch, useAppSelector } from '../store'
 import { setCurrentTime, setPlaying, setRepeat, setShuffle, setVolume } from '../store/slices/player'
-import { nextSong, prevSong, setCurrentMood, setCurrentSong } from '../store/slices/currentSong'
+import { addUpNext, nextSong, prevSong, setCurrentMood, setCurrentSong } from '../store/slices/currentSong'
 import { throttle } from 'lodash'
 import { editSong } from '../store/slices/songs'
 import peepoShrug from '../assets/peepoShrug.png'
@@ -14,18 +14,23 @@ import { motion } from 'framer-motion'
 import EditableText from './EditableText'
 import FavoriteButton from './FavoriteButton'
 import ProgressSlider from './ProgressSlider'
+import { PeepoMeta } from '../../core/src'
 
 function AudioPlayer(): ReactElement {
   const dispatch = useAppDispatch()
   const { currentTime, duration, filter, playing, repeat, shuffle, volume } = useAppSelector((state) => state.player)
-  const [{ song: currentSong, mood: curMood }, { songs, moods }] = useAppSelector((state) => [state.currentSong, { songs: state.songs, moods: state.moods }])
+  const [{ song: currentSong, mood: curMood, queue, userDefinedQueue }, { moods }] = useAppSelector((state) => [state.currentSong, { moods: state.moods }])
+  const songs = useAppSelector(
+    (state) => state.songs,
+    (a, b) => a.some((song, i) => b[i].path !== song.path)
+  )
   const [source, setSource] = React.useState('')
   const audioDevice = useAppSelector((state) => state.config.outputDevice)
+  const upNext = songs.find((s) => s.id === [...userDefinedQueue, ...queue][0])
 
-  const queue = curMood !== null ? songs.filter((song) => song.mood.includes(curMood)) : songs
-  const currentMood = curMood ? moods[curMood] : null
+  const currentMood = curMood !== -1 ? moods.find((m) => m.id === curMood) : null
 
-  const song = currentSong !== -1 && queue.length !== 0 ? queue[currentSong] : null
+  const song = currentSong !== -1 ? songs.find((song) => song.id === currentSong) : null
 
   const audio = React.useRef<HTMLAudioElement & { setSinkId(deviceId: string): void }>(null!)
   const audioCtx = React.useRef<AudioContext>()
@@ -49,7 +54,7 @@ function AudioPlayer(): ReactElement {
   }, [volume])
   useEffect(() => {
     setSinkId()
-    audio.current.addEventListener('play', () => {
+    const onPlay = () => {
       if (!audioCtx.current) {
         audioCtx.current = new AudioContext()
         const source = audioCtx.current.createMediaElementSource(audio.current!)
@@ -63,7 +68,8 @@ function AudioPlayer(): ReactElement {
         source.connect(compressor)
         compressor.connect(audioCtx.current.destination)
       }
-    })
+    }
+    audio.current.addEventListener('play', onPlay)
     try {
       navigator.mediaSession.setActionHandler('play', () => {
         // console.log(e.action, 'emitted')
@@ -80,6 +86,10 @@ function AudioPlayer(): ReactElement {
       })
     } catch (e) {
       console.log(e)
+    } finally {
+      return () => {
+        if (audio.current) audio.current.removeEventListener('play', onPlay)
+      }
     }
   }, [])
   const calcProgress = function (currentTime: number) {
@@ -109,29 +119,7 @@ function AudioPlayer(): ReactElement {
 
   const advSong = () => {
     if (song && audio.current) {
-      if (repeat) {
-        audio.current.currentTime = song.in
-        audioPlay()
-      } else if (shuffle) {
-        let nextSong
-        let exit = false
-        let exitTo = setTimeout(() => (exit = true), 250)
-        do {
-          nextSong = Math.floor(Math.random() * queue.length)
-        } while (nextSong === currentSong && !exit)
-        clearTimeout(exitTo)
-        if (!exit) {
-          dispatch(setCurrentSong(nextSong))
-        } else {
-          nextSong = currentSong
-        }
-
-        audio.current.currentTime = queue[nextSong].in
-        audioPlay()
-      } else {
-        if (currentSong === queue.length - 1) dispatch(setCurrentSong(0))
-        else dispatch(nextSong())
-      }
+      dispatch(nextSong())
     }
   }
 
@@ -181,13 +169,13 @@ function AudioPlayer(): ReactElement {
 
   return (
     <>
-      <audio ref={audio} src={song ? `resource://${song.path}` : ''} onEnded={() => advSong()} onCanPlayThrough={() => dispatch(setPlaying(true))} onTimeUpdate={onProgress}></audio>
+      <audio ref={audio} src={source} onEnded={() => advSong()} onCanPlayThrough={() => dispatch(setPlaying(true))} onTimeUpdate={onProgress}></audio>
       <Stack spacing={0} className="justify-end gap-0 pointer-events-none" style={{ position: 'fixed', width: '100vw', height: '100vh', top: 0, left: 0, zIndex: 9999 }}>
         <PeepoSings talk={playing} />
-        {curMood && (
+        {curMood !== -1 && (
           <div
             onClick={() => {
-              dispatch(setCurrentMood(null))
+              dispatch(setCurrentMood(-1))
               dispatch(setCurrentSong(-1))
             }}
             className="absolute
@@ -310,6 +298,7 @@ function AudioPlayer(): ReactElement {
                 </Button>
               </Tooltip>
             </Group>
+            {upNext && <div className="absolute bottom-0 right-2">Up Next: {upNext.title}</div>}
           </Group>
         </div>
       </Stack>

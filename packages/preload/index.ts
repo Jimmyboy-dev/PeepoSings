@@ -24,11 +24,7 @@ declare global {
   // }
 }
 
-const log = window.console.log
-window.console.log = (...args: any[]) => {
-  ipc.callMain(IpcEvents.RENDERER_LOG, args)
-  log(...args)
-}
+// const log = window.console.log
 
 const api = {
   windowControl: (e: 'minimize' | 'maximize' | 'close') => {

@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react'
-import { ActionIcon, Anchor, Box, Button, Checkbox, ColorInput, DEFAULT_THEME, Grid, Group, Input, Modal, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Anchor, Box, Button, Checkbox, ColorInput, DEFAULT_THEME, Grid, Group, Input, Modal, SimpleGrid, Stack, Text, TextInput, Tooltip } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import React, { ChangeEvent, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../store'
@@ -10,10 +10,13 @@ import { setCurrentMood, setCurrentSong } from '../store/slices/currentSong'
 import { setPlaying } from '../store/slices/player'
 import { MoodJSON } from '@peepo/core'
 import FavoritesBar from './FavoritesBar'
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 
 export default function Moods() {
   const [addingMood, { open, close, toggle: setAddMood }] = useDisclosure(false)
   const [mood, setMood] = React.useState<MoodJSON | undefined>(undefined)
+
+  const [selectedMoods, setSelectedMoods] = React.useState<number[]>([])
 
   const moods = useAppSelector((state) => state.moods)
   return (
@@ -28,27 +31,45 @@ export default function Moods() {
         <Icon fontSize={24} icon="fas:plus" color="white" />
       </ActionIcon>
       <AddMoodModal opened={addingMood} onClose={close} mood={mood && { ...mood, type: 'editing' }} />
-      <SimpleGrid
-        cols={4}
-        spacing="lg"
-        breakpoints={[
-          { maxWidth: 1500, cols: 3, spacing: 'md' },
-          { maxWidth: 1100, cols: 2, spacing: 'sm' },
-          { maxWidth: 600, cols: 1, spacing: 'sm' },
-        ]}
-        style={{ width: '80%' }}>
-        {Object.values(moods).map((mood, i) => (
-          <MoodItem
-            key={mood.id}
-            mood={mood}
-            onEdit={() => {
-              setMood(mood)
-              open()
-            }}
-          />
-        ))}
-      </SimpleGrid>
-      <FavoritesBar />
+      <DragDropContext onDragEnd={() => {}}>
+        <Droppable droppableId="mood">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              <SimpleGrid
+                cols={4}
+                spacing="lg"
+                breakpoints={[
+                  { maxWidth: 1500, cols: 3, spacing: 'md' },
+                  { maxWidth: 1100, cols: 2, spacing: 'sm' },
+                  { maxWidth: 600, cols: 1, spacing: 'sm' },
+                ]}
+                style={{ width: '80%' }}>
+                {moods.map((mood, i) => (
+                  <Mood
+                    key={mood.id.toString()}
+                    index={i}
+                    mood={mood}
+                    selected={selectedMoods.includes(mood.id)}
+                    onSelect={() => {
+                      setSelectedMoods((moods) => {
+                        if (moods.includes(mood.id)) {
+                          return moods.filter((m) => m !== mood.id)
+                        }
+                        return [...moods, mood.id]
+                      })
+                    }}
+                    onEdit={() => {
+                      setMood(mood)
+                      open()
+                    }}
+                  />
+                ))}
+              </SimpleGrid>
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+      <FavoritesBar filterMoods={selectedMoods} />
     </Stack>
   )
 }
@@ -82,11 +103,10 @@ function AddMoodModal({ onClose, opened, mood: moodP }: MoodProps) {
     onClose()
   }
   return (
-    <Modal opened={opened} onClose={onClose} title="Introduce yourself!">
+    <Modal opened={opened} onClose={onClose} title={mood.type === 'new' ? 'Create a new Mood' : `Editing ${mood.name}`}>
       <Stack align="center">
-        <Input.Wrapper label="Mood Name">
-          <Input value={name} onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.currentTarget.value)} />
-        </Input.Wrapper>
+        <TextInput label="Mood Name" value={name} onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
+
         <ColorInput placeholder="#24d896" label="Mood Color" value={color} onChange={setColor} swatches={[...Object.values(DEFAULT_THEME.colors).map((val) => val[4])]} />
         <Input.Wrapper label="Mood Icon">
           <Input
@@ -126,19 +146,29 @@ function AddMoodModal({ onClose, opened, mood: moodP }: MoodProps) {
   )
 }
 
-interface MoodItemProps {
+interface MoodItemProps extends React.PropsWithRef<JSX.IntrinsicElements['div']> {
   mood: MoodJSON
+  selected: boolean
+  onSelect?: () => void
   onEdit: () => void
 }
 
-function MoodItem({ mood: { id, name, color, icon }, onEdit }: MoodItemProps) {
+function Mood({ mood, index, ...props }: MoodItemProps & { index: number }) {
+  return (
+    <Draggable draggableId={mood.id.toString()} index={index}>
+      {(provided) => <MoodItem mood={mood} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} {...props} />}
+    </Draggable>
+  )
+}
+
+const MoodItem = React.forwardRef<HTMLDivElement, MoodItemProps>(({ mood: { id, name, color, icon }, onEdit, selected, onSelect, ...props }, ref) => {
   const dispatch = useAppDispatch()
   const songs = useAppSelector((state) => state.songs)
   const curMood = useAppSelector((state) => state.currentSong.mood)
-  const songsInMood = songs.filter((song) => song.mood.includes(id))
+  const songsInMood = songs.filter((song) => song.mood.some((m) => m.id === id))
   const [hovering, setHover] = React.useState(false)
   return (
-    <div className="w-full flex flex-row h-full items-center">
+    <div className="w-full flex flex-row h-full items-center" {...props} ref={ref}>
       <motion.div
         className="flex flex-row items-center bg-slate-600 justify-start p-4 h-16 rounded-lg cursor-pointer select-none font-bold text-xl"
         onTap={(e) => {
@@ -147,7 +177,8 @@ function MoodItem({ mood: { id, name, color, icon }, onEdit }: MoodItemProps) {
           dispatch(setPlaying())
         }}
         whileHover={{ scale: 1.1 }}
-        animate={{ width: hovering ? '100%' : '85%', zIndex: 1 }}
+        initial={{ scale: 1, width: '85%', borderStyle: 'solid', borderColor: 'white', borderWidth: 0 }}
+        animate={{ width: hovering ? '100%' : '85%', zIndex: 1, borderWidth: curMood === id ? 4 : 0 }}
         onHoverStart={(event, info) => setHover(true)}
         onHoverEnd={(event, info) => setHover(false)}
         whileTap={{ scale: 0.95 }}
@@ -161,6 +192,7 @@ function MoodItem({ mood: { id, name, color, icon }, onEdit }: MoodItemProps) {
       </motion.div>
       <MBox
         className="bg-slate-800 flex items-center justify-center rounded-r-md overflow-hidden"
+        initial={{ width: '15%' }}
         animate={{
           x: hovering ? '-100%' : 0,
           width: hovering ? '0%' : '15%',
@@ -172,14 +204,9 @@ function MoodItem({ mood: { id, name, color, icon }, onEdit }: MoodItemProps) {
         transition={{
           duration: 0.1,
         }}>
-        <Checkbox
-          checked={curMood === id}
-          onChange={(e) => {
-            dispatch(setCurrentMood(curMood === id ? null : id))
-          }}
-        />
+        <Checkbox checked={selected} onChange={onSelect} />
       </MBox>
     </div>
   )
-}
+})
 const MBox = motion(Box)

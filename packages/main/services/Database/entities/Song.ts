@@ -1,27 +1,52 @@
-import { SchemaRaw } from 'trilogy'
-import { PeepoMeta } from '@peepo/core'
-import { mood } from './Mood'
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm'
+import type { PeepoMeta, VideoInfo } from '@peepo/core'
+import { Mood } from './Mood'
 
-export const song = {
-  id: 'increments' as 'increments',
+@Entity()
+export class Song implements PeepoMeta {
+  @PrimaryGeneratedColumn()
+  id: number
 
-  title: String,
+  @Column({ nullable: true, unique: true })
+  muid?: string
 
-  path: String,
+  @Column({ default: 0, type: 'integer' })
+  position?: number
 
-  artist: String,
+  @Column()
+  title: string
 
-  duration: Number,
+  @Column({ unique: true })
+  path: string
 
-  album: String,
+  @Column()
+  artist: string
 
-  thumbnail: String,
+  @Column()
+  duration: number
 
-  favorite: Boolean,
+  @Column({ nullable: true })
+  album?: string
 
-  in: Number,
-  out: Number,
-  metadata: 'json' as 'json',
+  @Column()
+  thumbnail: string
 
-  mood: { type: Array },
+  @Column({ nullable: true })
+  lastScanned?: number
+
+  @Column({ default: false })
+  favorite: boolean;
+
+  @Column({ default: 0 })
+  in: number
+
+  @Column()
+  out: number
+
+  @Column('simple-json')
+  metadata: VideoInfo
+
+  @ManyToMany(() => Mood, (mood) => mood.songs)
+  @JoinTable()
+  mood: Mood[]
 }

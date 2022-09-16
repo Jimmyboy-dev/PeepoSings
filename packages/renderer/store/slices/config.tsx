@@ -28,6 +28,11 @@ const initialState: PeepoSingConfig = {
     session: null,
   },
   compactSongView: false,
+  advancedOptions: false,
+  hooks: {
+    onSongChange: [],
+    onTimeChange: [],
+  },
 }
 
 const config = createSlice({
@@ -49,6 +54,10 @@ const config = createSlice({
     },
     setScrobblerKeys(state, action: PayloadAction<{ apiKey: string; apiSecret: string }>) {
       state.scrobblerKeys = action.payload
+    },
+    toggleAdvancedOptions(state, action?: PayloadAction<boolean | null>) {
+      ipc.callMain(IpcEvents.SET_OPTION_SENSITIVE, ['advancedOptions', action?.payload || !state.advancedOptions])
+      state.advancedOptions = action?.payload || !state.advancedOptions
     },
   },
   extraReducers: (builder) => {
@@ -87,13 +96,19 @@ const config = createSlice({
             state.scrobbler.session = action.payload.settings.lastfm?.session
             state.scrobbler.connected = !!action.payload.settings.lastfm?.session
             break
+          case 'advancedOptions':
+            state.advancedOptions = action.payload.settings.advancedOptions
+            break
+          case 'hooks':
+            state.hooks = action.payload.settings.hooks
+            break
         }
       }
     })
   },
 })
 
-export const { setOutputDevice, setAutoPlay, setScrobblerKeys, toggleRunOnStartupFinished, toggleCompactSongView } = config.actions
+export const { setOutputDevice, setAutoPlay, setScrobblerKeys, toggleRunOnStartupFinished, toggleCompactSongView, toggleAdvancedOptions } = config.actions
 
 export const toggleRunOnStartup = async (dispatch: AppDispatch) => {
   try {

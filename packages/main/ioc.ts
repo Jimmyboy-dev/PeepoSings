@@ -4,6 +4,7 @@ import { DownloadController } from './controllers/download'
 import { LoggerCtrl } from './controllers/logger'
 import IpcPlayer from './controllers/player'
 import SettingsIpcCtrl from './controllers/settings'
+import AutoUpdater from './services/AutoUpdater'
 import Config from './services/config'
 import { Database } from './services/Database'
 import Discord from './services/discord'
@@ -11,6 +12,7 @@ import Discord from './services/discord'
 import $ipc from './services/ipc'
 import { MusicManager } from './services/music-manager'
 import Platform from './services/platform'
+import { PluginService } from './services/plugins'
 import Scrobbler from './services/scrobbler'
 import Store from './services/store'
 import TrayMenu from './services/trayMenu'
@@ -21,7 +23,6 @@ import { Class } from './utils/types'
 const services: ServiceProvider[] = [
   { useClass: Config },
   { useClass: Database },
-  // { useClass: Download },
   { useClass: Discord },
   { useClass: TrayMenu },
   { useClass: MusicManager },
@@ -29,6 +30,8 @@ const services: ServiceProvider[] = [
   { useClass: Scrobbler },
   { useClass: Store },
   { useClass: Window },
+  { useClass: AutoUpdater },
+  { useClass: PluginService },
   { provide: $ipc, useValue: ipcMain },
 ]
 

@@ -1,13 +1,24 @@
-import { SchemaRaw } from 'trilogy'
-import { MoodJSON } from '../../../../core/src'
-import { song } from './Song'
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { MoodJSON } from '@peepo/core'
+import { Song } from './Song'
 
-export const mood: SchemaRaw<MoodJSON> = {
-  id: Number,
+@Entity()
+export class Mood implements MoodJSON {
+  @PrimaryGeneratedColumn()
+  id: number
 
-  name: String,
+  @Column()
+  name: string
 
-  color: { type: String, defaultTo: '#77ee77' },
+  @Column({ default: '#77ee77', length: 7 })
+  color: string
 
-  icon: String,
+  @Column({ default: 'fas:music-note' })
+  icon: string
+
+  @Column({ default: false })
+  order: number
+
+  @ManyToMany(() => Song, (song) => song.mood)
+  songs: Song[]
 }

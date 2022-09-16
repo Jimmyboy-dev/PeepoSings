@@ -12,6 +12,13 @@ export const fetchSongs = createAsyncThunk('songs/fetch', async (songs, api) => 
   }
 })
 
+export const setSongMood = createAsyncThunk<PeepoMeta, { songId: number; moodId: number | number[] }>('songs/setMood', async (payload, api) => {
+  const newSong = await ipc.callMain(IpcEvents.MUSIC_MOOD, { song: payload.songId, mood: payload.moodId }).catch((err) => {
+    console.error(err)
+  })
+  return newSong as PeepoMeta
+})
+
 // Define a type for the slice state
 type SongsState = PeepoMeta[]
 
@@ -54,14 +61,6 @@ export const musicSlice = createSlice({
       const songs = action.payload
       return songs
     },
-    setSongMood(state, action: PayloadAction<{ songId: string; moodId: MoodJSON['id'] | MoodJSON['id'][] }>) {
-      const songIndex = state.findIndex((val) => val.id === action.payload.songId)
-      if (songIndex === -1) return
-      if (action.payload.moodId instanceof Array) {
-        state[songIndex].mood = action.payload.moodId
-      } else state[songIndex].mood.push(action.payload.moodId)
-      ipc.callMain(IpcEvents.MUSIC_MOOD, { song: state[songIndex].id, mood: state[songIndex].mood })
-    },
     markIn(state, action: PayloadAction<{ index: number; in: number }>) {
       state[action.payload.index].in = action.payload.in
     },
@@ -79,8 +78,9 @@ export const musicSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(removeMood, (state, action) => {
       state.forEach((song) => {
-        if (song.mood.includes(action.payload)) {
-          song.mood.splice(song.mood.indexOf(action.payload), 1)
+        const moodIndex = song.mood.findIndex((s) => s.id === action.payload)
+        if (moodIndex !== -1) {
+          song.mood.splice(moodIndex, 1)
           ipc.callMain(IpcEvents.MUSIC_MOOD, { song: song.id, mood: action.payload })
         }
       })
@@ -88,10 +88,16 @@ export const musicSlice = createSlice({
     builder.addCase(fetchSongs.fulfilled, (state, action) => {
       return action.payload.songs
     })
+    builder.addCase(setSongMood.fulfilled, (state, action) => {
+      const songIndex = state.findIndex((val) => val.id === action.payload.id)
+      if (songIndex === -1) return
+      console.log('setSongMood', action.payload)
+      state[songIndex] = action.payload
+    })
   },
 })
 
-export const { addSong, editSong, removeSong, setSongs, markIn, markOut, setSongMood } = musicSlice.actions
+export const { addSong, editSong, removeSong, setSongs, markIn, markOut } = musicSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectSongs = (state: RootState) => state.songs

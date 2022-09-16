@@ -19,12 +19,18 @@ export interface PeepoSingConfig {
     apiKey: string | null
     apiSecret: string | null
   }
+  advancedOptions: boolean
   scrobbler: {
     connected: boolean
     userInfo: ReturnType<import('lastfm-typed').default['user']['getInfo']>
     session: getSession | null
   }
   outputDevice: string | null
+
+  hooks: {
+    onSongChange: string[]
+    onTimeChange: string[]
+  }
 }
 
 export type TrackType = {
@@ -72,7 +78,7 @@ export type MoodJSON = {
 }
 
 export type PeepoMeta = {
-  id?: string
+  id: number
   muid?: string
   artist: string
   title: string
@@ -87,7 +93,7 @@ export type PeepoMeta = {
 
   in: number
   out: number
-  mood: MoodJSON['id'][]
+  mood: MoodJSON[]
 }
 
 export type MakeAllOptional<T> = { [K in keyof T]?: T[K] extends object ? MakeAllOptional<T[K]> : T[K] }

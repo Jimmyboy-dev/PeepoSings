@@ -1,4 +1,4 @@
-import { app, nativeImage, BrowserWindow, NativeImage, shell } from 'electron'
+import { app, nativeImage, BrowserWindow, NativeImage, shell, session } from 'electron'
 import installExtension, { REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { inject, injectable } from 'inversify'
 import path from 'path'
@@ -29,7 +29,9 @@ class Window {
   private resolve: () => void
 
   private thumbarButtons: Electron.ThumbarButton[]
+  private userTasks: Electron.Task[]
   appIcon: NativeImage
+  private session: Electron.Session
 
   constructor(@inject(Config) private config: Config, @inject(Platform) private platform: Platform, @inject(Store) store: Store) {
     this.appIcon = nativeImage.createFromPath(path.join(__dirname, '../..', 'buildResources', process.platform === 'win32' ? 'icon.ico' : 'icon.png'))
@@ -55,6 +57,7 @@ class Window {
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
+        nodeIntegrationInWorker: true,
         // webviewTag: true,
         // additionalArguments: [store.getOption('disableGPU') && '--disable-gpu'],
         preload,
@@ -71,26 +74,34 @@ class Window {
       this.thumbarButtons = [
         {
           tooltip: 'Previous Song',
-          icon: this.config.getIcon('step-backward'),
+          icon: this.config.getIcon('step-backward')?.img,
           click: () => this.send(IpcEvents.MUSIC_BACK),
-          flags: ['enabled'],
         },
         {
           tooltip: 'Play',
-          icon: this.config.getIcon('play'),
+          icon: this.config.getIcon('play')?.img,
           click: () => this.send(IpcEvents.MUSIC_PLAY),
-          flags: ['enabled'],
         },
         {
           tooltip: 'Forward Song',
-          icon: this.config.getIcon('step-forward'),
+          icon: this.config.getIcon('step-forward')?.img,
           click: () => this.send(IpcEvents.MUSIC_FORWARD),
-          flags: ['enabled'],
         },
       ]
+      this.userTasks = [
+        {
+          program: process.execPath,
+          arguments: '--play-pause',
+          iconPath: process.execPath,
+          iconIndex: 0,
+          title: 'Download Clipboard',
+          description: 'Download Song from Clipboard',
+        },
+      ]
+
       this.browserWindow.flashFrame(true)
       this.browserWindow.once('focus', () => this.browserWindow.flashFrame(false))
-    }
+    } else this.thumbarButtons = this.userTasks = []
 
     this.isReady = new Promise((resolve) => {
       this.resolve = resolve
@@ -113,6 +124,9 @@ class Window {
 
     this.mainWindowState.manage(this.browserWindow)
   }
+  getSession() {
+    return this.session
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(event: string, ...param: any[]): void {
@@ -130,7 +144,7 @@ class Window {
   }
 
   load() {
-    const url = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}`,
+    const url = process.env.VITE_DEV_SERVER_URL,
       indexHtml = path.join(ROOT_PATH.dist, 'index.html')
 
     if (!this.config.isDev()) {
@@ -140,7 +154,7 @@ class Window {
       console.debug('window loading url:', url)
       this.browserWindow.loadURL(url)
     }
-    if (process.platform === 'win32') this.browserWindow.setThumbarButtons(this.thumbarButtons)
+
     return this.isReady
   }
 
@@ -169,11 +183,24 @@ class Window {
     this.browserWindow.setTitle(title)
   }
 
+  updateThumbarButtons() {
+    if (!this.platform.isWindows()) return
+    this.browserWindow.setThumbarButtons(this.thumbarButtons) ? console.log('thumbar buttons set') : console.error('thumbar buttons not set')
+  }
+
+  clearThumbarButtons() {
+    if (!this.platform.isWindows()) return
+    this.thumbarButtons = []
+    this.updateThumbarButtons()
+  }
+
   openDevTools() {
     if (this.browserWindow.webContents.isDevToolsOpened()) {
       this.browserWindow.webContents.closeDevTools()
     } else {
-      this.browserWindow.webContents.openDevTools()
+      this.browserWindow.webContents.openDevTools({
+        mode: 'detach',
+      })
     }
   }
   async installDevTools() {

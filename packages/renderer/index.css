@@ -42,6 +42,11 @@ select {
   -webkit-user-select: none;
 }
 
+.winDrag {
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+}
+
 :root {
   --background: rgb(28 28 29);
   --a1: rgb(53 53 54);

@@ -91,9 +91,9 @@ export default function App(): ReactElement {
         id: err.title,
         loading: false,
         title: `Error Downloading ${err.title}`,
-        autoClose: true,
+        autoClose: false,
         message: err.message,
-        icon: <Icon icon="fas:times" />,
+        icon: <Icon icon="fas:times" color="red" />,
         disallowClose: false,
       })
     }

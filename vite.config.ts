@@ -1,8 +1,8 @@
 import { rmSync } from 'fs'
 import path from 'path'
-import { type Plugin, type UserConfig, defineConfig } from 'vite'
+import { type Plugin, type UserConfig, defineConfig, createLogger } from 'vite'
 import react from '@vitejs/plugin-react'
-import electron from 'vite-plugin-electron'
+import electron, { onstart } from 'vite-plugin-electron'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import swc from 'unplugin-swc'
 
@@ -21,13 +21,17 @@ export default defineConfig({
       '@peepo/core': path.join(__dirname, 'packages/core/src'),
     },
   },
+  customLogger: createLogger('info', {
+    allowClearScreen: false,
+    prefix: '[vite]',
+  }),
   plugins: [
     react(),
     tsconfigPaths(),
     electron({
       main: {
         entry: 'packages/main/index.ts',
-        vite: withDebug({
+        vite: {
           resolve: {
             alias: {
               '@peepo/core': path.join(__dirname, 'packages/core/src'),
@@ -35,7 +39,7 @@ export default defineConfig({
           },
           build: {
             outDir: 'dist/main',
-            sourcemap: 'inline',
+            sourcemap: true,
           },
           plugins: [
             swc.vite({
@@ -51,8 +55,9 @@ export default defineConfig({
                 },
               },
             }),
+            process.env.VSCODE_DEBUG ? onstart() : null,
           ],
-        }),
+        },
       },
       preload: {
         input: {
@@ -77,7 +82,7 @@ export default defineConfig({
       // https://github.com/electron-vite/vite-plugin-electron/tree/main/packages/electron-renderer#electron-renderervite-serve
       renderer: {
         resolve() {
-          return ['os']
+          return ['os', 'better-sqlite3', 'typeorm']
         },
       },
     }),
