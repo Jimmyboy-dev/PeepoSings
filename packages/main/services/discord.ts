@@ -8,6 +8,7 @@ import Config from './config'
 @injectable()
 class Discord {
   private rpc: DiscordRPC.Client
+  private connected = false
   private isReady = false
   private baseStart: number
   private pauseStart: number
@@ -56,11 +57,13 @@ class Discord {
       cb && cb()
     })
 
+    this.rpc.once('', () => {})
+
     try {
       await this.rpc.login({ clientId: this.config.discordClientId })
     } catch (err) {
       console.log('error trying to connect discord')
-      this.isReady = true
+      this.isReady = false
     }
   }
 
@@ -90,7 +93,11 @@ class Discord {
     delete this.activity
     if (this.isReady) {
       console.log('clear discord activity')
-      await this.rpc.clearActivity()
+      try {
+        await this.rpc.clearActivity()
+      } catch (err) {
+        console.error('error trying to clear discord activity')
+      }
     }
   }
 }
