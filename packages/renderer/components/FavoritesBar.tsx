@@ -54,7 +54,7 @@ export default function FavoritesBar({ filterMoods }: Props) {
 
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
-      viewport.current.scrollTo({ behavior: 'auto', left: viewport.current.scrollLeft + e.deltaY / 2 })
+      viewport.current.scrollTo({ behavior: 'auto', left: viewport.current.scrollLeft + e.deltaY })
     }
     viewport.current.addEventListener('wheel', onWheel)
     return () => {
@@ -63,7 +63,7 @@ export default function FavoritesBar({ filterMoods }: Props) {
   }, [])
   return (
     <Favorites style={{ bottom: !mood ? '0rem' : '2.5rem' }}>
-      <ScrollArea type="hover" style={{ width: '100%', height: '100%' }} offsetScrollbars viewportRef={viewport} scrollbarSize={8}>
+      <ScrollArea type="hover" style={{ width: '100%', overflowY: 'hidden' }} offsetScrollbars viewportRef={viewport} scrollbarSize={8}>
         <Group style={{ height: '11vw', maxHeight: '100px', minHeight: '90px', overflowY: 'hidden', overflowX: 'auto', padding: '0.5rem 0.75rem', flexWrap: 'nowrap' }} spacing={12}>
           {favorites.map((song) => (
             <FavoriteSongView key={song.id} song={song} />
@@ -81,6 +81,7 @@ function FavoriteSongView({ song }: { song: PeepoMeta }) {
 
   return (
     <Tooltip
+      withinPortal
       label={
         <>
           <Text className="font-semibold text-green-400 inline">{song.title}</Text> by <Text className="font-semibold inline">{song.artist}</Text>
@@ -106,6 +107,7 @@ function FavoriteSongView({ song }: { song: PeepoMeta }) {
           overflow: 'hidden',
           borderRadius: '0.5rem',
           mb: '0.5rem',
+          userSelect: 'none',
 
           boxShadow: '0 0.5rem 1rem rgba(0, 0, 0, 0.1), 0 0 var(--glow-size) var(--glow-spread) var(--glow-color)',
           '--glow-size': '0px',
@@ -149,7 +151,7 @@ function FavoriteSongView({ song }: { song: PeepoMeta }) {
             background: 'linear-gradient(to top, #000000aa 0%,#00000077 15%, #00000000 50%, #00000077 85%, #000000aa 100%)',
           }}>
           <Text className="text-lg font-semibold truncate">{song.title}</Text>
-          <Text className="text-md font-semibold">{song.artist}</Text>
+          <Text className="text-md font-semibold truncate">{song.artist}</Text>
         </Stack>
         <motion.img
           draggable={false}

@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react'
-import { ActionIcon, Button, Group, Affix, Progress, Slider, Stack, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Button, Group, Affix, Progress, Slider, Stack, Text, Tooltip, Box } from '@mantine/core'
 import type { MouseEventHandler, ReactElement } from 'react'
 import React, { useEffect } from 'react'
 import PeepoSings from './PeepoSings'
@@ -38,7 +38,7 @@ function AudioPlayer(): ReactElement {
   const setSinkId = React.useCallback(() => {
     if (!audioDevice) return
     let shouldPlay = false
-    if (!playing) {
+    if (playing) {
       audio.current.pause()
       shouldPlay = true
     }
@@ -59,7 +59,7 @@ function AudioPlayer(): ReactElement {
         audioCtx.current = new AudioContext()
         const source = audioCtx.current.createMediaElementSource(audio.current!)
         const compressor = audioCtx.current.createDynamicsCompressor()
-        compressor.threshold.value = -50
+        compressor.threshold.value = -40
         compressor.knee.value = 40
         compressor.ratio.value = 12
         compressor.attack.value = 0
@@ -71,9 +71,8 @@ function AudioPlayer(): ReactElement {
     }
     audio.current.addEventListener('play', onPlay)
     try {
-      navigator.mediaSession.setActionHandler('play', () => {
-        // console.log(e.action, 'emitted')
-        dispatch(setPlaying(true))
+      navigator.mediaSession.setActionHandler('play', (e) => {
+        e.action === 'play' && dispatch(setPlaying(true))
       })
       navigator.mediaSession.setActionHandler('pause', () => {
         dispatch(setPlaying(false))
@@ -141,35 +140,37 @@ function AudioPlayer(): ReactElement {
       return
     }
     setSource(`resource://${song.path}`)
-    dispatch(setPlaying(false))
-    audio.current.load()
+    if (playing) {
+      audio.current.load()
+      dispatch(setPlaying(true))
+    }
     dispatch(setCurrentTime(song.in))
     audio.current.currentTime = song.in || 0
   }, [currentSong, song])
 
-  useEffect(() => {
-    const listener = getHotkeyHandler([
-      [
-        ' ',
-        (e) => {
-          if (e.currentTarget instanceof HTMLInputElement) return
-          if (e.key === ' ') {
-            dispatch(setPlaying())
-            console.log('space pressed')
-          }
-        },
-      ],
-    ])
+  // useEffect(() => {
+  //   const listener = getHotkeyHandler([
+  //     [
+  //       ' ',
+  //       (e) => {
+  //         if (e.currentTarget instanceof HTMLInputElement) return
+  //         if (e.key === ' ') {
+  //           dispatch(setPlaying())
+  //           console.log('space pressed')
+  //         }
+  //       },
+  //     ],
+  //   ])
 
-    document.body.addEventListener('keypress', listener)
-    return () => {
-      document.removeEventListener('keypress', listener)
-    }
-  }, [])
+  //   document.body.addEventListener('keypress', listener)
+  //   return () => {
+  //     document.removeEventListener('keypress', listener)
+  //   }
+  // }, [])
 
   return (
     <>
-      <audio ref={audio} src={source} onEnded={() => advSong()} onCanPlayThrough={() => dispatch(setPlaying(true))} onTimeUpdate={onProgress}></audio>
+      <audio ref={audio} src={source} onEnded={() => advSong()} onCanPlayThrough={(e) => playing && e.currentTarget.play()} onTimeUpdate={onProgress}></audio>
       <Stack spacing={0} className="justify-end gap-0 pointer-events-none" style={{ position: 'fixed', width: '100vw', height: '100vh', top: 0, left: 0, zIndex: 9999 }}>
         <PeepoSings talk={playing} />
         {curMood !== -1 && (
@@ -193,7 +194,7 @@ function AudioPlayer(): ReactElement {
           </div>
         )}
 
-        <div style={{ pointerEvents: 'all' }} className="w-full z-10 bg-neutral h-32 bottom-0  m-0">
+        <Box sx={{ pointerEvents: 'all', zIndex: 0, overflow: 'hidden' }} className="w-full z-10 h-32 bottom-0  m-0">
           <ProgressSlider
             value={currentTime}
             onChange={(val) => {
@@ -201,7 +202,20 @@ function AudioPlayer(): ReactElement {
             }}
           />
 
-          <Group position="center" className="w-full h-full px-4 flex-nowrap relative">
+          <Group sx={{ zIndex: 0 }} position="center" className="w-full h-full px-4 flex-nowrap relative">
+            <div className="rounded-xl overflow-hidden" style={{ position: 'absolute', width: '100%', zIndex: -5 }}>
+              <motion.img
+                animate={{
+                  // as time goes on, the image shifts to the right
+                  x: `${50 - currentTime * 100}%`,
+                }}
+                style={{
+                  position: 'relative',
+                  filter: 'blur(10px) brightness(0.5)',
+                  scale: 2,
+                }}
+                src={song?.thumbnail || peepoShrug}></motion.img>
+            </div>
             {song && (
               <FavoriteButton
                 liked={song.favorite || false}
@@ -223,9 +237,6 @@ function AudioPlayer(): ReactElement {
                 <Icon icon="fas:forward-step" />
               </ActionIcon>
             </Group>
-            <div className="rounded-xl overflow-hidden" style={{ minWidth: '6em', minHeight: '6em' }}>
-              <img className="w-24 h-24 object-cover" src={song?.thumbnail || peepoShrug}></img>
-            </div>
 
             <Stack align="start" className="justify-center gap-0 flex-shrink truncate">
               <EditableText
@@ -300,7 +311,7 @@ function AudioPlayer(): ReactElement {
             </Group>
             {upNext && <div className="absolute bottom-0 right-2">Up Next: {upNext.title}</div>}
           </Group>
-        </div>
+        </Box>
       </Stack>
     </>
     // </Affix>

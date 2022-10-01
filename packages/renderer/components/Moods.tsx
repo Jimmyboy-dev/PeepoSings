@@ -5,7 +5,6 @@ import React, { ChangeEvent, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../store'
 import { addMood, removeMood, setMood } from '../store/slices/moods'
 import { motion } from 'framer-motion'
-import { nanoid } from '@reduxjs/toolkit'
 import { setCurrentMood, setCurrentSong } from '../store/slices/currentSong'
 import { setPlaying } from '../store/slices/player'
 import { MoodJSON } from '@peepo/core'
@@ -31,40 +30,41 @@ export default function Moods() {
         <Icon fontSize={24} icon="fas:plus" color="white" />
       </ActionIcon>
       <AddMoodModal opened={addingMood} onClose={close} mood={mood && { ...mood, type: 'editing' }} />
-      <DragDropContext onDragEnd={() => {}}>
+      <DragDropContext
+        onDragEnd={(result, provided) => {
+          if (!result.destination) return
+          const items = Array.from(selectedMoods)
+          const [reorderedItem] = items.splice(result.source.index, 1)
+          items.splice(result.destination.index, 0, reorderedItem)
+          setSelectedMoods(items)
+        }}>
         <Droppable droppableId="mood">
           {(provided) => (
             <div ref={provided.innerRef} {...provided.droppableProps}>
-              <SimpleGrid
-                cols={4}
-                spacing="lg"
-                breakpoints={[
-                  { maxWidth: 1500, cols: 3, spacing: 'md' },
-                  { maxWidth: 1100, cols: 2, spacing: 'sm' },
-                  { maxWidth: 600, cols: 1, spacing: 'sm' },
-                ]}
-                style={{ width: '80%' }}>
+              <Grid gutter="lg" style={{ width: '80%' }}>
                 {moods.map((mood, i) => (
-                  <Mood
-                    key={mood.id.toString()}
-                    index={i}
-                    mood={mood}
-                    selected={selectedMoods.includes(mood.id)}
-                    onSelect={() => {
-                      setSelectedMoods((moods) => {
-                        if (moods.includes(mood.id)) {
-                          return moods.filter((m) => m !== mood.id)
-                        }
-                        return [...moods, mood.id]
-                      })
-                    }}
-                    onEdit={() => {
-                      setMood(mood)
-                      open()
-                    }}
-                  />
+                  <Grid.Col span={6}>
+                    <Mood
+                      key={mood.id.toString()}
+                      index={i}
+                      mood={mood}
+                      selected={selectedMoods.includes(mood.id)}
+                      onSelect={() => {
+                        setSelectedMoods((moods) => {
+                          if (moods.includes(mood.id)) {
+                            return moods.filter((m) => m !== mood.id)
+                          }
+                          return [...moods, mood.id]
+                        })
+                      }}
+                      onEdit={() => {
+                        setMood(mood)
+                        open()
+                      }}
+                    />
+                  </Grid.Col>
                 ))}
-              </SimpleGrid>
+              </Grid>
             </div>
           )}
         </Droppable>
@@ -154,8 +154,9 @@ interface MoodItemProps extends React.PropsWithRef<JSX.IntrinsicElements['div']>
 }
 
 function Mood({ mood, index, ...props }: MoodItemProps & { index: number }) {
+  const dragId = `mood-${mood.id}`
   return (
-    <Draggable draggableId={mood.id.toString()} index={index}>
+    <Draggable draggableId={dragId} index={index}>
       {(provided) => <MoodItem mood={mood} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} {...props} />}
     </Draggable>
   )
@@ -174,7 +175,7 @@ const MoodItem = React.forwardRef<HTMLDivElement, MoodItemProps>(({ mood: { id, 
         onTap={(e) => {
           dispatch(setCurrentSong(Math.floor(Math.random() * songsInMood.length)))
           dispatch(setCurrentMood(id))
-          dispatch(setPlaying())
+          dispatch(setPlaying(true))
         }}
         whileHover={{ scale: 1.1 }}
         initial={{ scale: 1, width: '85%', borderStyle: 'solid', borderColor: 'white', borderWidth: 0 }}
