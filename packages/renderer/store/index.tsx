@@ -1,7 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
+import { createFilter, createBlacklistFilter } from 'redux-persist-transform-filter'
+
 import type { TypedUseSelectorHook } from 'react-redux'
 import { useDispatch, useSelector } from 'react-redux'
-// import { persistReducer, FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, PersistConfig } from 'redux-persist'
+import { persistReducer, persistStore, FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, PersistConfig } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 import type { RootState } from './slices'
 import rootReducer from './slices'
 // ...
@@ -19,22 +22,29 @@ const logger = createLogger({
   },
 })
 
-// const persistConfig: PersistConfig<RootState> = {
-//   key: 'root',
-//   version: 1,
-//   storage: localStorage,
-//   blacklist: ['currentSong'],
-// }
-// // const persistedReducer = persistReducer(persistConfig, rootReducer)
+const persistConfig: PersistConfig<RootState> = {
+  key: 'peepo-store',
+  storage,
+  throttle: 2500,
+  blacklist: ['songs', 'moods'],
+}
+export const persistedReducer = persistReducer(persistConfig, rootReducer)
 
-const store = configureStore({
-  reducer: rootReducer,
+if (import.meta.hot) {
+  import.meta.hot.accept('./slices', async () => {
+    // This fetch the new state of the above reducers.
+    const nextRootReducer = await import('./slices')
+    store.replaceReducer(persistReducer(persistConfig, nextRootReducer.default))
+  })
+}
+
+export const store = configureStore({
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
-      // serializableCheck: {
-      //   ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-      // },
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
       // immutableCheck: false,
     })
       .concat(logger)
@@ -42,11 +52,9 @@ const store = configureStore({
   devTools: import.meta.env.DEV,
 })
 
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
+export const persistor = persistStore(store)
 export type AppDispatch = typeof store.dispatch
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>()
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
-
-export default store

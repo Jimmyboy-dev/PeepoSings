@@ -5,10 +5,9 @@ import { setCurrentTime, setPlaying, setRepeat, setShuffle } from '../slices/pla
 import { IpcEvents, PeepoMeta } from '@peepo/core'
 import { addSong, setSongMood } from '../slices/songs'
 import { clamp } from 'lodash'
-import store from '..'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-const electronMiddleware: Middleware<{}, RootState> = (storeAPI) => {
+const electronMiddleware: Middleware<{}, RootState> = (store) => {
   return function wrapDispatch(dispatch) {
     return function handleAction(action) {
       switch (action?.type?.split('/')[0]) {
@@ -28,7 +27,8 @@ const electronMiddleware: Middleware<{}, RootState> = (storeAPI) => {
         currentSong: { mood, song, queue },
         player,
         config,
-      } = storeAPI.getState()
+      } = store.getState()
+      if (!queue) return
       let curSong: PeepoMeta | undefined
       if (song !== -1) curSong = songs.find((s) => s.id === song)
       if ([setCurrentSong, nextSong, prevSong].some((act) => act.match(action))) {
@@ -56,8 +56,14 @@ const electronMiddleware: Middleware<{}, RootState> = (storeAPI) => {
           })
       } else if (setCurrentMood.match(action)) {
         if (action.payload !== -1) {
-          const nextSong = songs.find((s) => s.mood.some((m) => m.id === action.payload))
-          storeAPI.dispatch(setCurrentSong(nextSong.id))
+          const nextSongs = songs.filter((s) => s.mood.some((m) => m.id === action.payload))
+          if (!nextSongs.length) {
+            store.dispatch(clearQueue())
+            return
+          }
+
+          const nextSong = nextSongs[Math.floor(Math.random() * nextSongs.length)]
+          store.dispatch(setCurrentSong(nextSong.id))
         }
       }
 
