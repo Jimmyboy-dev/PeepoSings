@@ -31,12 +31,14 @@ export class Database extends DataSource implements onModuleDestroy {
       migrations: ['./migrations/*.ts', './migrations/*.js'],
       migrationsRun: true,
       migrationsTableName: 'peepo_migrations',
+      synchronize: process.env.NODE_ENV === 'development',
     })
     this.dbPath = dbPath
 
     this.registerSchemas()
   }
   onModuleDestroy(): void | Promise<void> {
+    if (!this.isInitialized) return
     return this.destroy()
   }
 

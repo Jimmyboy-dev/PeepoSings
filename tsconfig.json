@@ -26,8 +26,8 @@
         "packages/renderer/src/*"
       ],
       "@peepo/core": [
-        "packages/core/src/index",
-        "packages/core/src/*"
+        "packages/core/index",
+        "packages/core/*"
       ]
     },
     "typeRoots": [

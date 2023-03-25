@@ -3,7 +3,6 @@ import { injectable, inject } from 'inversify'
 import path from 'path'
 import _ from 'lodash'
 
-import pkg from '../../../package.json'
 import { app, nativeImage } from 'electron'
 import { readdirSync } from 'fs'
 import chalk from 'chalk'

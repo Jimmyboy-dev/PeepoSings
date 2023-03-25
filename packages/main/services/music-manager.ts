@@ -78,7 +78,7 @@ export class MusicManager {
 
     if (fs.existsSync(this.ytdlPath)) {
       currVersion = (await this.ytdl.getVersion()).trim()
-      // console.log('current yt-dlp version:', currVersion)
+      console.log('current yt-dlp version:', currVersion)
     }
     if (currVersion !== githubReleasesData[0].tag_name.trim()) {
       await YTDlpWrap.downloadFromGithub(this.ytdlPath)
@@ -126,8 +126,9 @@ export class MusicManager {
     knownSongs
       .filter((s) => !fs.existsSync(s.path))
       .forEach((s) => {
-        this.removeSong(s.path)
+        s.available = false
       })
+
     for (const file of files) {
       const filePath = path.join(this.musicPath, file)
       const song = knownSongs.find((s) => s.path === filePath)

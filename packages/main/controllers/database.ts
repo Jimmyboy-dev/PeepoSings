@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify'
-import { IpcEvents, MoodJSON, PeepoMeta } from '@peepo/core'
+import { IpcEvents, MoodJSON, PeepoMeta } from '../../core'
 import { Database } from '../services/Database'
 import { MusicManager } from '../services/music-manager'
 import { ipcEvent } from '../utils/decorators'

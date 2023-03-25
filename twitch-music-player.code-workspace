@@ -33,7 +33,7 @@
     "git.ignoreLimitWarning": true,
     "files.exclude": {
       "**/twitch-music-player/types": true,
-      "**/packages/": true,
+      // "**/packages/": true,
       "**/.git": true,
       "**/.svn": true,
       "**/.hg": true,

@@ -14,7 +14,7 @@ import { motion } from 'framer-motion'
 import EditableText from './EditableText'
 import FavoriteButton from './FavoriteButton'
 import ProgressSlider from './ProgressSlider'
-import { PeepoMeta } from '../../core/src'
+import { PeepoMeta } from '../../core'
 
 function AudioPlayer(): ReactElement {
   const dispatch = useAppDispatch()

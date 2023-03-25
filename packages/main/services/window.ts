@@ -8,7 +8,7 @@ import Config from './config'
 import Store from './store'
 import Platform from './platform'
 import windowStateKeeper from 'electron-window-state'
-import { IpcEvents } from '../../core/src'
+import { IpcEvents } from '../../core'
 
 export const ROOT_PATH = {
   // /dist
@@ -144,7 +144,7 @@ class Window {
   }
 
   load() {
-    const url = process.env.VITE_DEV_SERVER_URL,
+    const url = process.env['ELECTRON_RENDERER_URL'],
       indexHtml = path.join(ROOT_PATH.dist, 'index.html')
 
     if (!this.config.isDev()) {

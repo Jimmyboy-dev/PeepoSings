@@ -40,6 +40,9 @@ export class Song implements PeepoMeta {
   @Column({ default: 0 })
   in: number
 
+  @Column({ default: false })
+  available: boolean
+
   @Column()
   out: number
 

@@ -5,7 +5,7 @@ import App from './App'
 // import type { Step } from 'react-joyride'
 // import Joyride from 'react-joyride'
 import { MantineProvider } from '@mantine/core'
-import { NotificationsProvider } from '@mantine/notifications'
+import { Notifications } from '@mantine/notifications'
 import { useAppSelector, store, persistor } from './store'
 import { Provider as StoreProvider } from 'react-redux'
 import theme from './theme'
@@ -25,12 +25,12 @@ const Root = () => {
   const currentMood = useAppSelector((state) => state.currentSong.mood)
   // 1. Retrieve the notifications to display.
   return (
-    <NotificationsProvider limit={5} position="bottom-right" style={{ bottom: currentMood ? 200 : 142 }} zIndex={99999}>
+    <Notifications limit={5} position="bottom-right" style={{ bottom: currentMood ? 200 : 142 }} zIndex={99999}>
       <ModalsProvider
         modalProps={{
           classNames: {
-            modal: 'winDrag',
             close: 'noDrag',
+            root: 'winDrag',
           },
           zIndex: 99998,
           styles: { overlay: { zIndex: 11111 } },
@@ -39,7 +39,7 @@ const Root = () => {
           <App />
         </Spotlight>
       </ModalsProvider>
-    </NotificationsProvider>
+    </Notifications>
   )
 }
 const root = createRoot(document.getElementById('root')!)

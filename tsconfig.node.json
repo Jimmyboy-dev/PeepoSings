@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "composite": true,
-    "target": "ESNext",
+    "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
@@ -22,8 +22,8 @@
         "types"
       ],
       "@peepo/core": [
-        "packages/core/src/index",
-        "packages/core/src/*"
+        "packages/core/index",
+        "packages/core/*"
       ]
     },
   },
@@ -31,7 +31,7 @@
     "packages/main/**/*",
     "packages/core/**/*",
     "cli.ts",
-    "vite.config.ts",
+    "electron.vite.config.ts",
     "package.json"
   ],
   "ts-node": {
