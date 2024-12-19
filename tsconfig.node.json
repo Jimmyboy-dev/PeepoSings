@@ -1,40 +1,63 @@
 {
+  "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
+  "include": [
+    "electron.vite.config.*",
+    "src/main/**/*",
+    "src/preload/*",
+    "./src/core/**/*"
+  ],
   "compilerOptions": {
     "composite": true,
-    "target": "ESNext",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
+    "types": [
+      "electron-vite/node"
+    ],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "useDefineForClassFields": true,
-    "importHelpers": true,
-    "esModuleInterop": true,
-    "baseUrl": ".",
-    "types": [
-      "node",
-      "vite/client",
-      "reflect-metadata"
-    ],
     "paths": {
-      "@types": [
-        "types"
-      ],
       "@peepo/core": [
-        "packages/core/src/index",
-        "packages/core/src/*"
+        "./src/core/src/index",
+        "./src/core/src/*"
       ]
     },
-  },
-  "include": [
-    "packages/main/**/*",
-    "packages/core/**/*",
-    "cli.ts",
-    "vite.config.ts",
-    "package.json"
-  ],
-  "ts-node": {
-    "files": true
   }
 }
+// {
+//   "compilerOptions": {
+//     "composite": true,
+//     "target": "ESNext",
+//     "module": "CommonJS",
+//     "moduleResolution": "Node",
+//     "resolveJsonModule": true,
+//     "allowSyntheticDefaultImports": true,
+//     "emitDecoratorMetadata": true,
+//     "experimentalDecorators": true,
+//     "useDefineForClassFields": true,
+//     "importHelpers": true,
+//     "esModuleInterop": true,
+//     "baseUrl": ".",
+//     "types": [
+//       "node",
+//       "vite/client",
+//       "reflect-metadata"
+//     ],
+//     "paths": {
+//       "@types": [
+//         "types"
+//       ],
+//       "@peepo/core": [
+//         "packages/core/src/index",
+//         "packages/core/src/*"
+//       ]
+//     },
+//   },
+//   "include": [
+//     "packages/main/**/*",
+//     "packages/core/**/*",
+//     "cli.ts",
+//     "vite.config.ts",
+//     "package.json"
+//   ],
+//   "ts-node": {
+//     "files": true
+//   }
+// }

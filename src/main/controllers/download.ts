@@ -3,9 +3,9 @@ import { BrowserWindow } from 'electron'
 import { inject } from 'inversify'
 import { join } from 'path'
 import yts from 'yt-search'
-import Config from '../services/config.js'
-import { MusicManager } from '../services/music-manager.js'
-import { ipcController, ipcEvent } from '../utils/decorators.js'
+import Config from '../services/config'
+import { MusicManager } from '../services/music-manager'
+import { ipcController, ipcEvent } from '../utils/decorators'
 
 @ipcController()
 export class DownloadController {
@@ -39,9 +39,12 @@ export class DownloadController {
   @ipcEvent(IpcEvents.MUSIC_SEARCH)
   async search(query: string) {
     console.log('searching for', query)
-    return await yts(query).catch((e) => {
-      // console.error(e)
+    try {
+      const results = await yts(query)
+      return JSON.stringify(results)
+    } catch (e) {
+      console.error('Failed to search for music', e)
       return []
-    })
+    }
   }
 }

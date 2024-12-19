@@ -1,70 +1,11 @@
 {
-  "compilerOptions": {
-    "noEmit": true,
-    "useDefineForClassFields": true,
-    "lib": [
-      "esnext",
-      "es6",
-      "dom",
-      "webworker"
-    ],
-    "target": "es2022",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "allowJs": false,
-    "esModuleInterop": false,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@types": [
-        "types"
-      ],
-      "@/*": [
-        "packages/renderer/src/*"
-      ],
-      "@peepo/core": [
-        "packages/core/src/index",
-        "packages/core/src/*"
-      ]
-    },
-    "typeRoots": [
-      "node_modules/@types/*",
-      "types"
-    ],
-    "types": [
-      "node",
-      "vite/client",
-      "reflect-metadata"
-    ],
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react"
-  },
-  "include": [
-    "packages/renderer/**/*",
-    "packages/core/**/*",
-    "packages/preload/**/*",
-    "types/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "packages/docs",
-    "packages/ui"
-  ],
+  "files": [],
   "references": [
     {
       "path": "./tsconfig.node.json"
-    }
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS",
-      "isolatedModules": false
     },
-    "files": true
-  }
+    {
+      "path": "./tsconfig.web.json"
+    }
+  ]
 }

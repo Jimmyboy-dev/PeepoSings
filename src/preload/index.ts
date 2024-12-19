@@ -80,7 +80,7 @@ const api = {
     },
     searchSongs: async (query: string): Promise<VideoSearchResult[]> => {
       if (query.length <= 0) throw new Error('Query is empty')
-      return ((await ipc.callMain(IpcEvents.MUSIC_SEARCH, query)) as SearchResult).videos
+      return (JSON.parse(await ipc.callMain(IpcEvents.MUSIC_SEARCH, query)) as SearchResult).videos
     },
   },
   listeners: {

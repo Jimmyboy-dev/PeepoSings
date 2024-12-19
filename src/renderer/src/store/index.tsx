@@ -11,7 +11,6 @@ import { createLogger } from 'redux-logger'
 import { electronMiddleware } from './middleware'
 const logger = createLogger({
   collapsed: true,
-  level: 'verbose',
 
   colors: {
     action: () => `#008080`,
