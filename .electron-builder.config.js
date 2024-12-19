@@ -10,17 +10,17 @@ if (process.env.VITE_APP_VERSION === undefined) {
 const config = {
   appId: 'com.devJimmyboy.PeepoSings',
   productName: 'Peepo Sings',
-  copyright: 'Copyright © 2021-2022 devJimmyboy',
-  icon: 'buildResources/icon.png',
+  copyright: 'Copyright © 2021-2023 devJimmyboy',
+  icon: 'resources/icon.png',
   win: {
     target: 'nsis',
     extraResources: {
       filter: ['**/*'],
-      from: './buildResources/bin/windows',
+      from: './resources/bin/windows',
       to: 'bin',
     },
     defaultArch: 'x64',
-    icon: 'buildResources/icon.ico',
+    icon: 'resources/icon.ico',
     artifactName: '${productName}-Setup.${ext}',
   },
   nsis: {
@@ -32,7 +32,7 @@ const config = {
   mac: {
     extraResources: {
       filter: ['**/*'],
-      from: './buildResources/bin/macos',
+      from: './resources/bin/macos',
       to: 'bin',
     },
     category: 'public.app-category.music',
@@ -42,7 +42,7 @@ const config = {
   linux: {
     extraResources: {
       filter: ['**/*'],
-      from: './buildResources/bin/linux',
+      from: './resources/bin/linux',
       to: 'bin',
     },
     desktop: {
@@ -54,7 +54,7 @@ const config = {
   },
   directories: {
     output: 'release/${version}',
-    buildResources: 'buildResources',
+    buildResources: 'resources',
   },
   fileAssociations: [
     {
@@ -102,7 +102,7 @@ const config = {
       mimeType: 'audio/webm',
     },
   ],
-  files: ['dist/**/*', 'buildResources/*', 'buildResources/icons/*', '!buildResources/bin/**/*'],
+  files: ['out/**/*', 'resources/*', 'resources/icons/*', '!resources/bin/**/*'],
   publish: {
     provider: 'github',
     owner: 'devJimmyboy',

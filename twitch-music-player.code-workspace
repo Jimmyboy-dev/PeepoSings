@@ -10,30 +10,30 @@
     },
     {
       "name": "Electron API",
-      "path": "./packages/main"
+      "path": "./src/main"
     },
     {
       "name": "Core",
-      "path": "./packages/core"
+      "path": "./src/core"
     },
     {
       "name": "Preload",
-      "path": "./packages/preload"
+      "path": "./src/preload"
     },
     {
       "name": "Renderer",
-      "path": "./packages/renderer"
+      "path": "./src/renderer"
     },
     {
       "name": "Docs",
-      "path": "./packages/docs"
+      "path": "./src/docs"
     }
   ],
   "settings": {
     "git.ignoreLimitWarning": true,
     "files.exclude": {
-      "**/twitch-music-player/types": true,
-      "**/packages/": true,
+      // "**/twitch-music-player/types": true,
+      // "**/packages/": true,
       "**/.git": true,
       "**/.svn": true,
       "**/.hg": true,

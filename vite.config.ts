@@ -1,8 +1,8 @@
 import { rmSync } from 'fs'
-import path from 'path'
+import path from 'node:path'
 import { type Plugin, type UserConfig, defineConfig, createLogger } from 'vite'
 import react from '@vitejs/plugin-react'
-import electron, { onstart } from 'vite-plugin-electron'
+import electron from 'vite-plugin-electron/simple'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import swc from 'unplugin-swc'
 
@@ -16,9 +16,9 @@ rmSync(path.join(__dirname, 'dist'), { recursive: true, force: true }) // v14.14
 export default defineConfig({
   resolve: {
     alias: {
-      '@/': path.join(__dirname, 'packages/renderer/src'),
-      styles: path.join(__dirname, 'packages/renderer/assets/styles'),
-      '@peepo/core': path.join(__dirname, 'packages/core/src'),
+      '@/': path.join(__dirname, 'src/renderer/src'),
+      styles: path.join(__dirname, 'src/renderer/assets/styles'),
+      '@peepo/core': path.join(__dirname, 'src/core/src'),
     },
   },
   customLogger: createLogger('info', {
@@ -30,20 +30,24 @@ export default defineConfig({
     tsconfigPaths(),
     electron({
       main: {
-        entry: 'packages/main/index.ts',
+        entry: 'src/main/index.ts',
         vite: {
           resolve: {
             alias: {
-              '@peepo/core': path.join(__dirname, 'packages/core/src'),
+              '@peepo/core': path.join(__dirname, 'src/core/src'),
             },
           },
           build: {
             outDir: 'dist/main',
             sourcemap: true,
+            rollupOptions: {
+              external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
+            },
           },
           plugins: [
             swc.vite({
               jsc: {
+                target: 'esnext',
                 parser: {
                   syntax: 'typescript',
                   decorators: true,
@@ -55,19 +59,18 @@ export default defineConfig({
                 },
               },
             }),
-            process.env.VSCODE_DEBUG ? onstart() : null,
           ],
         },
       },
       preload: {
         input: {
           // You can configure multiple preload scripts here
-          index: path.join(__dirname, 'packages/preload/index.ts'),
+          index: path.join(__dirname, 'src/preload/index.ts'),
         },
         vite: {
           resolve: {
             alias: {
-              '@peepo/core': path.join(__dirname, 'packages/core/src'),
+              '@peepo/core': path.join(__dirname, 'src/core/src'),
             },
           },
 
