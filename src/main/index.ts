@@ -11,7 +11,7 @@ import registerUnhandled from 'electron-unhandled'
 registerUnhandled({})
 
 import type { ProtocolRequest } from 'electron'
-import { nativeTheme } from 'electron'
+import { nativeTheme, net } from 'electron'
 import { app, BrowserWindow, Tray, Menu, session, protocol, nativeImage, shell } from 'electron'
 import { ipcMain as ipc } from 'electron-better-ipc'
 import contextMenu from 'electron-context-menu'
@@ -129,9 +129,9 @@ app.whenReady().then(async () => {
     const trayMenu = container.get<TrayMenu>(TrayMenu)
     // const touchbarMenu = container.get<TouchbarMenu>(TouchbarMenu);
     const window = container.get<Window>(Window)
-    if (config.isDev()) {
-      await Promise.all([window.installDevTools()])
-    }
+    // if (config.isDev()) {
+    //   await Promise.all([window.installDevTools()])
+    // }
     container.listen()
     await window.load()
     trayMenu.init()
@@ -139,9 +139,10 @@ app.whenReady().then(async () => {
       discord.init()
     }
     nativeTheme.themeSource = 'dark'
-    protocol.interceptFileProtocol('resource', async (req: ProtocolRequest, callback: (filePath: string) => void) => {
+    protocol.registerFileProtocol('resource', async (req, callback) => {
+      console.log('accessing', req.url)
       const url = fileURLToPath(req.url.replace('resource', 'file'))
-      callback(url)
+      return callback({ path: url })
     })
     if (config.isProd())
       autoLauncher = new AutoLaunch({

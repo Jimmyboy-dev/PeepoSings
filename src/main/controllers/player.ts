@@ -57,7 +57,7 @@ class IpcPlayer {
     if (!arg) {
       this.window.setTitle(`Peepo Sings`)
       this.discord.clear()
-      this.trayMenu.update({ isPlaying: false, track: null })
+      this.trayMenu.update({ isPlaying: false, track: undefined })
 
       return
     }

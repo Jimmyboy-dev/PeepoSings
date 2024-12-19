@@ -1,7 +1,7 @@
 'use strict';
 
 require('reflect-metadata');
-require('./index-BeLnRzmu.cjs');
+require('./index-CzvuUnI5.js');
 require('path');
 require('url');
 require('dotenv');

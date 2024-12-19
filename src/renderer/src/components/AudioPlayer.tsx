@@ -20,10 +20,7 @@ function AudioPlayer(): ReactElement {
   const dispatch = useAppDispatch()
   const { currentTime, duration, filter, playing, repeat, shuffle, volume } = useAppSelector((state) => state.player)
   const [{ song: currentSong, mood: curMood, queue, userDefinedQueue }, { moods }] = useAppSelector((state) => [state.currentSong, { moods: state.moods }])
-  const songs = useAppSelector(
-    (state) => state.songs,
-    (a, b) => a.some((song, i) => b[i]?.path !== song?.path)
-  )
+  const songs = useAppSelector((state) => state.songs)
   const [source, setSource] = React.useState('')
   const audioDevice = useAppSelector((state) => state.config.outputDevice)
   const upNext = songs.find((s) => s.id === [...userDefinedQueue, ...queue][0])

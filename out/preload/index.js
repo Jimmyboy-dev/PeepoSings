@@ -108,7 +108,7 @@ const api = {
     },
     searchSongs: async (query) => {
       if (query.length <= 0) throw new Error("Query is empty");
-      return (await electronBetterIpc.ipcRenderer.callMain(IpcEvents.MUSIC_SEARCH, query)).videos;
+      return JSON.parse(await electronBetterIpc.ipcRenderer.callMain(IpcEvents.MUSIC_SEARCH, query)).videos;
     }
   },
   listeners: {
