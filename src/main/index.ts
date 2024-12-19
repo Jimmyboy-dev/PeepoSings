@@ -129,9 +129,9 @@ app.whenReady().then(async () => {
     const trayMenu = container.get<TrayMenu>(TrayMenu)
     // const touchbarMenu = container.get<TouchbarMenu>(TouchbarMenu);
     const window = container.get<Window>(Window)
-    // if (config.isDev()) {
-    //   await Promise.all([window.installDevTools()])
-    // }
+    if (config.isDev()) {
+      await Promise.all([window.installDevTools()])
+    }
     container.listen()
     await window.load()
     trayMenu.init()
@@ -139,10 +139,10 @@ app.whenReady().then(async () => {
       discord.init()
     }
     nativeTheme.themeSource = 'dark'
-    protocol.registerFileProtocol('resource', async (req, callback) => {
+    protocol.handle('resource', async (req) => {
       console.log('accessing', req.url)
       const url = fileURLToPath(req.url.replace('resource', 'file'))
-      return callback({ path: url })
+      return net.fetch('file' + url.substring(9))
     })
     if (config.isProd())
       autoLauncher = new AutoLaunch({

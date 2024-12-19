@@ -117,7 +117,7 @@
     "cross-env": "^7.0.3",
     "daisyui": "^2.51.6",
     "dts-for-context-bridge": "^0.7.1",
-    "electron": "24",
+    "electron": "^33.2.1",
     "electron-builder": "^25.1.8",
     "electron-devtools-installer": "^3.2.0",
     "electron-vite": "^1.0.22",

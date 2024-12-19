@@ -59,6 +59,7 @@ class Window {
         nodeIntegration: true,
         contextIsolation: false,
         nodeIntegrationInWorker: true,
+        webSecurity: false,
         // webviewTag: true,
         // additionalArguments: [store.getOption('disableGPU') && '--disable-gpu'],
         preload,

@@ -2,14 +2,18 @@ import { useMantineTheme } from '@mantine/core'
 import { useMove } from '@mantine/hooks'
 import { motion } from 'framer-motion'
 import React from 'react'
+import { useAppSelector } from '../store'
+import { PeepoMeta } from '@peepo/core'
 
 interface Props {
   value: number
+  song?: PeepoMeta
   onChange: (value: number) => void
 }
 
-export default function ProgressSlider({ onChange, value }: Props) {
+export default function ProgressSlider({ onChange, value, song }: Props) {
   const theme = useMantineTheme()
+  // const [curTime, duration] = useAppSelector((state) => [state.player.currentTime, state.player.duration])
   const { ref } = useMove(({ x }) => onChange(x), {})
   return (
     <div className="group absolute z-50 pointer-events-auto w-full m-0 flex flex-row">
@@ -41,8 +45,7 @@ export default function ProgressSlider({ onChange, value }: Props) {
             transformOrigin: 'bottom',
 
             borderRadius: '50%',
-          }}
-        />
+          }}></motion.div>
       </div>
     </div>
   )

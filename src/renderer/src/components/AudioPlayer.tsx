@@ -136,7 +136,7 @@ function AudioPlayer(): ReactElement {
       dispatch(setPlaying(false))
       return
     }
-    setSource(`resource://${song.path}`)
+    setSource(`file://${song.path}`)
     if (playing) {
       audio.current.load()
       dispatch(setPlaying(true))
@@ -164,6 +164,7 @@ function AudioPlayer(): ReactElement {
   //     document.removeEventListener('keypress', listener)
   //   }
   // }, [])
+  const curTime = song ? Math.floor(currentTime * (song.duration - song.in - (song.duration - song.out))) + song.in : 0
 
   return (
     <>
@@ -194,13 +195,14 @@ function AudioPlayer(): ReactElement {
         <Box sx={{ pointerEvents: 'all', zIndex: 0, overflow: 'hidden' }} className="w-full z-10 h-32 bottom-0  m-0">
           <ProgressSlider
             value={currentTime}
+            song={song}
             onChange={(val) => {
               onSeek(val)
             }}
           />
 
-          <Group sx={{ zIndex: 0 }} position="center" className="w-full h-full px-4 flex-nowrap relative">
-            <div className="rounded-xl overflow-hidden" style={{ position: 'absolute', width: '100%', zIndex: -5 }}>
+          <Group sx={{ zIndex: 0 }} position="center" className="w-full h-full px-4 py-0 flex-nowrap relative">
+            <div className="rounded-xl overflow-visible" style={{ position: 'absolute', width: '100%', zIndex: -5 }}>
               <motion.img
                 animate={{
                   // as time goes on, the image shifts to the right
@@ -307,6 +309,25 @@ function AudioPlayer(): ReactElement {
               </Tooltip>
             </Group>
             {upNext && <div className="absolute bottom-0 right-2">Up Next: {upNext.title}</div>}
+            <div
+              className="absolute bottom-0 left-2"
+              style={{
+                position: 'absolute',
+                fontSize: '13px',
+                minWidth: '85px',
+                textAlign: 'center',
+                padding: '2px 6px',
+                borderRadius: '6px 6px 0 0',
+                fontWeight: 700,
+                userSelect: 'none',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+              }}>
+              {`${Math.floor(curTime / 60)}:${Math.floor(curTime % 60)
+                .toString()
+                .padStart(2, '0')}`}
+              {` / `}
+              {song ? `${Math.floor(song?.duration / 60)}:${(song?.duration % 60).toString().padStart(2, '0')}` : '--:--'}
+            </div>
           </Group>
         </Box>
       </Stack>

@@ -230,7 +230,7 @@ export class MusicManager {
     // if (!this.isVideo(url)) return
     const info = await this.getYoutubeVideoInfo(url)
 
-    const savePath = path.join(this.musicPath, sanitize((info?.title?.trim() ?? url.match('v=([a-zA-Z0-9_-]+)&?')![1]).replace(/[/|\\]/g, ''), { replacement: '' }) + '.mp3')
+    const savePath = path.join(this.musicPath, sanitize((info?.title?.trim() ?? url.match('v=([a-zA-Z0-9_-]+)&?')![1]).replace(/[/|\\]/g, ''), { replacement: '' }) + '.wav')
     this.dlInfo = { start: Date.now(), vidInfo: info ?? {}, savePath }
     let progress: number = 0
     let tempPath = await mkdtemp(`${tmpdir()}${path.sep}`)
@@ -256,6 +256,7 @@ export class MusicManager {
     }
     const dl = ffmpeg(tempVidPath)
       .audioBitrate(128)
+      .toFormat('wav')
       .save(savePath)
       .on('progress', (p) => {
         if (p.percent - progress > 0.1) {

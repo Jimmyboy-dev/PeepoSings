@@ -1,7 +1,7 @@
 // CodeEditorWindow.js
-import '../lib/loadMonaco'
+// import '../lib/loadMonaco'
 import React, { useRef, useState } from 'react'
-import Editor, { OnMount } from '@monaco-editor/react'
+// import Editor, { OnMount } from '@monaco-editor/react'
 import { Center, Loader } from '@mantine/core'
 import { AutoTypings, LocalStorageCache } from 'monaco-editor-auto-typings'
 

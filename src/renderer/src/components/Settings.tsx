@@ -126,7 +126,7 @@ export default function Settings({ opened, toggle }: Props): ReactElement {
     )
 }
 
-const CodeEditor = React.lazy(() => import('./CodeEditor'))
+// const CodeEditor = React.lazy(() => import('./CodeEditor'))
 
 interface Hook {}
 
@@ -145,14 +145,14 @@ function HookCreator({ hooks, type }: HookCreatorProps) {
   const [hook, setHook] = React.useState(hookDefaults[type])
   return (
     <React.Suspense fallback={<Loader color="green" />}>
-      <CodeEditor
+      {/* <CodeEditor
         code={hookDefaults[type]}
         language="typescript"
         onChange={(type, code) => {
           if (type === 'code') setHook(code)
         }}
         theme={'vs-dark'}
-      />
+      /> */}
     </React.Suspense>
   )
 }

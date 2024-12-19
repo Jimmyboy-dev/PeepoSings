@@ -19,6 +19,7 @@ export class DatabaseControl {
     const repoName = `${model}s` as 'songs' | 'moods'
     const repo = this.db[repoName] as typeof repoName extends 'songs' ? typeof this.db.songs : typeof this.db.moods
     let entity = await repo.findOneBy(criteria)
+    if (!entity) return
     entity = repo.merge(entity, data)
     return await repo.save(entity)
   }

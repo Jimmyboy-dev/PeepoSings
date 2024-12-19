@@ -10,6 +10,13 @@ export const addMood = createAsyncThunk('moods/add-mood', async (mood: MoodJSON)
   return finalizedMood
 })
 
+export const setMood = createAsyncThunk('moods/set-mood', async (mood: MoodJSON) => {
+  const finalizedMood = (await ipc.callMain(IpcEvents.DB_UPDATE, ['mood', { id: mood.id }, mood])) as MoodJSON
+  if (!finalizedMood) throw new Error('Failed to add mood')
+
+  return finalizedMood
+})
+
 type MoodsState = MoodJSON[]
 
 const initialState: MoodsState = []
@@ -18,12 +25,6 @@ const moods = createSlice({
   name: 'moods',
   initialState,
   reducers: {
-    setMood: (state, action: PayloadAction<MoodJSON>) => {
-      ipc.callMain(IpcEvents.DB_UPDATE, ['mood', { id: action.payload.id }, action.payload]).then((res: MoodJSON) => {
-        const index = state.findIndex((m) => m.id === res.id)
-        state[index] = action.payload
-      })
-    },
     removeMood: (state, action: PayloadAction<number>) => {
       ipc.callMain(IpcEvents.DB_REMOVE, ['mood', { id: action.payload }, action.payload])
       state.splice(
@@ -44,9 +45,14 @@ const moods = createSlice({
       const index = state.findIndex((m) => m.id === action.payload.id)
       if (index === -1) state.push(action.payload)
     })
+    builder.addCase(setMood.fulfilled, (state, action) => {
+      if (!action.payload) return
+      const index = state.findIndex((m) => m.id === action.payload.id)
+      state[index] = action.payload
+    })
   },
 })
 
-export const { setMood, removeMood } = moods.actions
+export const { removeMood } = moods.actions
 
 export default moods.reducer
