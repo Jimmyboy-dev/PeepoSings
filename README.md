@@ -2,7 +2,7 @@
 
 ![Peepo Sings](docs/meta.png)
 
-> Currently not ready. I'm working on this when I can b/c I need this functionality :)
+## Currently non-functional. Development is on hiatus as I work on future projects.
 
 Current Features:
 
