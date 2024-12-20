@@ -6,27 +6,27 @@
     },
     {
       "name": "Types",
-      "path": "./types"
+      "path": "types"
     },
     {
       "name": "Electron API",
-      "path": "./src/main"
+      "path": "src/main"
     },
     {
       "name": "Core",
-      "path": "./src/core"
+      "path": "src/core"
     },
     {
       "name": "Preload",
-      "path": "./src/preload"
+      "path": "src/preload"
     },
     {
       "name": "Renderer",
-      "path": "./src/renderer"
+      "path": "src/renderer"
     },
     {
       "name": "Docs",
-      "path": "./src/docs"
+      "path": "src/docs"
     }
   ],
   "settings": {
